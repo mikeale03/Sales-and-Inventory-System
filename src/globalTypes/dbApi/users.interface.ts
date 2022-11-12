@@ -1,5 +1,5 @@
 import Role from './users.enums';
-import { Response } from '../response.interface';
+import { IResponse } from '../response.interface';
 
 export interface User {
   _id: string;
@@ -15,5 +15,5 @@ export interface UserLogin {
 }
 
 export interface CreateUser {
-  (userLogin: UserLogin): Response<PouchDB.Core.Response>;
+  (userLogin: UserLogin): IResponse<PouchDB.Core.Response>;
 }

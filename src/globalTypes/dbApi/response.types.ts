@@ -1,8 +1,8 @@
-import { Response } from '../response.interface';
+import { IResponse } from '../response.interface';
 import { User } from './users.interface';
 
-export type CreateResponse = Response<PouchDB.Core.Response>;
-export type DeleteResponse = Response<undefined>;
-export type GetResponse = Response<
+export type CreateResponse = IResponse<PouchDB.Core.Response>;
+export type DeleteResponse = IResponse<undefined>;
+export type GetResponse = IResponse<
   User & PouchDB.Core.IdMeta & PouchDB.Core.GetMeta
 >;

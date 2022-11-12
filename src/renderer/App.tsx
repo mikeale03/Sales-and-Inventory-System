@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import Role from '../globalTypes/dbApi/users.enums';
-import './App.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import LoginPage from './pages/login';
 
 const { console, electron } = window;
 
@@ -78,7 +79,8 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Hello />} />
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/home" element={<Hello />} />
       </Routes>
     </Router>
   );
