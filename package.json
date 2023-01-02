@@ -106,8 +106,7 @@
     ],
     "transform": {
       "\\.(ts|tsx|js|jsx)$": [
-        "ts-jest",
-        "babel-jest"
+        "ts-jest"
       ]
     }
   },
@@ -120,7 +119,8 @@
     "react": "^18.2.0",
     "react-bootstrap": "^2.6.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.3.0"
+    "react-router-dom": "^6.3.0",
+    "reactstrap-sortable-table": "^1.1.1"
   },
   "devDependencies": {
     "@babel/core": "^7.19.1",
@@ -138,7 +138,6 @@
     "@types/webpack-bundle-analyzer": "^4.4.2",
     "@typescript-eslint/eslint-plugin": "^5.33.1",
     "@typescript-eslint/parser": "^5.33.1",
-    "babel-jest": "^29.0.3",
     "browserslist-config-erb": "^0.0.3",
     "chalk": "^4.1.2",
     "concurrently": "^7.3.0",

@@ -1,7 +1,7 @@
 import PouchDb from 'pouchdb';
 import { pbkdf2Sync, randomBytes } from 'crypto';
-import { TResponse } from './responseType';
-import Role from '../../globalTypes/dbApi/users.enums';
+import { IResponse } from 'globalTypes/dbApi/response.types';
+import { IUser, Role } from '../../globalTypes/dbApi/users.types';
 
 const hashAndSaltPassword = (password: string) => {
   const salt = randomBytes(16).toString('hex');
@@ -14,17 +14,7 @@ function isValidRole(role: string): role is Role {
   return Object.values<string>(Role).includes(role);
 }
 
-export interface IUser {
-  _id: string;
-  username?: string;
-  salt?: string;
-  hash?: string;
-  role?: Role;
-}
-
-export type GetUserResponse = IUser &
-  PouchDB.Core.IdMeta &
-  PouchDB.Core.GetMeta;
+type CreateResponse = Promise<IResponse<IUser>>;
 
 export const usersDb = new PouchDb<IUser>('database/Users');
 
@@ -32,7 +22,7 @@ export const createUser = async (user: {
   username: string;
   password: string;
   role: string;
-}): Promise<TResponse<PouchDB.Core.Response>> => {
+}): CreateResponse => {
   if (!isValidRole(user.role)) {
     return {
       isSuccess: false,
@@ -43,62 +33,71 @@ export const createUser = async (user: {
 
   const { hash, salt } = hashAndSaltPassword(user.password);
 
+  const newUser = {
+    _id: user.username,
+    username: user.username,
+    salt,
+    hash,
+    role: user.role,
+  };
+
   try {
-    const newUser = await usersDb.put({
-      _id: user.username,
-      username: user.username,
-      salt,
-      hash,
-      role: user.role,
-    });
+    const { rev } = await usersDb.put(newUser);
 
     return {
       isSuccess: true,
-      result: newUser,
+      result: { ...newUser, _rev: rev },
       message: 'Successfully created a new user.',
     };
   } catch (error) {
     return {
       isSuccess: false,
-      result: undefined,
       message: 'Error occured while creating a user.',
       error,
     };
   }
 };
 
-export const getAllUsers = async () =>
-  usersDb.allDocs({
+export const getAllUsers = async (): Promise<
+  IResponse<PouchDB.Core.AllDocsResponse<IUser>>
+> => {
+  const response = await usersDb.allDocs({
     include_docs: true,
   });
-
-export const deleteUser = async (id: string): Promise<TResponse<unknown>> => {
-  const response: TResponse<unknown> = {
-    isSuccess: false,
-    result: undefined,
-    message: '',
+  return {
+    isSuccess: true,
+    result: response,
+    message: 'Successfully get all users',
   };
+};
 
-  let user: GetUserResponse;
+export const deleteUser = async (id: string) => {
+  let user: IUser & PouchDB.Core.IdMeta & PouchDB.Core.GetMeta;
 
   try {
     user = await usersDb.get(id);
   } catch (error) {
-    response.message = 'Error occured while searching a user.';
-    response.error = error;
-    return response;
+    return {
+      isSuccess: false,
+      message: 'Error occured while searching user.',
+      error,
+    };
   }
 
   try {
-    response.result = await usersDb.remove(user);
-    response.isSuccess = true;
-    response.message = 'Successfully deleted a user.';
+    const result = await usersDb.remove(user);
+    return {
+      isSuccess: true,
+      result,
+      message: 'Deleting user is successful.',
+    };
   } catch (error: unknown) {
-    response.result = error;
-    response.message = 'Error occured while deleting a user.';
+    return {
+      isSuccess: false,
+      message: 'Error in deleting user.',
+      error,
+    };
   }
-
-  return response;
 };
 
 export const removeAll = async () => {

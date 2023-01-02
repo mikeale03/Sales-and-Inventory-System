@@ -9,9 +9,13 @@ import {
 } from 'react-bootstrap';
 import { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { GetResponse } from '../../globalTypes/dbApi/response.types';
+import { GetResponse } from 'globalTypes/dbApi/response.types';
+import { IUser } from 'globalTypes/dbApi/users.types';
 
-const { electron } = window;
+const {
+  electron: { ipcRenderer },
+  console,
+} = window;
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
@@ -22,12 +26,15 @@ const LoginPage = () => {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    const response = await electron.ipcRenderer.invoke<GetResponse>(
+    const response = await ipcRenderer.invoke<GetResponse<IUser>>(
       'users:login',
       username,
       password
     );
-    if (response.isSuccess) {
+
+    if (!response.isSuccess) {
+      console.log(response);
+    } else {
       navigate('/home');
     }
   };
@@ -37,8 +44,8 @@ const LoginPage = () => {
       <div className="h-100">
         <Row className="justify-content-center h-100 g-0">
           <Col md="6" lg="4" className="h-100">
-            <div className="login-container d-flex align-items-center h-100">
-              <div className="w-100">
+            <div className="d-flex align-items-center h-100">
+              <div className="w-100 m-2">
                 <Card>
                   <Card.Body>
                     <Form onSubmit={handleSubmit}>

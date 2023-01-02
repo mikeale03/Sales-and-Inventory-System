@@ -9,12 +9,14 @@ describe('UsersDb', () => {
   };
 
   it('should create user', async () => {
+    expect.assertions(1);
     const response = await createUser(user);
     console.log(response);
     expect(response.isSuccess).toEqual(true);
   });
 
   it('should delete user', async () => {
+    expect.assertions(1);
     const response = await deleteUser(user.username);
     console.log(response);
     expect(response.isSuccess).toEqual(true);

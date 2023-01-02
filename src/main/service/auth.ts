@@ -1,6 +1,7 @@
 import { pbkdf2Sync } from 'crypto';
-import { usersDb, GetUserResponse } from './usersDb';
-import { TResponse } from './responseType';
+import { IUser } from 'globalTypes/dbApi/users.types';
+import { GetResponse } from 'globalTypes/dbApi/response.types';
+import { usersDb } from './usersDb';
 
 const isValidPassword = (password: string, hash: string, salt: string) => {
   const passwordHash = pbkdf2Sync(password, salt, 1000, 64, `sha512`).toString(
@@ -12,29 +13,31 @@ const isValidPassword = (password: string, hash: string, salt: string) => {
 const login = async (
   username: string,
   password: string
-): Promise<TResponse<GetUserResponse>> => {
-  let user: GetUserResponse;
-  const response: TResponse<GetUserResponse> = {
-    isSuccess: false,
-    message: '',
-  };
+): Promise<GetResponse<IUser>> => {
+  let user: IUser & PouchDB.Core.IdMeta & PouchDB.Core.GetMeta;
 
   try {
     user = await usersDb.get(username);
   } catch (error) {
-    response.message = 'Username error';
-    response.error = error;
-    return response;
+    return {
+      isSuccess: false,
+      message: 'Cannot get user',
+      error,
+    };
   }
 
   if (isValidPassword(password, user.hash!, user.salt!)) {
-    response.isSuccess = true;
-    response.message = 'Login successful.';
-  } else {
-    response.isSuccess = false;
-    response.message = 'Incorrect password.';
+    return {
+      isSuccess: true,
+      result: user,
+      message: 'Login successful',
+    };
   }
-  return response;
+
+  return {
+    isSuccess: false,
+    message: 'Incorrect password',
+  };
 };
 
 export default login;

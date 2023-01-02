@@ -1,4 +1,3 @@
-import { IResponse } from 'globalTypes/response.interface';
 import { Channels } from 'main/preload';
 
 declare global {
@@ -11,7 +10,7 @@ declare global {
           func: (...args: unknown[]) => void
         ): (() => void) | undefined;
         once(channel: string, func: (...args: unknown[]) => void): void;
-        invoke<T>(channel: string, ...args: unknown[]): Promise<IResponse<T>>;
+        invoke<T>(channel: string, ...args: unknown[]): Promise<T>;
       };
     };
   }
