@@ -6,6 +6,18 @@ module.exports = {
     'import/no-unresolved': 'error',
     // Since React 17 and typescript 4.1 you can safely disable the rule
     'react/react-in-jsx-scope': 'off',
+    'no-underscore-dangle': 'off',
+    'no-unused-expressions': 'off',
+    '@typescript-eslint/no-unused-expressions': 'off',
+    "react/require-default-props": "off"
+    '@typescript-eslint/naming-convention': [
+      'error',
+      {
+        selector: 'default',
+        format: null,
+        leadingUnderscore: 'allow',
+      },
+    ],
   },
   parserOptions: {
     ecmaVersion: 2020,

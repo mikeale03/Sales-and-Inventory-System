@@ -1,7 +1,7 @@
-import { IProduct } from 'globalTypes/dbApi/products.types';
+import { IProduct, ProductUpdate } from 'globalTypes/dbApi/products.types';
 import {
   AllDocsResponse,
-  CreateResponse,
+  PutResponse,
   DeleteResponse,
 } from 'globalTypes/dbApi/response.types';
 import PouchDb from 'pouchdb';
@@ -10,7 +10,7 @@ export const productsDb = new PouchDb<IProduct>('database/Products');
 
 export const createProduct = async (
   product: IProduct
-): Promise<CreateResponse<IProduct>> => {
+): Promise<PutResponse<IProduct>> => {
   try {
     const { id, rev } = await productsDb.put({
       ...product,
@@ -21,6 +21,42 @@ export const createProduct = async (
       isSuccess: true,
       result: { ...product, _id: id, _rev: rev },
       message: 'Successfully created a product',
+    };
+  } catch (error) {
+    return {
+      isSuccess: false,
+      result: undefined,
+      message: 'Error occured while creating a user.',
+      error,
+    };
+  }
+};
+
+export const updateProduct = async (
+  product: ProductUpdate
+): Promise<PutResponse<IProduct>> => {
+  let doc: IProduct & PouchDB.Core.IdMeta & PouchDB.Core.GetMeta;
+  try {
+    doc = await productsDb.get(product._id);
+  } catch (error) {
+    return {
+      isSuccess: false,
+      message: 'Product not found',
+      error,
+    };
+  }
+
+  try {
+    const { id, rev } = await productsDb.put({
+      ...product,
+      _id: product.name,
+      _rev: doc._rev,
+    });
+
+    return {
+      isSuccess: true,
+      result: { ...product, _id: id, _rev: rev },
+      message: 'Successfully updated a product',
     };
   } catch (error) {
     return {
@@ -53,9 +89,17 @@ export const deleteProduct = async (
   }
 };
 
-export const getAllProducts = async (): Promise<AllDocsResponse<IProduct>> => {
+export const getAllProducts = async (
+  search?: string
+): Promise<AllDocsResponse<IProduct>> => {
+  const startkey = search || undefined;
+  const endkey = startkey ? `${search}\ufff0` : undefined;
   try {
-    const response = await productsDb.allDocs({ include_docs: true });
+    const response = await productsDb.allDocs({
+      include_docs: true,
+      startkey,
+      endkey,
+    });
     return {
       isSuccess: true,
       result: response,

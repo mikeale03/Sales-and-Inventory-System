@@ -1,5 +1,5 @@
 import { Col, Row } from 'react-bootstrap';
-import FormInput from '../components/forms/formInput';
+import FormInput from '../components/common/forms/formInput';
 
 function CashRegisterPage() {
   return (

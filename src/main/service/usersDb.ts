@@ -1,6 +1,6 @@
 import PouchDb from 'pouchdb';
 import { pbkdf2Sync, randomBytes } from 'crypto';
-import { IResponse } from 'globalTypes/dbApi/response.types';
+import { IResponse, PutResponse } from 'globalTypes/dbApi/response.types';
 import { IUser, Role } from '../../globalTypes/dbApi/users.types';
 
 const hashAndSaltPassword = (password: string) => {
@@ -14,15 +14,13 @@ function isValidRole(role: string): role is Role {
   return Object.values<string>(Role).includes(role);
 }
 
-type CreateResponse = Promise<IResponse<IUser>>;
-
 export const usersDb = new PouchDb<IUser>('database/Users');
 
 export const createUser = async (user: {
   username: string;
   password: string;
   role: string;
-}): CreateResponse => {
+}): Promise<PutResponse<IUser>> => {
   if (!isValidRole(user.role)) {
     return {
       isSuccess: false,
