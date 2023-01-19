@@ -16,6 +16,7 @@ coverage
 node_modules
 
 database
+realm/*
 
 # OSX
 .DS_Store

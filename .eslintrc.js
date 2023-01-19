@@ -9,7 +9,7 @@ module.exports = {
     'no-underscore-dangle': 'off',
     'no-unused-expressions': 'off',
     '@typescript-eslint/no-unused-expressions': 'off',
-    "react/require-default-props": "off"
+    'react/require-default-props': 'off',
     '@typescript-eslint/naming-convention': [
       'error',
       {

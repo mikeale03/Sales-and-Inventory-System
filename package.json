@@ -120,11 +120,13 @@
     "electron-log": "^4.4.8",
     "electron-updater": "^5.2.1",
     "pouchdb": "^7.3.0",
+    "pouchdb-find": "^8.0.0",
     "react": "^18.2.0",
     "react-bootstrap": "^2.6.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.3.0",
-    "reactstrap-sortable-table": "^1.1.1"
+    "reactstrap-sortable-table": "^1.1.1",
+    "realm": "^11.3.1"
   },
   "devDependencies": {
     "@babel/core": "^7.19.1",

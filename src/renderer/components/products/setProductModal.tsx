@@ -1,12 +1,18 @@
 import { IProduct } from 'globalTypes/dbApi/products.types';
-import { FormEvent, useState } from 'react';
+import { Channels } from 'globalTypes/electron/productChannels';
+import { Product } from 'main/service/productsRealm';
+import { FormEvent, useContext, useState } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
+import UserContext from 'renderer/context/context';
 import { createProduct, updateProduct } from 'renderer/service/products';
 import FormInput from '../common/forms/formInput';
 
-type Product = {
+const {
+  electron: { ipcRenderer },
+} = window;
+
+type ProductForm = {
   _id?: string;
-  _rev?: string;
   name: string;
   barcode?: string | number;
   description?: string;
@@ -17,9 +23,11 @@ type Product = {
 export type Props = {
   show: boolean;
   toggle: (show: boolean) => void;
-  selectedProduct?: Product;
-  onCreate?: (product: { _id: string; _rev: string; } & IProduct | undefined) => void;
-  onUpdate?: (product: { _id: string; _rev: string; } & IProduct | undefined) => void;
+  selectedProduct?: ProductForm;
+  onCreate?: (product: Product) => void;
+  onUpdate?: (
+    product: ({ _id: string; _rev: string } & IProduct) | undefined
+  ) => void;
 };
 
 const SetProductModal = ({
@@ -29,7 +37,7 @@ const SetProductModal = ({
   onUpdate,
   onCreate,
 }: Props) => {
-  const [product, setProduct] = useState<Product>({
+  const [product, setProduct] = useState<ProductForm>({
     name: '',
     barcode: '',
     description: '',
@@ -37,22 +45,26 @@ const SetProductModal = ({
     price: '',
   });
 
+  const { user } = useContext(UserContext);
+
   const handleOnSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.stopPropagation();
     e.preventDefault();
-    let result: { _id: string; _rev: string; } & IProduct | undefined;
-    if (product?._id && product?._rev) {
+    let result: ({ _id: string; _rev: string } & IProduct) | undefined;
+    if (product?._id) {
       result = await updateProduct(product);
       onUpdate?.(result);
-    }
-    else {
-      result = await createProduct(product);
-      onCreate?.(result);
+    } else {
+      const newProduct = await ipcRenderer.invoke<Product>(Channels.create, {
+        ...product,
+        created_by: user?.username,
+      });
+      onCreate?.(newProduct);
     }
     toggle(false);
   };
 
-  const handleChange = (updateFields: Partial<Product>) => {
+  const handleChange = (updateFields: Partial<ProductForm>) => {
     setProduct({ ...product, ...updateFields });
   };
 
@@ -82,14 +94,14 @@ const SetProductModal = ({
             onChange={(e: React.ChangeEvent<HTMLFormElement>) =>
               handleChange({ name: e.target.value })
             }
-            required={true}
+            required
           />
           <FormInput
             formGroupProps={{ className: 'mb-2' }}
             label="Barcode"
             type="number"
             min="0"
-            value={product.barcode ?? '' }
+            value={product.barcode ?? ''}
             onChange={(e: React.ChangeEvent<HTMLFormElement>) =>
               handleChange({ barcode: e.target.value })
             }
@@ -130,7 +142,7 @@ const SetProductModal = ({
             Close
           </Button>
           <Button type="submit" variant="primary">
-            Save changes
+            Save
           </Button>
         </Modal.Footer>
       </Form>

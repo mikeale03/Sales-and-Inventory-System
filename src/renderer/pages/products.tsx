@@ -1,8 +1,8 @@
 /* eslint-disable radix */
 import { useEffect, useState } from 'react';
-import { Button, Form, Table, Card } from 'react-bootstrap';
+import { Button, Table, Card, Row, Col, FormControl } from 'react-bootstrap';
 import { AllProductItem, IProduct } from 'globalTypes/dbApi/products.types';
-import { AllDocsResponse } from 'globalTypes/dbApi/response.types';
+import { AllDocsResponse, IResponse } from 'globalTypes/dbApi/response.types';
 import { debounce } from 'renderer/utils/helper';
 import {
   deleteProduct,
@@ -13,6 +13,10 @@ import {
 import AddQuantityModal from 'renderer/components/products/addQuantityModal';
 import SetProductModal from 'renderer/components/products/setProductModal';
 import ConfirmationModal from 'renderer/components/common/modals/confirmation';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCirclePlus } from '@fortawesome/free-solid-svg-icons';
+import { faPenToSquare, faTrashCan } from '@fortawesome/free-regular-svg-icons';
+import { Product } from 'main/service/productsRealm';
 
 const {
   electron: { ipcRenderer },
@@ -23,45 +27,36 @@ const ProductsPage = () => {
   const [selectedProduct, setSelectedProduct] = useState<
     ProductForm | undefined
   >();
-  const [products, setProducts] = useState<AllProductItem[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [showSetProductModal, setShowSetProductModal] =
     useState<boolean>(false);
   const [showAddQuantityModal, setShowAddQuantityModal] = useState(false);
-  const [showConfirmationModal, setShowConfirmationModal] = useState(false)
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 
   const handleGetAllProducts = async () => {
-    const response = await ipcRenderer.invoke<AllDocsResponse<IProduct>>(
+    const response = await ipcRenderer.invoke<IResponse<Product[]>>(
       'products:get-all'
     );
     console.log(response);
     if (response.isSuccess) {
-      const data = response.result?.rows;
+      const data = response.result;
       setProducts(data ?? []);
     }
   };
 
   const handleUpdateProduct = async (product: SetProductResult) => {
-    product &&
-      setProducts(
-        products.map((prod) =>
-          prod.doc?._id === product!._id
-            ? { ...prod, doc: { ...prod.doc, ...product } }
-            : prod
-        )
-      );
+  //   product &&
+  //     setProducts(
+  //       products.map((prod) =>
+  //         prod.doc?._id === product!._id
+  //           ? { ...prod, doc: { ...prod.doc, ...product } }
+  //           : prod
+  //       )
+  //     );
   };
 
-  const handleCreateProduct = async (product: SetProductResult) => {
-    product &&
-      setProducts([
-        {
-          doc: product!,
-          id: product!._id,
-          key: product!._id,
-          value: { rev: product!._rev },
-        },
-        ...products,
-      ]);
+  const handleAddProduct = async (product: Product) => {
+    setProducts([product, ...products]);
   };
 
   const handleShowSetProductModal = (doc: IProduct | undefined) => {
@@ -77,7 +72,7 @@ const ProductsPage = () => {
   const handleShowConfirmationModal = (doc: IProduct) => {
     setSelectedProduct(doc);
     setShowConfirmationModal(true);
-  }
+  };
 
   const handleAddQuantity = async (qty: number) => {
     let quantity = selectedProduct?.quantity ? +selectedProduct?.quantity : 0;
@@ -96,22 +91,32 @@ const ProductsPage = () => {
   };
 
   const handleDeleteProduct = async () => {
-    if(selectedProduct?._id) {
+    if (selectedProduct?._id) {
       const result = await deleteProduct(selectedProduct._id);
-      if(result) {
+      if (result) {
         setProducts(
-          products.filter((prod) =>
-            prod.doc?._id !== selectedProduct._id
-          )
+          products.filter((prod) => prod.doc?._id !== selectedProduct._id)
         );
         setSelectedProduct(undefined);
       }
     }
-  }
+  };
 
   const searchProduct = debounce<void>(async (search: string) => {
     const response = await ipcRenderer.invoke<AllDocsResponse<IProduct>>(
       'products:search',
+      search
+    );
+    console.log(response);
+    if (response.isSuccess) {
+      const data = response.result?.rows;
+      setProducts(data ?? []);
+    }
+  }, 500);
+
+  const searchBarcode = debounce<void>(async (search: number) => {
+    const response = await ipcRenderer.invoke<AllDocsResponse<IProduct>>(
+      'products:get-barcode',
       search
     );
     console.log(response);
@@ -131,7 +136,7 @@ const ProductsPage = () => {
         show={showSetProductModal}
         toggle={setShowSetProductModal}
         selectedProduct={selectedProduct}
-        onCreate={handleCreateProduct}
+        onCreate={handleAddProduct}
         onUpdate={handleUpdateProduct}
       />
 
@@ -155,14 +160,25 @@ const ProductsPage = () => {
       >
         Add Product
       </Button>
-      <Form.Group className="mb-3">
-        <Form.Control
-          type="search"
-          placeholder="Search product"
-          // value={search}
-          onChange={(e) => searchProduct(e.target.value)}
-        />
-      </Form.Group>
+
+      <Row className="mb-3">
+        <Col md="6">
+          <FormControl
+            type="search"
+            placeholder="Search name"
+            // value={search}
+            onChange={(e) => searchProduct(e.target.value)}
+          />
+        </Col>
+        <Col md="6">
+          <FormControl
+            type="search"
+            placeholder="Search barcode"
+            // value={search}
+            onChange={(e) => searchBarcode(e.target.value)}
+          />
+        </Col>
+      </Row>
 
       <Card>
         <Card.Body>
@@ -178,27 +194,35 @@ const ProductsPage = () => {
             </thead>
             <tbody>
               {products.map((d) => (
-                <tr key={d.id}>
-                  <td>{d.doc?.name}</td>
-                  <td>{d.doc?.barcode}</td>
-                  <td>{d.doc?.price}</td>
-                  <td>{d.doc?.quantity}</td>
+                <tr key={d._id}>
+                  <td>{d.name}</td>
+                  <td>{d.barcode}</td>
+                  <td>{d.price}</td>
+                  <td>{d.quantity}</td>
                   <td>
-                    <Button
-                      onClick={() => d.doc && handleShowSetProductModal(d.doc)}
-                    >
-                      Edit
-                    </Button>
-                    <Button
+                    <FontAwesomeIcon
                       onClick={() => d.doc && handleShowAddQuantityModal(d.doc)}
-                    >
-                      Add Quantity
-                    </Button>
-                    <Button
-                      onClick={() => d.doc && handleShowConfirmationModal(d.doc)}
-                    >
-                      Delete
-                    </Button>
+                      icon={faCirclePlus}
+                      title="Add quantity"
+                      size="xl"
+                      className="me-2"
+                    />
+                    <FontAwesomeIcon
+                      onClick={() => d.doc && handleShowSetProductModal(d.doc)}
+                      icon={faPenToSquare}
+                      title="Edit"
+                      size="xl"
+                      className="me-2"
+                    />
+                    <FontAwesomeIcon
+                      onClick={() =>
+                        d.doc && handleShowConfirmationModal(d.doc)
+                      }
+                      icon={faTrashCan}
+                      title="Delete"
+                      size="xl"
+                      className="me-2"
+                    />
                   </td>
                 </tr>
               ))}

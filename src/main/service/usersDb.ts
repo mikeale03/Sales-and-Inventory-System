@@ -1,6 +1,6 @@
-import PouchDb from 'pouchdb';
 import { pbkdf2Sync, randomBytes } from 'crypto';
 import { IResponse, PutResponse } from 'globalTypes/dbApi/response.types';
+import PouchDb from './pouchDb';
 import { IUser, Role } from '../../globalTypes/dbApi/users.types';
 
 const hashAndSaltPassword = (password: string) => {

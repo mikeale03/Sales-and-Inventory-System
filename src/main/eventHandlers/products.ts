@@ -1,21 +1,26 @@
-import { IProduct, ProductUpdate } from 'globalTypes/dbApi/products.types';
+import { ProductUpdate } from 'globalTypes/dbApi/products.types';
+import { Channels } from 'globalTypes/electron/productChannels';
 import { IpcMain, IpcMainInvokeEvent } from 'electron';
 import {
-  createProduct,
   deleteProduct,
-  getAllProducts,
+  getProductByBarcode,
   updateProduct,
 } from '../service/productsDb';
+import {
+  createProduct,
+  CreateProductParam,
+  getAllProducts,
+} from '../service/productsRealm';
 
 const setProductEventHandler = (ipcMain: IpcMain) => {
   ipcMain.handle(
-    'products:create',
-    async (event: IpcMainInvokeEvent, product: IProduct) => {
+    Channels.create,
+    async (event: IpcMainInvokeEvent, product: CreateProductParam) => {
       const result = await createProduct(product);
       return result;
     }
   );
-  ipcMain.handle('products:get-all', async () => {
+  ipcMain.handle(Channels.getAll, async () => {
     const result = await getAllProducts();
     return result;
   });
@@ -26,20 +31,24 @@ const setProductEventHandler = (ipcMain: IpcMain) => {
       return result;
     }
   );
-  ipcMain.handle(
-    'products:search',
-    async (event: IpcMainInvokeEvent, search: string) => {
-      const result = await getAllProducts(search);
-      return result;
-    }
-  );
+  ipcMain.handle('products:search', async (event: IpcMainInvokeEvent) => {
+    const result = await getAllProducts();
+    return result;
+  });
   ipcMain.handle(
     'products:delete',
     async (event: IpcMainInvokeEvent, id: string) => {
       const result = await deleteProduct(id);
       return result;
     }
-  )
+  );
+  ipcMain.handle(
+    'products:get-barcode',
+    async (event: IpcMainInvokeEvent, barcode: number) => {
+      const result = await getProductByBarcode(barcode);
+      return result;
+    }
+  );
 };
 
 export default setProductEventHandler;

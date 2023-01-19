@@ -3,8 +3,9 @@ import {
   AllDocsResponse,
   PutResponse,
   DeleteResponse,
+  IResponse,
 } from 'globalTypes/dbApi/response.types';
-import PouchDb from 'pouchdb';
+import PouchDb from './pouchDb';
 
 export const productsDb = new PouchDb<IProduct>('database/Products');
 
@@ -103,12 +104,56 @@ export const getAllProducts = async (
     return {
       isSuccess: true,
       result: response,
-      message: 'Successfully get all products',
+      message: 'Successfully get products',
     };
   } catch (error) {
     return {
       isSuccess: false,
-      message: 'Error getting all products',
+      message: 'Error getting products',
+      error,
     };
   }
+};
+
+export const getProductByBarcode = async (quantity: number) => {
+  console.log(quantity);
+  let response: IResponse<any> = {
+    isSuccess: false,
+    message: '',
+  };
+
+  return await productsDb
+  .createIndex({
+    index: { fields: ['quantity'] },
+  })
+  .then(async () => {
+    return productsDb.find({
+      selector: { quantity },
+    })
+  }).then((result) => {
+    console.log(result);
+    response = {
+      isSuccess: true,
+      result: result,
+      message: 'Successfully get product',
+    };
+    return response;
+  })
+  .catch((error) => {
+    response = {
+      isSuccess: false,
+      message: 'Failed to get product',
+      error,
+    };
+    return response;
+  });
+
+  // try {
+  //   const response = await productsDb.find({
+  //     selector: { barcode }
+  //   });
+
+  // } catch (error) {
+
+  // }
 };

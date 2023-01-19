@@ -36,6 +36,7 @@ const AddQuantityModal = ({
           <Form.Group className="mb-3">
             <Form.Control
               type="number"
+              placeholder="Enter quantity"
               min="1"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
@@ -48,7 +49,7 @@ const AddQuantityModal = ({
             Close
           </Button>
           <Button type="submit" variant="primary">
-            Save changes
+            Add
           </Button>
         </Modal.Footer>
       </Form>

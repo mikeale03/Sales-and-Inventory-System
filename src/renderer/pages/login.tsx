@@ -7,10 +7,11 @@ import {
   Row,
   Form,
 } from 'react-bootstrap';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { GetResponse } from 'globalTypes/dbApi/response.types';
 import { IUser } from 'globalTypes/dbApi/users.types';
+import UserContext from 'renderer/context/context';
 
 const {
   electron: { ipcRenderer },
@@ -22,6 +23,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
 
   const navigate = useNavigate();
+  const { setUser } = useContext(UserContext);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -35,7 +37,8 @@ const LoginPage = () => {
     if (!response.isSuccess) {
       console.log(response);
     } else {
-      navigate('/home');
+      response.result && setUser?.(response.result);
+      navigate('Home');
     }
   };
 

@@ -1,5 +1,9 @@
-import { IProduct } from "globalTypes/dbApi/products.types";
-import { DeleteResponse, ExistingDoc, PutResponse } from "globalTypes/dbApi/response.types";
+import { IProduct } from 'globalTypes/dbApi/products.types';
+import {
+  DeleteResponse,
+  ExistingDoc,
+  PutResponse,
+} from 'globalTypes/dbApi/response.types';
 
 export type ProductForm = {
   _id?: string;
@@ -11,17 +15,18 @@ export type ProductForm = {
   price: string | number;
 };
 
-export type SetProductResult = ({
-  _id: string;
-  _rev: string;
-} & IProduct) | undefined
+export type SetProductResult =
+  | ({
+      _id: string;
+      _rev: string;
+    } & IProduct)
+  | undefined;
 
 const {
-  electron: { ipcRenderer }
+  electron: { ipcRenderer },
 } = window;
 
 export const updateProduct = async (product: ProductForm) => {
-
   const { barcode, price, quantity } = product;
   let data: ExistingDoc<IProduct>;
 
@@ -43,10 +48,9 @@ export const updateProduct = async (product: ProductForm) => {
     data
   );
 
-  if(response.isSuccess) {
+  if (response.isSuccess) {
     return response.result;
-  }
-  else {
+  } else {
     alert(response.message);
     return undefined;
   }
@@ -67,25 +71,22 @@ export const createProduct = async (product: ProductForm) => {
   );
   console.log(response);
   if (response.isSuccess && response.result) {
-    return response.result
-  }
-  else {
+    return response.result;
+  } else {
     alert(response.message);
     return undefined;
   }
 };
 
 export const deleteProduct = async (productId: string) => {
-
   const response = await ipcRenderer.invoke<DeleteResponse>(
     'products:delete',
     productId
   );
   console.log(response);
   if (response.isSuccess && response.result) {
-    return response.result
-  }
-  else {
+    return response.result;
+  } else {
     alert(response.message);
     return undefined;
   }
