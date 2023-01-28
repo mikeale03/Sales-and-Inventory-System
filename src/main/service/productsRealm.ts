@@ -1,6 +1,8 @@
 import { IResponse } from 'globalTypes/dbApi/response.types';
 import Realm from 'realm';
 
+const PRODUCTS = 'Products';
+
 export type Product = {
   _id: string;
   name: string;
@@ -15,15 +17,6 @@ export type Product = {
   image?: string;
 };
 
-export type CreateProductParam = Omit<
-  Product,
-  'barcode' | 'quantity' | 'price' | 'date_created' | '_id'
-> & {
-  barcode?: number | string;
-  quantity: number | string;
-  price: number | string;
-};
-
 export class ProductsSchema extends Realm.Object {
   static schema = {
     name: 'Products',
@@ -33,7 +26,7 @@ export class ProductsSchema extends Realm.Object {
       barcode: { type: 'int?', indexed: true },
       description: 'string?',
       quantity: 'int',
-      price: 'int',
+      price: 'float',
       date_created: 'date',
       date_updated: 'date?',
       created_by: 'string',
@@ -53,24 +46,55 @@ export const openProductsRealm = async () => {
   return products;
 };
 
+const checkProductNameOrBarcodeExist = (
+  realm: Realm,
+  { name, barcode }: { name?: string; barcode?: number }
+) => {
+  const products = realm?.objects<Product>(PRODUCTS);
+  let prop = '';
+  const isExist = products?.find((item) => {
+    if (name && item.name.toLowerCase() === name.toLowerCase()) {
+      prop = 'name';
+      return true;
+    }
+    if (barcode && barcode === item.barcode) {
+      prop = 'barcode';
+      return true;
+    }
+    return false;
+  });
+
+  return {
+    isExist,
+    prop,
+  };
+};
+
 export const createProduct = async (
-  productParam: CreateProductParam
+  product: Product
 ): Promise<IResponse<Product>> => {
   let task: Realm.Object<Product, never> | undefined;
   let realm: Realm | undefined;
+  const { name, barcode } = product;
   try {
     realm = await openProductsRealm();
+    const { isExist, prop } = checkProductNameOrBarcodeExist(realm, {
+      name,
+      barcode,
+    });
+    if (isExist) {
+      realm.close();
+      return {
+        isSuccess: false,
+        message: `Product ${prop} already exist`,
+      };
+    }
 
     realm.write(() => {
-      task = realm?.create('Products', {
-        ...productParam,
-        barcode: productParam.barcode ? +productParam.barcode : undefined,
-        quantity: +productParam.quantity,
-        price: +productParam.price,
+      task = realm?.create(PRODUCTS, {
+        ...product,
         date_created: new Date(),
       });
-
-      console.log(task?.toJSON());
     });
   } catch (error) {
     realm?.close();
@@ -144,38 +168,94 @@ export const getAllProducts = async (): Promise<IResponse<Product[]>> => {
 };
 
 export const updateProduct = async (
-  productId: string,
-  updates: Record<string, any>
+  updates: Partial<Product> & { _id: string }
 ) => {
   let realm: Realm | undefined;
+  interface ProductRecord {
+    [key: string]: number | string | boolean | Date | undefined | null;
+  }
+
+  const { name, barcode } = updates;
   try {
     realm = await openProductsRealm();
-    const product: Record<string, any> | null =
-      realm.objectForPrimaryKey<Product>('Products', productId);
-
-    console.log(product);
+    const product = realm?.objectForPrimaryKey<ProductRecord>(
+      'Products',
+      new Realm.BSON.ObjectID(updates._id)
+    );
+    if (
+      (name &&
+        name.toLowerCase() !== (product?.name as string).toLowerCase()) ||
+      (barcode && barcode !== product?.barcode)
+    ) {
+      const { isExist, prop } = checkProductNameOrBarcodeExist(realm, {
+        name,
+        barcode,
+      });
+      if (isExist) {
+        realm.close();
+        return {
+          isSuccess: false,
+          message: `Product ${prop} already exist`,
+        };
+      }
+    }
 
     realm.write(() => {
       if (product) {
+        type UpdateKey = keyof typeof updates;
         Object.keys(updates).forEach((key) => {
-          product[key] = updates[key];
+          if (key !== '_id') product[key] = updates[key as UpdateKey];
         });
       }
     });
 
-    const result = product?.toJSON();
+    const newProduct = product?.toJSON() as Product;
     realm?.close();
 
+    if (newProduct)
+      return {
+        isSuccess: true,
+        message: 'Successfully updated a product',
+        result: { ...newProduct, _id: newProduct._id.toString() },
+      };
+
     return {
-      isSuccess: true,
-      message: 'Successfully get products',
-      result,
+      isSuccess: false,
+      message: 'Failed to update product',
     };
   } catch (error) {
     realm?.close();
     return {
       isSuccess: false,
-      message: 'Failed to get products',
+      message: 'Failed to update product',
+      error,
+    };
+  }
+};
+
+export const deleteProduct = async (productId: string) => {
+  let realm: Realm | undefined;
+  try {
+    realm = await openProductsRealm();
+    let product = realm?.objectForPrimaryKey<Product>(
+      'Products',
+      new Realm.BSON.ObjectID(productId)
+    );
+
+    realm.write(() => {
+      product && realm?.delete(product);
+      product = null;
+    });
+    realm?.close();
+    return {
+      isSuccess: true,
+      message: 'Successfully deleted a product',
+    };
+  } catch (error) {
+    realm?.close();
+    return {
+      isSuccess: false,
+      message: 'Failed to delete a product',
       error,
     };
   }

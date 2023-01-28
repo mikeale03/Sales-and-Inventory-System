@@ -3,10 +3,10 @@ import Sidebar from '../components/common/sidebar';
 
 function HomePage() {
   return (
-    <div className="container-fluid vh-100">
-      <div className="d-flex flex-row h-100">
+    <div className="container-fluid p-0">
+      <div className="pe-0 h-100" style={{ paddingLeft: '120px' }}>
         <Sidebar />
-        <main role="main" className="p-3 h-100 flex-grow-1 bg-light">
+        <main role="main" className="p-3 m-0 h-100 flex-grow-1 bg-light border">
           <Outlet />
         </main>
       </div>

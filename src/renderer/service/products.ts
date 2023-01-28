@@ -1,18 +1,30 @@
+import { Channels } from 'globalTypes/channels/productChannels';
 import { IProduct } from 'globalTypes/dbApi/products.types';
 import {
   DeleteResponse,
   ExistingDoc,
+  IResponse,
   PutResponse,
 } from 'globalTypes/dbApi/response.types';
+import { Product } from 'main/service/productsRealm';
 
-export type ProductForm = {
-  _id?: string;
-  _rev?: string;
+type ProductUpdateParam = Partial<{
+  name: string;
+  barcode: string | number;
+  description: string;
+  quantity: string | number;
+  price: string | number;
+  updated_by: string;
+  date_updated: Date;
+}> & { _id: string };
+
+type ProductCreateParam = {
   name: string;
   barcode?: string | number;
   description?: string;
   quantity: string | number;
   price: string | number;
+  created_by: string;
 };
 
 export type SetProductResult =
@@ -26,68 +38,37 @@ const {
   electron: { ipcRenderer },
 } = window;
 
-export const updateProduct = async (product: ProductForm) => {
-  const { barcode, price, quantity } = product;
-  let data: ExistingDoc<IProduct>;
+export const updateProduct = async (updates: ProductUpdateParam) => {
+  const newUpdate = { ...updates };
+  if (newUpdate.barcode) newUpdate.barcode = +newUpdate.barcode;
+  if (newUpdate.price) newUpdate.price = +newUpdate.price;
+  if (newUpdate.quantity) newUpdate.quantity = +newUpdate.quantity;
 
-  if (product._id && product._rev)
-    data = {
-      ...product,
-      _id: product._id,
-      _rev: product._rev,
-      barcode: barcode ? +barcode : undefined,
-      price: +price,
-      quantity: +quantity,
-    };
-  else {
-    throw Error('Product _id and _rev is required');
-  }
-
-  const response = await ipcRenderer.invoke<PutResponse<IProduct>>(
-    'products:update',
-    data
+  const response = await ipcRenderer.invoke<IResponse<Product>>(
+    Channels.update,
+    newUpdate
   );
-
-  if (response.isSuccess) {
-    return response.result;
-  } else {
-    alert(response.message);
-    return undefined;
-  }
+  return response;
 };
 
-export const createProduct = async (product: ProductForm) => {
-  let barcode: number | undefined;
+export const createProduct = async (product: ProductCreateParam) => {
+  const barcode = product.barcode ? +product.barcode : undefined;
+  const price = +product.price;
+  const quantity = +product.quantity;
 
-  if (product.barcode) barcode = +product.barcode;
-
-  const quantity: number = +product.quantity;
-  const price: number = +product.price;
-
-  const data: IProduct = { ...product, barcode, quantity, price };
-  const response = await ipcRenderer.invoke<PutResponse<IProduct>>(
-    'products:create',
+  const data = { ...product, barcode, quantity, price };
+  const response = await ipcRenderer.invoke<IResponse<Product>>(
+    Channels.create,
     data
   );
-  console.log(response);
-  if (response.isSuccess && response.result) {
-    return response.result;
-  } else {
-    alert(response.message);
-    return undefined;
-  }
+  return response;
 };
 
 export const deleteProduct = async (productId: string) => {
-  const response = await ipcRenderer.invoke<DeleteResponse>(
-    'products:delete',
+  const response = await ipcRenderer.invoke<IResponse<undefined>>(
+    Channels.delete,
     productId
   );
   console.log(response);
-  if (response.isSuccess && response.result) {
-    return response.result;
-  } else {
-    alert(response.message);
-    return undefined;
-  }
+  return response;
 };

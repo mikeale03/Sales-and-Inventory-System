@@ -1,15 +1,13 @@
 import { ProductUpdate } from 'globalTypes/dbApi/products.types';
-import { Channels } from 'globalTypes/electron/productChannels';
 import { IpcMain, IpcMainInvokeEvent } from 'electron';
-import {
-  deleteProduct,
-  getProductByBarcode,
-  updateProduct,
-} from '../service/productsDb';
+import { Channels } from '../../globalTypes/channels/productChannels';
+import { getProductByBarcode } from '../service/productsDb';
 import {
   createProduct,
   CreateProductParam,
+  deleteProduct,
   getAllProducts,
+  updateProduct,
 } from '../service/productsRealm';
 
 const setProductEventHandler = (ipcMain: IpcMain) => {
@@ -25,9 +23,9 @@ const setProductEventHandler = (ipcMain: IpcMain) => {
     return result;
   });
   ipcMain.handle(
-    'products:update',
-    async (event: IpcMainInvokeEvent, product: ProductUpdate) => {
-      const result = await updateProduct(product);
+    Channels.update,
+    async (event: IpcMainInvokeEvent, updates: ProductUpdate) => {
+      const result = await updateProduct(updates);
       return result;
     }
   );
@@ -37,8 +35,8 @@ const setProductEventHandler = (ipcMain: IpcMain) => {
   });
   ipcMain.handle(
     'products:delete',
-    async (event: IpcMainInvokeEvent, id: string) => {
-      const result = await deleteProduct(id);
+    async (event: IpcMainInvokeEvent, productId: string) => {
+      const result = await deleteProduct(productId);
       return result;
     }
   );

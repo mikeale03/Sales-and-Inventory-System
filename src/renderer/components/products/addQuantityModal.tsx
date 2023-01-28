@@ -1,30 +1,49 @@
-import { FormEvent, useState } from 'react';
+import { Product } from 'main/service/productsRealm';
+import { FormEvent, useContext, useState } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
+import UserContext from 'renderer/context/userContext';
+import { updateProduct } from 'renderer/service/products';
 
 export type Props = {
   show: boolean;
   toggle: (show: boolean) => void;
-  onSubmit: (value: number) => void;
+  selectedProduct: Product | undefined;
+  onUpdate: (product: Product) => void;
 };
 
 const AddQuantityModal = ({
   show,
   toggle,
-  onSubmit,
+  selectedProduct,
+  onUpdate,
 }: Props) => {
   const [quantity, setQuantity] = useState('');
-
-  const handleOnSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.stopPropagation();
-    e.preventDefault();
-    onSubmit(+quantity);
-    onHide();
-  };
+  const { user } = useContext(UserContext);
 
   const onHide = () => {
     setQuantity('');
     toggle(false);
-  }
+  };
+
+  const handleOnSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const numQuality = +quantity;
+
+    if (selectedProduct) {
+      const response = await updateProduct({
+        _id: selectedProduct._id,
+        quantity: selectedProduct.quantity + numQuality,
+        updated_by: user?.username,
+        date_updated: new Date(),
+      });
+
+      if (response.isSuccess && response.result) onUpdate(response.result);
+      else alert(response.message);
+
+      onHide();
+    }
+  };
 
   return (
     <Modal show={show} onHide={onHide}>

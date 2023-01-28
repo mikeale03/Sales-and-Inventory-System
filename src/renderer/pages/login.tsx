@@ -11,7 +11,7 @@ import { FormEvent, useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { GetResponse } from 'globalTypes/dbApi/response.types';
 import { IUser } from 'globalTypes/dbApi/users.types';
-import UserContext from 'renderer/context/context';
+import UserContext from 'renderer/context/userContext';
 
 const {
   electron: { ipcRenderer },

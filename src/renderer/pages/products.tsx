@@ -1,15 +1,10 @@
 /* eslint-disable radix */
 import { useEffect, useState } from 'react';
 import { Button, Table, Card, Row, Col, FormControl } from 'react-bootstrap';
-import { AllProductItem, IProduct } from 'globalTypes/dbApi/products.types';
+import { IProduct } from 'globalTypes/dbApi/products.types';
 import { AllDocsResponse, IResponse } from 'globalTypes/dbApi/response.types';
 import { debounce } from 'renderer/utils/helper';
-import {
-  deleteProduct,
-  ProductForm,
-  SetProductResult,
-  updateProduct,
-} from 'renderer/service/products';
+import { deleteProduct } from 'renderer/service/products';
 import AddQuantityModal from 'renderer/components/products/addQuantityModal';
 import SetProductModal from 'renderer/components/products/setProductModal';
 import ConfirmationModal from 'renderer/components/common/modals/confirmation';
@@ -23,10 +18,148 @@ const {
   console,
 } = window;
 
+const products1 = [
+  {
+    _id: 1,
+    barcode: 12,
+    created_by: 'user',
+    date_updated: null,
+    description: '',
+    image: null,
+    name: 'name',
+    price: 3,
+    quantity: 3,
+    updated_by: null,
+  },
+  {
+    _id: 2,
+    barcode: 12,
+    created_by: 'user',
+    date_updated: null,
+    description: '',
+    image: null,
+    name: 'name',
+    price: 3,
+    quantity: 3,
+    updated_by: null,
+  },
+  {
+    _id: 3,
+    barcode: 12,
+    created_by: 'user',
+    date_updated: null,
+    description: '',
+    image: null,
+    name: 'name',
+    price: 3,
+    quantity: 3,
+    updated_by: null,
+  },
+  {
+    _id: 4,
+    barcode: 12,
+    created_by: 'user',
+    date_updated: null,
+    description: '',
+    image: null,
+    name: 'name',
+    price: 3,
+    quantity: 3,
+    updated_by: null,
+  },
+  {
+    _id: 5,
+    barcode: 12,
+    created_by: 'user',
+    date_updated: null,
+    description: '',
+    image: null,
+    name: 'name',
+    price: 3,
+    quantity: 3,
+    updated_by: null,
+  },
+  {
+    barcode: 12,
+    created_by: 'user',
+    date_updated: null,
+    description: '',
+    image: null,
+    name: 'name',
+    price: 3,
+    quantity: 3,
+    updated_by: null,
+  },
+  {
+    barcode: 12,
+    created_by: 'user',
+    date_updated: null,
+    description: '',
+    image: null,
+    name: 'name',
+    price: 3,
+    quantity: 3,
+    updated_by: null,
+  },
+  {
+    barcode: 12,
+    created_by: 'user',
+    date_updated: null,
+    description: '',
+    image: null,
+    name: 'name',
+    price: 3,
+    quantity: 3,
+    updated_by: null,
+  },
+  {
+    barcode: 12,
+    created_by: 'user',
+    date_updated: null,
+    description: '',
+    image: null,
+    name: 'name',
+    price: 3,
+    quantity: 3,
+    updated_by: null,
+  },
+  {
+    barcode: 12,
+    created_by: 'user',
+    date_updated: null,
+    description: '',
+    image: null,
+    name: 'name',
+    price: 3,
+    quantity: 3,
+    updated_by: null,
+  },
+  {
+    barcode: 12,
+    created_by: 'user',
+    date_updated: null,
+    description: '',
+    image: null,
+    name: 'name',
+    price: 3,
+    quantity: 3,
+    updated_by: null,
+  },
+  {
+    barcode: 12,
+    created_by: 'user',
+    date_updated: null,
+    description: '',
+    image: null,
+    name: 'name',
+    price: 3,
+    quantity: 3,
+    updated_by: null,
+  },
+];
+
 const ProductsPage = () => {
-  const [selectedProduct, setSelectedProduct] = useState<
-    ProductForm | undefined
-  >();
+  const [selectedProduct, setSelectedProduct] = useState<Product | undefined>();
   const [products, setProducts] = useState<Product[]>([]);
   const [showSetProductModal, setShowSetProductModal] =
     useState<boolean>(false);
@@ -44,61 +177,40 @@ const ProductsPage = () => {
     }
   };
 
-  const handleUpdateProduct = async (product: SetProductResult) => {
-  //   product &&
-  //     setProducts(
-  //       products.map((prod) =>
-  //         prod.doc?._id === product!._id
-  //           ? { ...prod, doc: { ...prod.doc, ...product } }
-  //           : prod
-  //       )
-  //     );
+  const handleUpdateProduct = async (product: Product) => {
+    console.log(product);
+    setProducts(
+      products.map((prod) => (prod._id === product._id ? product : prod))
+    );
   };
 
   const handleAddProduct = async (product: Product) => {
     setProducts([product, ...products]);
   };
 
-  const handleShowSetProductModal = (doc: IProduct | undefined) => {
-    setSelectedProduct(doc);
+  const handleShowSetProductModal = (product: Product | undefined) => {
+    setSelectedProduct(product);
     setShowSetProductModal(true);
   };
 
-  const handleShowAddQuantityModal = (doc: IProduct) => {
-    setSelectedProduct(doc);
+  const handleShowAddQuantityModal = (product: Product) => {
+    setSelectedProduct(product);
     setShowAddQuantityModal(true);
   };
 
-  const handleShowConfirmationModal = (doc: IProduct) => {
-    setSelectedProduct(doc);
+  const handleShowConfirmationModal = (product: Product) => {
+    setSelectedProduct(product);
     setShowConfirmationModal(true);
   };
 
-  const handleAddQuantity = async (qty: number) => {
-    let quantity = selectedProduct?.quantity ? +selectedProduct?.quantity : 0;
-    quantity = qty + quantity;
-
-    if (selectedProduct) {
-      const product = await updateProduct({ ...selectedProduct, quantity });
-      setProducts(
-        products.map((prod) =>
-          prod.doc?._id === product!._id
-            ? { ...prod, doc: { ...prod.doc, ...product } }
-            : prod
-        )
-      );
-    }
-  };
-
   const handleDeleteProduct = async () => {
-    if (selectedProduct?._id) {
-      const result = await deleteProduct(selectedProduct._id);
-      if (result) {
-        setProducts(
-          products.filter((prod) => prod.doc?._id !== selectedProduct._id)
-        );
-        setSelectedProduct(undefined);
-      }
+    if (selectedProduct) {
+      const response = await deleteProduct(selectedProduct._id);
+      response.isSuccess
+        ? setProducts(
+            products.filter((prod) => prod._id !== selectedProduct._id)
+          )
+        : alert(response.message);
     }
   };
 
@@ -127,7 +239,7 @@ const ProductsPage = () => {
   }, 500);
 
   useEffect(() => {
-    handleGetAllProducts();
+    // handleGetAllProducts();
   }, []);
 
   return (
@@ -143,7 +255,8 @@ const ProductsPage = () => {
       <AddQuantityModal
         show={showAddQuantityModal}
         toggle={setShowAddQuantityModal}
-        onSubmit={handleAddQuantity}
+        onUpdate={handleUpdateProduct}
+        selectedProduct={selectedProduct}
       />
 
       <ConfirmationModal
@@ -180,9 +293,9 @@ const ProductsPage = () => {
         </Col>
       </Row>
 
-      <Card>
-        <Card.Body>
-          <Table>
+      <Card className="d-flex">
+        <Card.Body className="flex-grow-1">
+          <Table responsive>
             <thead>
               <tr>
                 <th>Name</th>
@@ -193,31 +306,29 @@ const ProductsPage = () => {
               </tr>
             </thead>
             <tbody>
-              {products.map((d) => (
-                <tr key={d._id}>
+              {products1.map((d, i) => (
+                <tr key={i+''}>
                   <td>{d.name}</td>
                   <td>{d.barcode}</td>
                   <td>{d.price}</td>
                   <td>{d.quantity}</td>
                   <td>
                     <FontAwesomeIcon
-                      onClick={() => d.doc && handleShowAddQuantityModal(d.doc)}
+                      onClick={() => handleShowAddQuantityModal(d)}
                       icon={faCirclePlus}
                       title="Add quantity"
                       size="xl"
                       className="me-2"
                     />
                     <FontAwesomeIcon
-                      onClick={() => d.doc && handleShowSetProductModal(d.doc)}
+                      onClick={() => handleShowSetProductModal(d)}
                       icon={faPenToSquare}
                       title="Edit"
                       size="xl"
                       className="me-2"
                     />
                     <FontAwesomeIcon
-                      onClick={() =>
-                        d.doc && handleShowConfirmationModal(d.doc)
-                      }
+                      onClick={() => handleShowConfirmationModal(d)}
                       icon={faTrashCan}
                       title="Delete"
                       size="xl"

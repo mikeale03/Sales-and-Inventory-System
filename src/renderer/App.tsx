@@ -8,7 +8,7 @@ import CashRegisterPage from './pages/cashRegister';
 import ProductsPage from './pages/products';
 import SalesPage from './pages/sales';
 import ReportingPage from './pages/reporting';
-import UserContext from './context/context';
+import UserContext from './context/userContext';
 
 export default function App() {
   const [user, setUser] = useState<IUser | undefined>();

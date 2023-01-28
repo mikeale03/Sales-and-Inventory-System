@@ -1,15 +1,9 @@
-import { IProduct } from 'globalTypes/dbApi/products.types';
-import { Channels } from 'globalTypes/electron/productChannels';
 import { Product } from 'main/service/productsRealm';
 import { FormEvent, useContext, useState } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
-import UserContext from 'renderer/context/context';
+import UserContext from 'renderer/context/userContext';
 import { createProduct, updateProduct } from 'renderer/service/products';
 import FormInput from '../common/forms/formInput';
-
-const {
-  electron: { ipcRenderer },
-} = window;
 
 type ProductForm = {
   _id?: string;
@@ -25,9 +19,7 @@ export type Props = {
   toggle: (show: boolean) => void;
   selectedProduct?: ProductForm;
   onCreate?: (product: Product) => void;
-  onUpdate?: (
-    product: ({ _id: string; _rev: string } & IProduct) | undefined
-  ) => void;
+  onUpdate?: (product: Product) => void;
 };
 
 const SetProductModal = ({
@@ -50,16 +42,24 @@ const SetProductModal = ({
   const handleOnSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.stopPropagation();
     e.preventDefault();
-    let result: ({ _id: string; _rev: string } & IProduct) | undefined;
-    if (product?._id) {
-      result = await updateProduct(product);
-      onUpdate?.(result);
-    } else {
-      const newProduct = await ipcRenderer.invoke<Product>(Channels.create, {
+    if (product?._id && user?.username) {
+      const response = await updateProduct({
         ...product,
-        created_by: user?.username,
+        _id: product._id,
+        updated_by: user.username,
+        date_updated: new Date(),
       });
-      onCreate?.(newProduct);
+      response.isSuccess && response.result
+        ? onUpdate?.(response.result)
+        : alert(response.message);
+    } else if (user?.username) {
+      const response = await createProduct({
+        ...product,
+        created_by: user.username,
+      });
+      response.isSuccess && response.result
+        ? onCreate?.(response.result)
+        : alert(response.message);
     }
     toggle(false);
   };
