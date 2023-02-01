@@ -1,6 +1,7 @@
 import { Product } from 'main/service/productsRealm';
 import { FormEvent, useContext, useState } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
+import { toast } from 'react-toastify';
 import UserContext from 'renderer/context/userContext';
 import { createProduct, updateProduct } from 'renderer/service/products';
 import FormInput from '../common/forms/formInput';
@@ -51,7 +52,7 @@ const SetProductModal = ({
       });
       response.isSuccess && response.result
         ? onUpdate?.(response.result)
-        : alert(response.message);
+        : toast.error(response.message);
     } else if (user?.username) {
       const response = await createProduct({
         ...product,
@@ -59,7 +60,7 @@ const SetProductModal = ({
       });
       response.isSuccess && response.result
         ? onCreate?.(response.result)
-        : alert(response.message);
+        : toast.error(response.message);
     }
     toggle(false);
   };

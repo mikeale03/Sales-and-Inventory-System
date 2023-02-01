@@ -1,11 +1,6 @@
 import { Channels } from 'globalTypes/channels/productChannels';
 import { IProduct } from 'globalTypes/dbApi/products.types';
-import {
-  DeleteResponse,
-  ExistingDoc,
-  IResponse,
-  PutResponse,
-} from 'globalTypes/dbApi/response.types';
+import { IResponse } from 'globalTypes/dbApi/response.types';
 import { Product } from 'main/service/productsRealm';
 
 type ProductUpdateParam = Partial<{
@@ -64,11 +59,32 @@ export const createProduct = async (product: ProductCreateParam) => {
   return response;
 };
 
+export const getProducts = async (searchText?: string) => {
+  const response = await ipcRenderer.invoke<IResponse<Product[]>>(
+    Channels.getAll,
+    searchText
+  );
+  return response;
+};
+
 export const deleteProduct = async (productId: string) => {
   const response = await ipcRenderer.invoke<IResponse<undefined>>(
     Channels.delete,
     productId
   );
   console.log(response);
+  return response;
+};
+
+export const purchaseProduct = async (
+  products: {
+    _id: string;
+    quantity: string | number;
+  }[]
+) => {
+  const response = await ipcRenderer.invoke<IResponse<Product>>(
+    Channels.purchase,
+    products
+  );
   return response;
 };

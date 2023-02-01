@@ -1,10 +1,8 @@
 /* eslint-disable radix */
 import { useEffect, useState } from 'react';
 import { Button, Table, Card, Row, Col, FormControl } from 'react-bootstrap';
-import { IProduct } from 'globalTypes/dbApi/products.types';
-import { AllDocsResponse, IResponse } from 'globalTypes/dbApi/response.types';
 import { debounce } from 'renderer/utils/helper';
-import { deleteProduct } from 'renderer/service/products';
+import { deleteProduct, getProducts } from 'renderer/service/products';
 import AddQuantityModal from 'renderer/components/products/addQuantityModal';
 import SetProductModal from 'renderer/components/products/setProductModal';
 import ConfirmationModal from 'renderer/components/common/modals/confirmation';
@@ -12,151 +10,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCirclePlus } from '@fortawesome/free-solid-svg-icons';
 import { faPenToSquare, faTrashCan } from '@fortawesome/free-regular-svg-icons';
 import { Product } from 'main/service/productsRealm';
+import { toast } from 'react-toastify';
 
-const {
-  electron: { ipcRenderer },
-  console,
-} = window;
-
-const products1 = [
-  {
-    _id: 1,
-    barcode: 12,
-    created_by: 'user',
-    date_updated: null,
-    description: '',
-    image: null,
-    name: 'name',
-    price: 3,
-    quantity: 3,
-    updated_by: null,
-  },
-  {
-    _id: 2,
-    barcode: 12,
-    created_by: 'user',
-    date_updated: null,
-    description: '',
-    image: null,
-    name: 'name',
-    price: 3,
-    quantity: 3,
-    updated_by: null,
-  },
-  {
-    _id: 3,
-    barcode: 12,
-    created_by: 'user',
-    date_updated: null,
-    description: '',
-    image: null,
-    name: 'name',
-    price: 3,
-    quantity: 3,
-    updated_by: null,
-  },
-  {
-    _id: 4,
-    barcode: 12,
-    created_by: 'user',
-    date_updated: null,
-    description: '',
-    image: null,
-    name: 'name',
-    price: 3,
-    quantity: 3,
-    updated_by: null,
-  },
-  {
-    _id: 5,
-    barcode: 12,
-    created_by: 'user',
-    date_updated: null,
-    description: '',
-    image: null,
-    name: 'name',
-    price: 3,
-    quantity: 3,
-    updated_by: null,
-  },
-  {
-    barcode: 12,
-    created_by: 'user',
-    date_updated: null,
-    description: '',
-    image: null,
-    name: 'name',
-    price: 3,
-    quantity: 3,
-    updated_by: null,
-  },
-  {
-    barcode: 12,
-    created_by: 'user',
-    date_updated: null,
-    description: '',
-    image: null,
-    name: 'name',
-    price: 3,
-    quantity: 3,
-    updated_by: null,
-  },
-  {
-    barcode: 12,
-    created_by: 'user',
-    date_updated: null,
-    description: '',
-    image: null,
-    name: 'name',
-    price: 3,
-    quantity: 3,
-    updated_by: null,
-  },
-  {
-    barcode: 12,
-    created_by: 'user',
-    date_updated: null,
-    description: '',
-    image: null,
-    name: 'name',
-    price: 3,
-    quantity: 3,
-    updated_by: null,
-  },
-  {
-    barcode: 12,
-    created_by: 'user',
-    date_updated: null,
-    description: '',
-    image: null,
-    name: 'name',
-    price: 3,
-    quantity: 3,
-    updated_by: null,
-  },
-  {
-    barcode: 12,
-    created_by: 'user',
-    date_updated: null,
-    description: '',
-    image: null,
-    name: 'name',
-    price: 3,
-    quantity: 3,
-    updated_by: null,
-  },
-  {
-    barcode: 12,
-    created_by: 'user',
-    date_updated: null,
-    description: '',
-    image: null,
-    name: 'name',
-    price: 3,
-    quantity: 3,
-    updated_by: null,
-  },
-];
+const { console } = window;
 
 const ProductsPage = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | undefined>();
@@ -166,10 +22,8 @@ const ProductsPage = () => {
   const [showAddQuantityModal, setShowAddQuantityModal] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 
-  const handleGetAllProducts = async () => {
-    const response = await ipcRenderer.invoke<IResponse<Product[]>>(
-      'products:get-all'
-    );
+  const handleGetProducts = async (searchText?: string) => {
+    const response = await getProducts(searchText);
     console.log(response);
     if (response.isSuccess) {
       const data = response.result;
@@ -210,36 +64,16 @@ const ProductsPage = () => {
         ? setProducts(
             products.filter((prod) => prod._id !== selectedProduct._id)
           )
-        : alert(response.message);
+        : toast.error(response.message);
     }
   };
 
   const searchProduct = debounce<void>(async (search: string) => {
-    const response = await ipcRenderer.invoke<AllDocsResponse<IProduct>>(
-      'products:search',
-      search
-    );
-    console.log(response);
-    if (response.isSuccess) {
-      const data = response.result?.rows;
-      setProducts(data ?? []);
-    }
-  }, 500);
-
-  const searchBarcode = debounce<void>(async (search: number) => {
-    const response = await ipcRenderer.invoke<AllDocsResponse<IProduct>>(
-      'products:get-barcode',
-      search
-    );
-    console.log(response);
-    if (response.isSuccess) {
-      const data = response.result?.rows;
-      setProducts(data ?? []);
-    }
+    handleGetProducts(search);
   }, 500);
 
   useEffect(() => {
-    // handleGetAllProducts();
+    handleGetProducts();
   }, []);
 
   return (
@@ -278,17 +112,9 @@ const ProductsPage = () => {
         <Col md="6">
           <FormControl
             type="search"
-            placeholder="Search name"
+            placeholder="Search name or barcode"
             // value={search}
-            onChange={(e) => searchProduct(e.target.value)}
-          />
-        </Col>
-        <Col md="6">
-          <FormControl
-            type="search"
-            placeholder="Search barcode"
-            // value={search}
-            onChange={(e) => searchBarcode(e.target.value)}
+            onChange={(e) => searchProduct(e.target.value.trim())}
           />
         </Col>
       </Row>
@@ -306,8 +132,8 @@ const ProductsPage = () => {
               </tr>
             </thead>
             <tbody>
-              {products1.map((d, i) => (
-                <tr key={i+''}>
+              {products.map((d) => (
+                <tr key={d._id}>
                   <td>{d.name}</td>
                   <td>{d.barcode}</td>
                   <td>{d.price}</td>

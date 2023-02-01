@@ -12,16 +12,17 @@ export const debounce = <T>(
 ) => {
   let timer: ReturnType<typeof setTimeout> | null = null;
 
-  return (...args: any[]) => {
-    const onComplete = () => {
-      func(...args);
-      timer = null;
-    };
+  return (...args: any[]) =>
+    new Promise<T>((resolve) => {
+      const onComplete = () => {
+        timer = null;
+        resolve(func(...args));
+      };
 
-    if (timer) {
-      clearTimeout(timer);
-    }
+      if (timer) {
+        clearTimeout(timer);
+      }
 
-    timer = setTimeout(onComplete, milliseconds);
-  };
+      timer = setTimeout(onComplete, milliseconds);
+    });
 };

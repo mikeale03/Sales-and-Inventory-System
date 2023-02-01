@@ -4,24 +4,28 @@ import { Channels } from '../../globalTypes/channels/productChannels';
 import { getProductByBarcode } from '../service/productsDb';
 import {
   createProduct,
-  CreateProductParam,
   deleteProduct,
   getAllProducts,
+  Product,
+  purchaseProduct,
   updateProduct,
 } from '../service/productsRealm';
 
 const setProductEventHandler = (ipcMain: IpcMain) => {
   ipcMain.handle(
     Channels.create,
-    async (event: IpcMainInvokeEvent, product: CreateProductParam) => {
+    async (event: IpcMainInvokeEvent, product: Omit<Product, '_id'>) => {
       const result = await createProduct(product);
       return result;
     }
   );
-  ipcMain.handle(Channels.getAll, async () => {
-    const result = await getAllProducts();
-    return result;
-  });
+  ipcMain.handle(
+    Channels.getAll,
+    async (event: IpcMainInvokeEvent, searchText?: string) => {
+      const result = await getAllProducts(searchText);
+      return result;
+    }
+  );
   ipcMain.handle(
     Channels.update,
     async (event: IpcMainInvokeEvent, updates: ProductUpdate) => {
@@ -44,6 +48,16 @@ const setProductEventHandler = (ipcMain: IpcMain) => {
     'products:get-barcode',
     async (event: IpcMainInvokeEvent, barcode: number) => {
       const result = await getProductByBarcode(barcode);
+      return result;
+    }
+  );
+  ipcMain.handle(
+    Channels.purchase,
+    async (
+      event: IpcMainInvokeEvent,
+      products: { _id: string; quantity: number }[]
+    ) => {
+      const result = await purchaseProduct(products);
       return result;
     }
   );

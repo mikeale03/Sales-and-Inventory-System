@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'react-toastify/dist/ReactToastify.css';
+import './App.css';
 import { IUser } from 'globalTypes/dbApi/users.types';
 import LoginPage from './pages/login';
 import HomePage from './pages/home';
@@ -26,6 +29,7 @@ export default function App() {
           </Route>
         </Routes>
       </Router>
+      <ToastContainer />
     </UserContext.Provider>
   );
 }
