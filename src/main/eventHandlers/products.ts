@@ -1,7 +1,6 @@
 import { ProductUpdate } from 'globalTypes/dbApi/products.types';
 import { IpcMain, IpcMainInvokeEvent } from 'electron';
 import { Channels } from '../../globalTypes/channels/productChannels';
-import { getProductByBarcode } from '../service/productsDb';
 import {
   createProduct,
   deleteProduct,
@@ -41,13 +40,6 @@ const setProductEventHandler = (ipcMain: IpcMain) => {
     'products:delete',
     async (event: IpcMainInvokeEvent, productId: string) => {
       const result = await deleteProduct(productId);
-      return result;
-    }
-  );
-  ipcMain.handle(
-    'products:get-barcode',
-    async (event: IpcMainInvokeEvent, barcode: number) => {
-      const result = await getProductByBarcode(barcode);
       return result;
     }
   );

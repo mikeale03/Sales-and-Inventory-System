@@ -165,6 +165,11 @@ const ProductsPage = () => {
               ))}
             </tbody>
           </Table>
+          {products.length === 0 && (
+            <span className="ms-2 fw-light fst-italic text-secondary">
+              no products
+            </span>
+          )}
         </Card.Body>
       </Card>
     </div>

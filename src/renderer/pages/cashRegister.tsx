@@ -1,8 +1,7 @@
 import { Product } from 'main/service/productsRealm';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Button, Card, Col, Table } from 'react-bootstrap';
 import AsyncSelect from 'react-select/async';
-import { toast } from 'react-toastify';
 import PaymentModal from 'renderer/components/cashRegister/paymentModal';
 import QuantityInputModal from 'renderer/components/cashRegister/quantityInputModal';
 import { getProducts } from 'renderer/service/products';
@@ -26,6 +25,8 @@ function CashRegisterPage() {
   const [items, setItems] = useState<
     Record<string, Product & { totalPrice: number }>
   >({});
+
+  const itemKeys = useMemo(() => Object.keys(items), [items]);
 
   const handleGetOptions = async (searchText: string) => {
     const response = await handleGetProducts(searchText);
@@ -126,7 +127,7 @@ function CashRegisterPage() {
               </tr>
             </thead>
             <tbody>
-              {Object.keys(items).map((key) => (
+              {itemKeys.map((key) => (
                 <tr key={items[key]._id}>
                   <td>{items[key].name}</td>
                   <td>{items[key].quantity}</td>
@@ -136,6 +137,11 @@ function CashRegisterPage() {
               ))}
             </tbody>
           </Table>
+          {itemKeys.length === 0 && (
+            <span className="ms-2 fw-light fst-italic text-secondary">
+              no items
+            </span>
+          )}
         </Card.Body>
       </Card>
     </div>

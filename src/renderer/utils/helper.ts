@@ -26,3 +26,14 @@ export const debounce = <T>(
       timer = setTimeout(onComplete, milliseconds);
     });
 };
+
+export const getUpdatedProps = <T extends object>(obj: T, updatedObj: T) => {
+  const newObject: Partial<T> = {};
+  type Key = keyof T;
+  type newObjKey = keyof typeof newObject;
+  Object.keys(obj).forEach((key) => {
+    if (obj[key as Key] !== updatedObj[key as Key]) {
+      newObject[key as newObjKey] = updatedObj[key as Key];
+    }
+  });
+};

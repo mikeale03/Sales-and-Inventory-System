@@ -1,7 +1,5 @@
 import { pbkdf2Sync } from 'crypto';
-import { IUser } from 'globalTypes/dbApi/users.types';
-import { GetResponse, IResponse } from 'globalTypes/dbApi/response.types';
-import { usersDb } from './usersDb';
+import { IResponse } from 'globalTypes/dbApi/response.types';
 
 const isValidPassword = (password: string, hash: string, salt: string) => {
   const passwordHash = pbkdf2Sync(password, salt, 1000, 64, `sha512`).toString(
