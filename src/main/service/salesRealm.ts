@@ -94,9 +94,9 @@ export const salesPurchase = async (
 };
 
 export const getSalesByProducts = async (filter?: {
-  transactBy: string;
-  startDate: Date;
-  endDate: Date;
+  transactBy?: string;
+  startDate?: Date;
+  endDate?: Date;
 }): Promise<IResponse<Sales[]>> => {
   let realm: Realm | undefined;
   try {
@@ -107,23 +107,22 @@ export const getSalesByProducts = async (filter?: {
     const startDate = filter?.startDate;
     const endDate = filter?.endDate;
 
-    let query = '';
+    const query: string[] = [];
     const args = [];
 
     if (transactBy) {
-      query += `transact_by == $${args.length} `;
+      query.push(`transact_by == $${args.length}`);
       args.push(transactBy);
     }
     if (startDate) {
-      query += `start_date >= $${args.length} `;
+      query.push(`date_created >= $${args.length}`);
       args.push(startDate);
     }
-    if (startDate) {
-      query += `end_date <= $${args.length} `;
+    if (endDate) {
+      query.push(`date_created <= $${args.length}`);
       args.push(endDate);
     }
-
-    sales = args.length ? sales.filtered(query, ...args) : sales;
+    sales = args.length ? sales.filtered(query.join(' && '), ...args) : sales;
 
     const salesMap = new Map<string, Sales>();
     const result: Sales[] = [];
