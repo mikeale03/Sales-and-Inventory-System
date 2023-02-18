@@ -10,14 +10,13 @@ module.exports = {
     'no-unused-expressions': 'off',
     '@typescript-eslint/no-unused-expressions': 'off',
     'react/require-default-props': 'off',
-    '@typescript-eslint/naming-convention': [
-      'error',
-      {
-        selector: 'default',
-        format: null,
-        leadingUnderscore: 'allow',
-      },
-    ],
+    '@typescript-eslint/naming-convention': 'off',
+    camelcase: 'off',
+    'import/extensions': 'off',
+    'react/jsx-filename-extension': 'off',
+    'react/function-component-definition': 'off',
+    'import/no-relative-packages': 'off',
+    'no-unused-vars': 'off',
   },
   parserOptions: {
     ecmaVersion: 2020,

@@ -1,7 +1,7 @@
 /* eslint-disable radix */
 import { useEffect, useState } from 'react';
 import { Button, Table, Card, Row, Col, FormControl } from 'react-bootstrap';
-import { debounce } from 'renderer/utils/helper';
+import { debounce, pesoFormat } from 'renderer/utils/helper';
 import { deleteProduct, getProducts } from 'renderer/service/products';
 import AddQuantityModal from 'renderer/components/products/addQuantityModal';
 import SetProductModal from 'renderer/components/products/setProductModal';
@@ -115,6 +115,7 @@ const ProductsPage = () => {
             placeholder="Search name or barcode"
             // value={search}
             onChange={(e) => searchProduct(e.target.value.trim())}
+            autoFocus
           />
         </Col>
       </Row>
@@ -136,8 +137,8 @@ const ProductsPage = () => {
                 <tr key={d._id}>
                   <td>{d.name}</td>
                   <td>{d.barcode}</td>
-                  <td>{d.price}</td>
-                  <td>{d.quantity}</td>
+                  <td>{pesoFormat(d.price)}</td>
+                  <td>{d.quantity.toLocaleString()}</td>
                   <td>
                     <FontAwesomeIcon
                       onClick={() => handleShowAddQuantityModal(d)}

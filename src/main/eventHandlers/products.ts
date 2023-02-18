@@ -6,7 +6,7 @@ import {
   deleteProduct,
   getAllProducts,
   Product,
-  purchaseProduct,
+  // purchaseProduct,
   updateProduct,
 } from '../service/productsRealm';
 
@@ -32,7 +32,7 @@ const setProductEventHandler = (ipcMain: IpcMain) => {
       return result;
     }
   );
-  ipcMain.handle('products:search', async (event: IpcMainInvokeEvent) => {
+  ipcMain.handle('products:search', async () => {
     const result = await getAllProducts();
     return result;
   });
@@ -43,16 +43,16 @@ const setProductEventHandler = (ipcMain: IpcMain) => {
       return result;
     }
   );
-  ipcMain.handle(
-    Channels.purchase,
-    async (
-      event: IpcMainInvokeEvent,
-      products: { _id: string; quantity: number }[]
-    ) => {
-      const result = await purchaseProduct(products);
-      return result;
-    }
-  );
+  // ipcMain.handle(
+  //   Channels.purchase,
+  //   async (
+  //     event: IpcMainInvokeEvent,
+  //     products: { _id: string; quantity: number }[]
+  //   ) => {
+  //     const result = await purchaseProduct(products);
+  //     return result;
+  //   }
+  // );
 };
 
 export default setProductEventHandler;

@@ -124,38 +124,23 @@ export const createProduct = async (
   };
 };
 
-export const create = <T extends Unmanaged<T, never>>(
-  realm: Realm,
-  payload: T,
-  name: string
-) => {
-  let task: (T & Realm.Object<unknown, never>) | undefined;
-  realm.write(() => {
-    task = realm.create<T>(name, {
-      ...payload,
-    });
-  });
-  return task;
-};
-
 export const getAllProducts = async (
-  searchText?: string
+  searchText: string = ''
 ): Promise<IResponse<Product[]>> => {
   let realm: Realm | undefined;
   try {
     realm = await openProductsRealm();
-    let products = realm.objects(PRODUCTS);
+    let products = realm?.objects(PRODUCTS);
 
     const name = searchText;
     const barcode = searchText && +searchText;
     const args = [];
     let query = '';
-    if (name) {
-      query += 'name CONTAINS[c] $0 ';
-      args.push(name);
-    }
+    query += 'name CONTAINS[c] $0';
+    args.push(name);
+
     if (barcode) {
-      query += 'OR barcode == $1';
+      query += ' OR barcode == $1';
       args.push(barcode);
     }
 
@@ -200,15 +185,24 @@ export const updateProduct = async (
       'Products',
       new Realm.BSON.ObjectID(updates._id)
     );
+    const checkProp: { name?: string; barcode?: number } = {};
+
     if (
-      (name &&
-        name.toLowerCase() !== (product?.name as string).toLowerCase()) ||
-      (barcode && barcode !== product?.barcode)
+      name &&
+      name.toLowerCase() !== (product?.name as string).toLowerCase()
     ) {
-      const { isExist, prop } = checkProductNameOrBarcodeExist(realm, {
-        name,
-        barcode,
-      });
+      checkProp.name = name;
+    }
+
+    if (barcode && barcode !== product?.barcode) {
+      checkProp.barcode = barcode;
+    }
+
+    if (checkProp.barcode || checkProp.name) {
+      const { isExist, prop } = checkProductNameOrBarcodeExist(
+        realm,
+        checkProp
+      );
       if (isExist) {
         realm.close();
         return {

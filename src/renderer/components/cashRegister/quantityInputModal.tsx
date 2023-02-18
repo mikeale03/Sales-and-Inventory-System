@@ -36,34 +36,37 @@ const QuantityInputModal = ({
   };
 
   return (
-    <Modal show={show} onHide={() => toggle(false)} onShow={onShow}>
+    <Modal show={show} onHide={() => toggle(false)} onShow={onShow} size="sm">
       <Form onSubmit={handleConfirm}>
         <Modal.Header>
-          <Modal.Title>
-            <strong>{product?.name}</strong>
+          <Modal.Title className="w-100 text-center fw-bold">
+            {product?.name}
           </Modal.Title>
         </Modal.Header>
 
         <Modal.Body>
           {product?.barcode && (
-            <p>
+            <p className="text-secondary text-center mb-1">
               <strong>Barcode: </strong> {product.barcode}
             </p>
           )}
-          <p className="text-secondary">
+          <p className="text-secondary text-center mb-1">
             <strong>Remaining: </strong>
             {product?.quantity}
           </p>
           {product?.description && (
-            <p>
+            <p className="text-secondary text-center mb-1">
               <strong>Description: </strong>
               {product.description}
             </p>
           )}
 
-          <Form.Group className="mb-3">
-            <Form.Label>Quantity of items to purchase</Form.Label>
+          <Form.Group className="m-3">
+            <Form.Label className="d-block fw-bold text-center">
+              Quantity of Items
+            </Form.Label>
             <Form.Control
+              className="text-center"
               type="number"
               min="1"
               placeholder="Enter quantity"

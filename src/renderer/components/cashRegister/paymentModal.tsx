@@ -1,10 +1,12 @@
-import { FormEvent, useMemo, useState } from 'react';
+import { salesPurchase } from 'renderer/service/sales';
+import { FormEvent, useMemo, useState, useContext } from 'react';
 import { Button, Col, Form, Modal, Row } from 'react-bootstrap';
 import { toast } from 'react-toastify';
-import { purchaseProduct } from 'renderer/service/products';
+import UserContext from 'renderer/context/userContext';
 
 export type Props = {
   show: boolean;
+  // eslint-disable-next-line no-unused-vars
   toggle: (show: boolean) => void;
   items?: Record<
     string,
@@ -19,6 +21,7 @@ const PaymentModal = ({ show, toggle, items, onDone, onCancel }: Props) => {
   const [lines, setLines] = useState(1);
   const [total, setTotal] = useState(0);
   const [isDone, setIsDone] = useState(false);
+  const { user } = useContext(UserContext);
 
   const change = useMemo(() => +payment - total, [total, payment]);
 
@@ -30,13 +33,16 @@ const PaymentModal = ({ show, toggle, items, onDone, onCancel }: Props) => {
   const handleConfirm = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!items || !user?.username) return;
 
-    if (!items) return;
-    const response = await purchaseProduct(
-      Object.keys(items).map((key) => items[key])
+    const response = await salesPurchase(
+      Object.keys(items).map((key) => items[key]),
+      user.username
     );
+    window.console.log(response);
     if (!response.isSuccess) {
       toast.error(response.message);
+      return;
     }
     setIsDone(true);
   };

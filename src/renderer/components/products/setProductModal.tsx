@@ -1,5 +1,5 @@
 import { Product } from 'main/service/productsRealm';
-import { FormEvent, useContext, useState } from 'react';
+import { ChangeEvent, FormEvent, useContext, useState } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import UserContext from 'renderer/context/userContext';
@@ -92,10 +92,11 @@ const SetProductModal = ({
             formGroupProps={{ className: 'mb-2' }}
             label="Product Name"
             value={product.name}
-            onChange={(e: React.ChangeEvent<HTMLFormElement>) =>
+            onChange={(e: ChangeEvent<HTMLFormElement>) =>
               handleChange({ name: e.target.value })
             }
             required
+            autoFocus
           />
           <FormInput
             formGroupProps={{ className: 'mb-2' }}
@@ -103,7 +104,7 @@ const SetProductModal = ({
             type="number"
             min="0"
             value={product.barcode ?? ''}
-            onChange={(e: React.ChangeEvent<HTMLFormElement>) =>
+            onChange={(e: ChangeEvent<HTMLFormElement>) =>
               handleChange({ barcode: e.target.value })
             }
           />

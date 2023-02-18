@@ -1,5 +1,4 @@
 import { Channels } from 'globalTypes/channels/productChannels';
-import { IProduct } from 'globalTypes/dbApi/products.types';
 import { IResponse } from 'globalTypes/dbApi/response.types';
 import { Product } from 'main/service/productsRealm';
 
@@ -21,13 +20,6 @@ type ProductCreateParam = {
   price: string | number;
   created_by: string;
 };
-
-export type SetProductResult =
-  | ({
-      _id: string;
-      _rev: string;
-    } & IProduct)
-  | undefined;
 
 const {
   electron: { ipcRenderer },

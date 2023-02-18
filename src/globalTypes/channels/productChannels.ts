@@ -8,4 +8,4 @@ export const Channels = {
   purchase: 'products:purchase',
 } as const;
 
-export type ProductChannels = typeof Channels[keyof typeof Channels];
+export type ProductChannels = (typeof Channels)[keyof typeof Channels];
