@@ -1,6 +1,10 @@
 import { IpcMain, IpcMainInvokeEvent } from 'electron';
 import { Channels } from '../../globalTypes/channels/salesChannels';
-import { getSalesByProducts, salesPurchase } from '../service/salesRealm';
+import {
+  getSalesByProducts,
+  getSalesByTransactions,
+  salesPurchase,
+} from '../service/salesRealm';
 
 const setSalesEventHandler = (ipcMain: IpcMain) => {
   ipcMain.handle(
@@ -8,9 +12,10 @@ const setSalesEventHandler = (ipcMain: IpcMain) => {
     async (
       event: IpcMainInvokeEvent,
       items: { _id: string; quantity: number }[],
-      transactBy: string
+      transactBy: string,
+      transactByUserId: string
     ) => {
-      const result = await salesPurchase(items, transactBy);
+      const result = await salesPurchase(items, transactBy, transactByUserId);
       return result;
     }
   );
@@ -25,6 +30,20 @@ const setSalesEventHandler = (ipcMain: IpcMain) => {
       }
     ) => {
       const result = await getSalesByProducts(filter);
+      return result;
+    }
+  );
+  ipcMain.handle(
+    Channels.getByTransactions,
+    async (
+      event: IpcMainInvokeEvent,
+      filter?: {
+        transactByUserId: string;
+        startDate: Date;
+        endDate: Date;
+      }
+    ) => {
+      const result = await getSalesByTransactions(filter);
       return result;
     }
   );

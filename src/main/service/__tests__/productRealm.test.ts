@@ -1,4 +1,4 @@
-import { IResponse } from 'globalTypes/dbApi/response.types';
+import { Response } from 'globalTypes/realm/response.types';
 import Realm from 'realm';
 import * as ProductsRealm from '../productsRealm';
 
@@ -9,6 +9,7 @@ describe('ProductsRealm', () => {
     quantity: 12,
     price: 10,
     created_by: 'Mike',
+    created_by_user_id: '123',
   };
 
   const config = {
@@ -43,7 +44,12 @@ describe('ProductsRealm', () => {
   it('should update product', async () => {
     expect.assertions(3);
     const response = productId
-      ? await ProductsRealm.updateProduct({ _id: productId, name: 'Taekwondo' })
+      ? await ProductsRealm.updateProduct({
+          _id: productId,
+          name: 'Taekwondo',
+          updated_by: 'mike',
+          updated_by_user_id: '123',
+        })
       : undefined;
     expect(ProductsRealm.openProductsRealm).toHaveBeenCalled();
     expect(response?.isSuccess).toBe(true);
@@ -58,13 +64,14 @@ describe('ProductsRealm', () => {
       quantity: 10,
       price: 10,
       created_by: 'Mike',
+      created_by_user_id: '123',
     });
     expect(createResponse.isSuccess).toBe(true);
     const getResponse = await ProductsRealm.getAllProducts();
     expect(getResponse.isSuccess).toBe(true);
     const { result } = getResponse;
     expect(result).toBeTruthy();
-    let purchaseResponse: IResponse<ProductsRealm.Product[]> | undefined;
+    let purchaseResponse: Response<ProductsRealm.Product[]> | undefined;
     if (result) {
       purchaseResponse = await ProductsRealm.purchaseProduct(
         result.map((r) => ({

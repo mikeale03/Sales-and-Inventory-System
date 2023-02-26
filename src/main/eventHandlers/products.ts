@@ -1,4 +1,3 @@
-import { ProductUpdate } from 'globalTypes/dbApi/products.types';
 import { IpcMain, IpcMainInvokeEvent } from 'electron';
 import { Channels } from '../../globalTypes/channels/productChannels';
 import {
@@ -20,14 +19,29 @@ const setProductEventHandler = (ipcMain: IpcMain) => {
   );
   ipcMain.handle(
     Channels.getAll,
-    async (event: IpcMainInvokeEvent, searchText?: string) => {
-      const result = await getAllProducts(searchText);
+    async (
+      event: IpcMainInvokeEvent,
+      filter?: {
+        searchText?: string;
+        sortProp?: keyof Product;
+        sortAs?: 'asc' | 'desc';
+        limit?: number;
+      }
+    ) => {
+      const result = await getAllProducts(filter);
       return result;
     }
   );
   ipcMain.handle(
     Channels.update,
-    async (event: IpcMainInvokeEvent, updates: ProductUpdate) => {
+    async (
+      event: IpcMainInvokeEvent,
+      updates: Partial<Product> & {
+        _id: string;
+        updated_by: string;
+        updated_by_user_id: string;
+      }
+    ) => {
       const result = await updateProduct(updates);
       return result;
     }

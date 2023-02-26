@@ -48,7 +48,7 @@ const SetProductModal = ({
         ...product,
         _id: product._id,
         updated_by: user.username,
-        date_updated: new Date(),
+        updated_by_user_id: user._id,
       });
       response.isSuccess && response.result
         ? onUpdate?.(response.result)
@@ -57,6 +57,7 @@ const SetProductModal = ({
       const response = await createProduct({
         ...product,
         created_by: user.username,
+        created_by_user_id: user._id,
       });
       response.isSuccess && response.result
         ? onCreate?.(response.result)

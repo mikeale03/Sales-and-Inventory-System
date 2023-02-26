@@ -45,7 +45,8 @@ const PaymentCard = ({ items, onPaymentDone, onReset }: Props) => {
 
     const response = await salesPurchase(
       Object.keys(items).map((key) => items[key]),
-      user.username
+      user.username,
+      user._id
     );
     window.console.log(response);
     if (!response.isSuccess) {

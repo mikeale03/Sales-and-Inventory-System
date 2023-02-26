@@ -2,10 +2,9 @@ import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Product } from 'main/service/productsRealm';
 import { useState, useMemo } from 'react';
-import { Button, Card, Col, Row, Table } from 'react-bootstrap';
+import { Card, Col, Row, Table } from 'react-bootstrap';
 import AsyncSelect from 'react-select/async';
 import PaymentCard from 'renderer/components/cashRegister/paymentCard';
-import PaymentModal from 'renderer/components/cashRegister/paymentModal';
 import QuantityInputModal from 'renderer/components/cashRegister/quantityInputModal';
 import { getProducts } from 'renderer/service/products';
 import { debounce, pesoFormat } from 'renderer/utils/helper';
@@ -16,8 +15,12 @@ type Value = {
   product: Product;
 };
 
-const handleGetProducts = debounce(async (searchText) => {
-  return getProducts(searchText);
+const handleGetProducts = debounce(async (searchText: string) => {
+  return getProducts({
+    searchText,
+    sortProp: 'last_transaction_date',
+    limit: 10,
+  });
 }, 300);
 
 function CashRegisterPage() {
@@ -100,12 +103,6 @@ function CashRegisterPage() {
         product={selectedProduct}
         onConfirm={handleConfirmQuantity}
       />
-      {/* <PaymentModal
-        show={showPaymentModal}
-        toggle={setShowPaymentModal}
-        items={items}
-        onDone={() => setItems({})}
-      /> */}
 
       <h3>Cash Register</h3>
 
@@ -120,12 +117,6 @@ function CashRegisterPage() {
         cacheOptions
         autoFocus
       />
-      {/* <Button
-          onClick={() => setShowPaymentModal(true)}
-          disabled={Object.keys(items).length === 0}
-        >
-          Payment
-        </Button> */}
       <Row className="my-3">
         <Col lg="8" style={{ position: 'relative' }}>
           <Card style={{ minHeight: '100%' }}>

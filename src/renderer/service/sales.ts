@@ -1,6 +1,6 @@
 import { Channels } from 'globalTypes/channels/salesChannels';
-import { IResponse } from 'globalTypes/dbApi/response.types';
-import { Sales } from 'main/service/salesRealm';
+import { Response } from '../../globalTypes/realm/response.types';
+import { Sales } from '../../main/service/salesRealm';
 
 const {
   electron: { ipcRenderer },
@@ -11,12 +11,14 @@ export const salesPurchase = async (
     _id: string;
     quantity: string | number;
   }[],
-  transactBy: string
+  transactBy: string,
+  transactByUserId: string
 ) => {
-  const response = await ipcRenderer.invoke<IResponse<undefined>>(
+  const response = await ipcRenderer.invoke<Response<undefined>>(
     Channels.purchase,
     items,
-    transactBy
+    transactBy,
+    transactByUserId
   );
   return response;
 };
@@ -26,8 +28,20 @@ export const getSalesByProducts = async (filter?: {
   startDate?: Date;
   endDate?: Date;
 }) => {
-  const response = await ipcRenderer.invoke<IResponse<Sales[]>>(
+  const response = await ipcRenderer.invoke<Response<Sales[]>>(
     Channels.getByProducts,
+    filter
+  );
+  return response;
+};
+
+export const getSalesByTransactions = async (filter?: {
+  transactByUserId?: string;
+  startDate?: Date;
+  endDate?: Date;
+}) => {
+  const response = await ipcRenderer.invoke<Response<Sales[]>>(
+    Channels.getByTransactions,
     filter
   );
   return response;

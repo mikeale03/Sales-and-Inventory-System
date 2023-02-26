@@ -1,4 +1,4 @@
-import { IResponse } from 'globalTypes/dbApi/response.types';
+import { Response } from 'globalTypes/realm/response.types';
 import Realm from 'realm';
 
 const PRODUCTS = 'Products';
@@ -10,10 +10,13 @@ export type Product = {
   description?: string;
   quantity: number;
   price: number;
-  date_created?: Date;
+  date_created: Date;
   date_updated?: Date;
-  created_by?: string;
+  created_by: string;
+  created_by_user_id: string;
   updated_by?: string;
+  updated_by_user_id?: string;
+  last_transaction_date?: Date;
   image?: string;
 };
 
@@ -30,7 +33,10 @@ export class ProductsSchema extends Realm.Object {
       date_created: 'date',
       date_updated: 'date?',
       created_by: 'string',
+      created_by_user_id: 'string',
       updated_by: 'string?',
+      updated_by_user_id: 'string?',
+      last_transaction_date: 'date?',
       image: 'string?',
     },
     primaryKey: '_id',
@@ -71,8 +77,8 @@ const checkProductNameOrBarcodeExist = (
 };
 
 export const createProduct = async (
-  product: Omit<Product, '_id'>
-): Promise<IResponse<Product>> => {
+  product: Omit<Product, '_id' | 'date_created'>
+): Promise<Response<Product>> => {
   let task: Realm.Object<Product, never> | undefined;
   let realm: Realm | undefined;
   const { name, barcode } = product;
@@ -124,24 +130,34 @@ export const createProduct = async (
   };
 };
 
-export const getAllProducts = async (
-  searchText: string = ''
-): Promise<IResponse<Product[]>> => {
+export const getAllProducts = async (filter?: {
+  searchText?: string;
+  sortProp?: keyof Product;
+  sortAs?: 'asc' | 'desc';
+  limit?: number;
+}): Promise<Response<Product[]>> => {
   let realm: Realm | undefined;
   try {
     realm = await openProductsRealm();
     let products = realm?.objects(PRODUCTS);
 
-    const name = searchText;
-    const barcode = searchText && +searchText;
+    const name = filter?.searchText ?? '';
+    const barcode = filter?.searchText && +filter.searchText;
     const args = [];
     let query = '';
-    query += 'name CONTAINS[c] $0';
+    query += `name CONTAINS[c] $${args.length}`;
     args.push(name);
 
     if (barcode) {
-      query += ' OR barcode == $1';
+      query += ` OR barcode == $${args.length}`;
       args.push(barcode);
+    }
+    if (filter?.sortProp) {
+      const sort = filter.sortAs || 'desc';
+      query += ` SORT(${filter.sortProp} ${sort})`;
+    }
+    if (filter?.limit) {
+      query += ` LIMIT(${filter.limit})`;
     }
 
     products = args.length ? products.filtered(query, ...args) : products;
@@ -171,7 +187,11 @@ export const getAllProducts = async (
 };
 
 export const updateProduct = async (
-  updates: Partial<Product> & { _id: string }
+  updates: Partial<Product> & {
+    _id: string;
+    updated_by: string;
+    updated_by_user_id: string;
+  }
 ) => {
   let realm: Realm | undefined;
   interface ProductRecord {
@@ -218,6 +238,7 @@ export const updateProduct = async (
         Object.keys(updates).forEach((key) => {
           if (key !== '_id') product[key] = updates[key as UpdateKey];
         });
+        product.date_updated = new Date();
       }
     });
 

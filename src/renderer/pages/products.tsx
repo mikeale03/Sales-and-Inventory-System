@@ -23,7 +23,7 @@ const ProductsPage = () => {
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 
   const handleGetProducts = async (searchText?: string) => {
-    const response = await getProducts(searchText);
+    const response = await getProducts({ searchText });
     console.log(response);
     if (response.isSuccess) {
       const data = response.result;

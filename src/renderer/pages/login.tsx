@@ -1,3 +1,7 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable prettier/prettier */
 import {
   Button,
   Card,
@@ -7,35 +11,42 @@ import {
   Row,
   Form,
 } from 'react-bootstrap';
-import { FormEvent, useContext, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { GetResponse } from 'globalTypes/dbApi/response.types';
-import { IUser } from 'globalTypes/dbApi/users.types';
+import { FormEvent, useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import UserContext from 'renderer/context/userContext';
+import { getUsersQuantity, login } from 'renderer/service/users';
+import CreateAdminModal from 'renderer/components/login/createAdminModal';
+import { toast } from 'react-toastify';
 
 const {
-  electron: { ipcRenderer },
   console,
 } = window;
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showCreateAdminModal, setShowCreateAdminModal] = useState(false);
+  const [canCreateAdmin, setCanCreateAdmin] = useState(false);
 
   const navigate = useNavigate();
   const { setUser } = useContext(UserContext);
 
+  useEffect(() => {
+    (async () => {
+      const response = await getUsersQuantity();
+      if (response.isSuccess && !response.result) {
+        setCanCreateAdmin(true);
+      }
+      console.log(response);
+    })();
+  }, []);
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    const response = await ipcRenderer.invoke<GetResponse<IUser>>(
-      'users:login',
-      username,
-      password
-    );
-
+    const response = await login(username, password);
     if (!response.isSuccess) {
-      console.log(response);
+      toast.error(response.message);
     } else {
       response.result && setUser?.(response.result);
       navigate('Home');
@@ -44,6 +55,12 @@ const LoginPage = () => {
 
   return (
     <section style={{ height: '100vh', backgroundColor: '#fff' }}>
+      <CreateAdminModal
+        show={showCreateAdminModal}
+        toggle={setShowCreateAdminModal}
+        onSuccess={() => setCanCreateAdmin(false)}
+      />
+
       <div className="h-100">
         <Row className="justify-content-center h-100 g-0">
           <Col md="6" lg="4" className="h-100">
@@ -74,13 +91,16 @@ const LoginPage = () => {
                           <i className="fa-solid fa-lock" />
                         </InputGroup.Text>
                       </InputGroup>
-
-                      <p className="mb-1 mt-n1 text-center">
-                        <Link to="/forgot-password">
-                          <small>Forgot Password?</small>
-                        </Link>
-                      </p>
-
+                      {canCreateAdmin && (
+                        <p className="mb-1 mt-n1 text-center text-primary">
+                          <small
+                            onClick={() => setShowCreateAdminModal(true)}
+                            style={{ cursor: 'pointer' }}
+                          >
+                            Create Admin Account
+                          </small>
+                        </p>
+                      )}
                       <Button className="w-100 mt-2" type="submit">
                         Login
                       </Button>

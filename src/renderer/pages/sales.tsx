@@ -1,8 +1,10 @@
 import { Sales } from 'main/service/salesRealm';
-import { ChangeEvent, useEffect, useState } from 'react';
+import { ChangeEvent, useEffect, useState, useContext } from 'react';
 import { Card, Table, FormSelect, Col } from 'react-bootstrap';
-import { getSalesByProducts } from 'renderer/service/sales';
+import { getSalesByTransactions } from 'renderer/service/sales';
 import { pesoFormat } from 'renderer/utils/helper';
+import format from 'date-fns/format';
+import UserContext from 'renderer/context/userContext';
 
 const SalesPage = () => {
   const [sales, setSales] = useState<Sales[]>([]);
@@ -12,21 +14,23 @@ const SalesPage = () => {
   const [endDate, setEndDate] = useState(
     new Date(new Date().setHours(23, 59, 59, 999))
   );
+  const { user } = useContext(UserContext);
 
   const handlegetSales = async (filter?: {
     transactBy?: string;
     startDate?: Date;
     endDate?: Date;
   }) => {
-    const response = await getSalesByProducts(filter);
+    const response = await getSalesByTransactions(filter);
     if (response.isSuccess && response.result) {
       setSales(response.result);
     }
+    console.log(response);
   };
 
   useEffect(() => {
-    handlegetSales({ startDate, endDate });
-  }, [startDate, endDate]);
+    handlegetSales({ transactBy: user?._id, startDate, endDate });
+  }, [user, startDate, endDate]);
 
   const handlePeriodSelect = (e: ChangeEvent<HTMLSelectElement>) => {
     const { value } = e.target;
@@ -71,6 +75,7 @@ const SalesPage = () => {
                 <th>Quantity</th>
                 <th>Price</th>
                 <th>Total Price</th>
+                <th>Date</th>
                 <th>Transact By</th>
               </tr>
             </thead>
@@ -81,6 +86,7 @@ const SalesPage = () => {
                   <td>{d.quantity.toLocaleString()}</td>
                   <td>{pesoFormat(d.price)}</td>
                   <td>{pesoFormat(d.total_price)}</td>
+                  <td>{format(d.date_created, 'MM/dd/yyyy hh:mm aaa')}</td>
                   <td>{d.transact_by}</td>
                 </tr>
               ))}

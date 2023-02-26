@@ -1,6 +1,6 @@
-import { Channels } from 'globalTypes/channels/productChannels';
-import { IResponse } from 'globalTypes/dbApi/response.types';
-import { Product } from 'main/service/productsRealm';
+import { Channels } from '../../globalTypes/channels/productChannels';
+import { Response } from '../../globalTypes/realm/response.types';
+import { Product } from '../../main/service/productsRealm';
 
 type ProductUpdateParam = Partial<{
   name: string;
@@ -8,9 +8,7 @@ type ProductUpdateParam = Partial<{
   description: string;
   quantity: string | number;
   price: string | number;
-  updated_by: string;
-  date_updated: Date;
-}> & { _id: string };
+}> & { _id: string; updated_by: string; updated_by_user_id: string };
 
 type ProductCreateParam = {
   name: string;
@@ -19,6 +17,7 @@ type ProductCreateParam = {
   quantity: string | number;
   price: string | number;
   created_by: string;
+  created_by_user_id: string;
 };
 
 const {
@@ -31,7 +30,7 @@ export const updateProduct = async (updates: ProductUpdateParam) => {
   if (newUpdate.price) newUpdate.price = +newUpdate.price;
   if (newUpdate.quantity) newUpdate.quantity = +newUpdate.quantity;
 
-  const response = await ipcRenderer.invoke<IResponse<Product>>(
+  const response = await ipcRenderer.invoke<Response<Product>>(
     Channels.update,
     newUpdate
   );
@@ -44,23 +43,28 @@ export const createProduct = async (product: ProductCreateParam) => {
   const quantity = +product.quantity;
 
   const data = { ...product, barcode, quantity, price };
-  const response = await ipcRenderer.invoke<IResponse<Product>>(
+  const response = await ipcRenderer.invoke<Response<Product>>(
     Channels.create,
     data
   );
   return response;
 };
 
-export const getProducts = async (searchText?: string) => {
-  const response = await ipcRenderer.invoke<IResponse<Product[]>>(
+export const getProducts = async (filter?: {
+  searchText?: string;
+  sortProp?: keyof Product;
+  sortAs?: 'asc' | 'desc';
+  limit?: number;
+}) => {
+  const response = await ipcRenderer.invoke<Response<Product[]>>(
     Channels.getAll,
-    searchText
+    filter
   );
   return response;
 };
 
 export const deleteProduct = async (productId: string) => {
-  const response = await ipcRenderer.invoke<IResponse<undefined>>(
+  const response = await ipcRenderer.invoke<Response<undefined>>(
     Channels.delete,
     productId
   );
@@ -74,7 +78,7 @@ export const purchaseProduct = async (
     quantity: string | number;
   }[]
 ) => {
-  const response = await ipcRenderer.invoke<IResponse<Product>>(
+  const response = await ipcRenderer.invoke<Response<Product>>(
     Channels.purchase,
     products
   );

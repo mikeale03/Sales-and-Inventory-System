@@ -1,9 +1,9 @@
 import { createContext } from 'react';
-import { IUser } from 'globalTypes/dbApi/users.types';
+import { User } from 'main/service/usersRealm';
 
 const UserContext = createContext<{
-  user: IUser | undefined;
-  setUser: (user: IUser) => void;
+  user: User | undefined;
+  setUser: (user: User) => void;
 }>({
   user: undefined,
   setUser: () => {},

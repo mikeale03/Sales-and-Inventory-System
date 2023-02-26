@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -16,7 +16,7 @@ import UserContext from './context/userContext';
 export default function App() {
   const [user, setUser] = useState<IUser | undefined>();
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={useMemo(() => ({ user, setUser }), [user])}>
       <Router>
         <Routes>
           <Route path="/" element={<LoginPage />} />
