@@ -1,29 +1,52 @@
 import { IpcMain, IpcMainInvokeEvent } from 'electron';
-import { createUser, getUsersQuantity, userLogin } from '../service/usersRealm';
+import { UserCreate, UserUpdate } from '../../globalTypes/realm/user.types';
+import { Channels } from '../../globalTypes/channels/usersChannels';
+import {
+  createUser,
+  deleteUser,
+  getUsers,
+  getAdminUsersQuantity,
+  updateUser,
+  userLogin,
+} from '../service/usersRealm';
 
 const setUserEventHandler = (ipcMain: IpcMain) => {
   ipcMain.handle(
-    'users:create',
-    async (
-      event: IpcMainInvokeEvent,
-      user: {
-        username: string;
-        password: string;
-        role: 'admin' | 'staff';
-      }
-    ) => {
+    Channels.create,
+    async (event: IpcMainInvokeEvent, user: UserCreate) => {
       const result = await createUser(user);
       return result;
     }
   );
-  ipcMain.handle('users:quantity', async (event: IpcMainInvokeEvent) => {
-    const result = await getUsersQuantity();
+  ipcMain.handle(
+    Channels.getAdminQuantity,
+    async (event: IpcMainInvokeEvent) => {
+      const result = await getAdminUsersQuantity();
+      return result;
+    }
+  );
+  ipcMain.handle(
+    Channels.login,
+    async (event: IpcMainInvokeEvent, username: string, password: string) => {
+      const result = await userLogin(username, password);
+      return result;
+    }
+  );
+  ipcMain.handle(Channels.getAll, async (event: IpcMainInvokeEvent) => {
+    const result = await getUsers();
     return result;
   });
   ipcMain.handle(
-    'users:login',
-    async (event: IpcMainInvokeEvent, username: string, password: string) => {
-      const result = await userLogin(username, password);
+    Channels.updateUser,
+    async (event: IpcMainInvokeEvent, updates: UserUpdate) => {
+      const result = await updateUser(updates);
+      return result;
+    }
+  );
+  ipcMain.handle(
+    Channels.delete,
+    async (event: IpcMainInvokeEvent, userId: string) => {
+      const result = await deleteUser(userId);
       return result;
     }
   );

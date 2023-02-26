@@ -1,6 +1,6 @@
 import { Sales } from 'main/service/salesRealm';
 import { ChangeEvent, useEffect, useState, useContext } from 'react';
-import { Card, Table, FormSelect, Col } from 'react-bootstrap';
+import { Card, Table, FormSelect, Col, Row } from 'react-bootstrap';
 import { getSalesByTransactions } from 'renderer/service/sales';
 import { pesoFormat } from 'renderer/utils/helper';
 import format from 'date-fns/format';
@@ -68,6 +68,15 @@ const SalesPage = () => {
       </Col>
       <Card className="d-flex">
         <Card.Body className="flex-grow-1">
+          <Row>
+            <Col lg="6">
+              <span>Total Amount: P 100,000.00</span>
+            </Col>
+            <Col lg="6">
+              <span>Quantity: {sales.length.toLocaleString()}</span>
+            </Col>
+          </Row>
+          <hr />
           <Table responsive>
             <thead>
               <tr>

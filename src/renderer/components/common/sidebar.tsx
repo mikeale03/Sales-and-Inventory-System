@@ -1,3 +1,4 @@
+import { useContext } from 'react';
 import {
   faCartShopping,
   faCashRegister,
@@ -5,8 +6,10 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { NavLink } from 'react-router-dom';
+import UserContext from 'renderer/context/userContext';
 
 const Sidebar = () => {
+  const { user } = useContext(UserContext);
   return (
     <nav
       className="px-0 h-100 position-fixed bg-light shadow"
@@ -48,6 +51,20 @@ const Sidebar = () => {
           </li>
         </NavLink> */}
       </ul>
+      {user?.role === 'admin' && (
+        <div className="container bg-white position-absolute bottom-0 start-0 p-2">
+          <ul className="nav flex-column">
+            <NavLink to="admin" className="mb-0">
+              <li>
+                <span className="nav-link cursor-pointer">
+                  {/* <i className="fa-solid fa-gear"></i> */}
+                  <strong>Admin</strong>
+                </span>
+              </li>
+            </NavLink>
+          </ul>
+        </div>
+      )}
     </nav>
   );
 };

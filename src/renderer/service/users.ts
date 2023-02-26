@@ -1,5 +1,6 @@
 import { Response } from 'globalTypes/realm/response.types';
-import { User } from 'main/service/usersRealm';
+import { Channels } from 'globalTypes/channels/usersChannels';
+import { UserUpdate, User } from 'globalTypes/realm/user.types';
 
 const {
   electron: { ipcRenderer },
@@ -11,22 +12,45 @@ export const createUser = async (user: {
   role: 'admin' | 'staff';
 }) => {
   const response = await ipcRenderer.invoke<Response<User>>(
-    'users:create',
+    Channels.create,
     user
   );
   return response;
 };
 
 export const getUsersQuantity = async () => {
-  const response = await ipcRenderer.invoke<Response<number>>('users:quantity');
+  const response = await ipcRenderer.invoke<Response<number>>(
+    Channels.getAdminQuantity
+  );
   return response;
 };
 
 export const login = async (username: string, password: string) => {
   const response = await ipcRenderer.invoke<Response<User>>(
-    'users:login',
+    Channels.login,
     username,
     password
+  );
+  return response;
+};
+
+export const getUsers = async () => {
+  const response = await ipcRenderer.invoke<Response<User[]>>(Channels.getAll);
+  return response;
+};
+
+export const updateUser = async (updates: UserUpdate) => {
+  const response = await ipcRenderer.invoke<Response<User>>(
+    Channels.updateUser,
+    updates
+  );
+  return response;
+};
+
+export const deleteUser = async (userId: string) => {
+  const response = await ipcRenderer.invoke<Response<undefined>>(
+    Channels.delete,
+    userId
   );
   return response;
 };
