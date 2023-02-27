@@ -1,10 +1,12 @@
 import { Sales } from 'main/service/salesRealm';
 import { ChangeEvent, useEffect, useState, useContext } from 'react';
-import { Card, Table, FormSelect, Col, Row } from 'react-bootstrap';
+import { Card, Table, FormSelect, Col, Row, FormLabel } from 'react-bootstrap';
 import { getSalesByTransactions } from 'renderer/service/sales';
 import { pesoFormat } from 'renderer/utils/helper';
 import format from 'date-fns/format';
 import UserContext from 'renderer/context/userContext';
+import { User } from 'main/service/usersRealm';
+import { getUsers } from 'renderer/service/users';
 
 const SalesPage = () => {
   const [sales, setSales] = useState<Sales[]>([]);
@@ -14,10 +16,12 @@ const SalesPage = () => {
   const [endDate, setEndDate] = useState(
     new Date(new Date().setHours(23, 59, 59, 999))
   );
+  const [users, setUsers] = useState<User[]>([]);
+  const [userOption, setUserOption] = useState<string>('');
   const { user } = useContext(UserContext);
 
   const handlegetSales = async (filter?: {
-    transactBy?: string;
+    transactByUserId?: string;
     startDate?: Date;
     endDate?: Date;
   }) => {
@@ -29,8 +33,21 @@ const SalesPage = () => {
   };
 
   useEffect(() => {
-    handlegetSales({ transactBy: user?._id, startDate, endDate });
-  }, [user, startDate, endDate]);
+    handlegetSales({
+      transactByUserId: userOption || undefined,
+      startDate,
+      endDate,
+    });
+  }, [userOption, startDate, endDate]);
+
+  useEffect(() => {
+    (async () => {
+      const response = await getUsers();
+      if (response.isSuccess && response.result) {
+        setUsers(response.result);
+      }
+    })();
+  }, []);
 
   const handlePeriodSelect = (e: ChangeEvent<HTMLSelectElement>) => {
     const { value } = e.target;
@@ -59,13 +76,27 @@ const SalesPage = () => {
   return (
     <div>
       <h3>Sales</h3>
+      <Row>
+        <Col md="2" className="mb-3">
+          <FormLabel>Period</FormLabel>
+          <FormSelect onChange={handlePeriodSelect}>
+            <option>Daily</option>
+            <option>Monthly</option>
+          </FormSelect>
+        </Col>
+        <Col md="2" className="mb-3">
+          <FormLabel>User</FormLabel>
+          <FormSelect onChange={(e) => setUserOption(e.target.value)}>
+            <option value="">All</option>
+            {users.map((opt) => (
+              <option key={opt._id} value={opt._id}>
+                {opt.username}
+              </option>
+            ))}
+          </FormSelect>
+        </Col>
+      </Row>
 
-      <Col md="2" className="mb-3">
-        <FormSelect onChange={handlePeriodSelect}>
-          <option>Daily</option>
-          <option>Monthly</option>
-        </FormSelect>
-      </Col>
       <Card className="d-flex">
         <Card.Body className="flex-grow-1">
           <Row>

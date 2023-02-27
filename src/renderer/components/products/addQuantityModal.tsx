@@ -1,6 +1,7 @@
 import { Product } from 'main/service/productsRealm';
 import { FormEvent, useContext, useState } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
+import { toast } from 'react-toastify';
 import UserContext from 'renderer/context/userContext';
 import { updateProduct } from 'renderer/service/products';
 
@@ -30,23 +31,23 @@ const AddQuantityModal = ({
     e.preventDefault();
     const numQuality = +quantity;
 
-    if (selectedProduct) {
+    if (selectedProduct && user) {
       const response = await updateProduct({
         _id: selectedProduct._id,
         quantity: selectedProduct.quantity + numQuality,
         updated_by: user?.username,
-        date_updated: new Date(),
+        updated_by_user_id: user._id,
       });
 
       if (response.isSuccess && response.result) onUpdate(response.result);
-      else alert(response.message);
+      else toast(response.message);
 
       onHide();
     }
   };
 
   return (
-    <Modal show={show} onHide={onHide}>
+    <Modal show={show} onHide={onHide} size="sm">
       <Modal.Header closeButton>
         <Modal.Title>Add Quantity</Modal.Title>
       </Modal.Header>

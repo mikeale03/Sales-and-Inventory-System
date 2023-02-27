@@ -25,7 +25,7 @@ const SetUserModal = ({
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [role, setRole] = useState('staff');
-  const [isChangePassword, setIsChangePassword] = useState(false);
+  const [isSetPassword, setIsSetPassword] = useState(false);
 
   const handleCancel = () => {
     toggle(false);
@@ -37,7 +37,7 @@ const SetUserModal = ({
     e.stopPropagation();
     if (role !== 'staff' && role !== 'admin') return;
 
-    if (isChangePassword && password !== confirmPassword) {
+    if (isSetPassword && password !== confirmPassword) {
       toast.error('Password and Confirm Password does not match');
       return;
     }
@@ -63,18 +63,20 @@ const SetUserModal = ({
   };
 
   const onShow = () => {
-    selectedUser?.username
-      ? setUsername(selectedUser.username)
-      : setUsername('');
-    selectedUser?.password
-      ? setPassword(selectedUser.password)
-      : setPassword('');
-    selectedUser?.role ? setRole(selectedUser.role) : setRole('');
+    if (selectedUser) {
+      setUsername(selectedUser.username);
+      setRole(selectedUser.role);
+      setIsSetPassword(false);
+    } else {
+      setUsername('');
+      setRole('staff');
+      setIsSetPassword(true);
+    }
   };
 
   const handleShowChangePassword = (e: ChangeEvent<HTMLInputElement>) => {
     const isChecked = e.target.checked;
-    setIsChangePassword(isChecked);
+    setIsSetPassword(isChecked);
     if (!isChecked) {
       setPassword('');
       setConfirmPassword('');
@@ -85,7 +87,7 @@ const SetUserModal = ({
     <Modal show={show} onHide={() => toggle(false)} onShow={onShow}>
       <Form onSubmit={handleConfirm}>
         <Modal.Header>
-          <Modal.Title>{selectedUser ? 'Create' : 'Edit'} User</Modal.Title>
+          <Modal.Title>{selectedUser ? 'Edit' : 'Create'} User</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form.Group className="mb-3">
@@ -104,17 +106,19 @@ const SetUserModal = ({
               onChange={(e) => setRole(e.target.value)}
               required
             >
-              <option value="staff">staff</option>
-              <option value="admin">admin</option>
+              <option value="staff">Staff</option>
+              <option value="admin">Admin</option>
             </FormSelect>
           </Form.Group>
-          <Form.Check
-            type="checkbox"
-            id="checkbox"
-            label="Change Password"
-            onChange={handleShowChangePassword}
-          />
-          {isChangePassword && (
+          {selectedUser && (
+            <Form.Check
+              type="checkbox"
+              id="checkbox"
+              label="Change Password"
+              onChange={handleShowChangePassword}
+            />
+          )}
+          {isSetPassword && (
             <>
               <Form.Group className="my-3">
                 <Form.Label>Password</Form.Label>

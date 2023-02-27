@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { faPenToSquare, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Button, Card, Table } from 'react-bootstrap';
@@ -7,6 +7,7 @@ import { deleteUser, getUsers } from 'renderer/service/users';
 import { useNavigate } from 'react-router-dom';
 import SetUserModal from 'renderer/components/user/setUserModal';
 import ConfirmationModal from 'renderer/components/common/modals/confirmation';
+import UserContext from 'renderer/context/userContext';
 
 const UsersPage = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -14,6 +15,7 @@ const UsersPage = () => {
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | undefined>();
   const navigate = useNavigate();
+  const { user, setUser } = useContext(UserContext);
 
   useEffect(() => {
     (async () => {
@@ -22,13 +24,13 @@ const UsersPage = () => {
     })();
   }, []);
 
-  const handleShowSetUserModal = (user: User | undefined) => {
-    setSelectedUser(user);
+  const handleShowSetUserModal = (userSelect: User | undefined) => {
+    setSelectedUser(userSelect);
     setShowSetUserModal(true);
   };
 
-  const handleShowConfirmationModal = (user: User) => {
-    setSelectedUser(user);
+  const handleShowConfirmationModal = (userSelect: User) => {
+    setSelectedUser(userSelect);
     setShowConfirmationModal(true);
   };
 
@@ -36,8 +38,19 @@ const UsersPage = () => {
     if (!selectedUser) return;
     const response = await deleteUser(selectedUser._id);
     if (response.isSuccess) {
-      users.filter((user) => user._id !== selectedUser._id);
+      setUsers(users.filter((item) => item._id !== selectedUser._id));
     }
+  };
+
+  const updateUsers = (updatedUser: User) => {
+    updatedUser._id === user?._id && setUser(updatedUser);
+    setUsers(
+      users.map((item) => (item._id === updatedUser._id ? updatedUser : item))
+    );
+  };
+
+  const addUser = (newUser: User) => {
+    setUsers([...users, newUser]);
   };
 
   return (
@@ -46,6 +59,8 @@ const UsersPage = () => {
         show={showSetUserModal}
         toggle={setShowSetUserModal}
         selectedUser={selectedUser}
+        onUpdate={updateUsers}
+        onCreate={addUser}
       />
       <ConfirmationModal
         show={showConfirmationModal}
@@ -58,7 +73,7 @@ const UsersPage = () => {
         className="mb-3 mt-1"
         onClick={() => handleShowSetUserModal(undefined)}
       >
-        Add Product
+        Add User
       </Button>
       <Card className="mb-3">
         <Card.Body>

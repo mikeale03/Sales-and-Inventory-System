@@ -85,7 +85,7 @@ const SetProductModal = ({
   return (
     <Modal show={show} onHide={() => toggle(false)} onShow={onShow}>
       <Modal.Header closeButton>
-        <Modal.Title>Add Product</Modal.Title>
+        <Modal.Title>{selectedProduct ? 'Edit' : 'Add'} Product</Modal.Title>
       </Modal.Header>
       <Form onSubmit={handleOnSubmit}>
         <Modal.Body>
@@ -110,7 +110,9 @@ const SetProductModal = ({
             }
           />
           <Form.Group className="mb-3">
-            <Form.Label>Price</Form.Label>
+            <Form.Label>
+              Price <span className="text-danger">*</span>
+            </Form.Label>
             <Form.Control
               type="number"
               min="0"
@@ -121,7 +123,9 @@ const SetProductModal = ({
             />
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>Quantity</Form.Label>
+            <Form.Label>
+              Quantity <span className="text-danger">*</span>
+            </Form.Label>
             <Form.Control
               type="number"
               min="0"

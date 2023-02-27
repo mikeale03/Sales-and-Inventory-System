@@ -23,7 +23,9 @@ const FormInput: React.FC<
       <FormLabel {...formLabelProps}>
         {label} {required && <span className="text-danger">*</span>}
       </FormLabel>
-      <FormControl required={required} {...rest}>{children}</FormControl>
+      <FormControl required={required} {...rest}>
+        {children}
+      </FormControl>
     </FormGroup>
   );
 };

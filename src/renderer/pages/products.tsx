@@ -1,5 +1,5 @@
 /* eslint-disable radix */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { Button, Table, Card, Row, Col, FormControl } from 'react-bootstrap';
 import { debounce, pesoFormat } from 'renderer/utils/helper';
 import { deleteProduct, getProducts } from 'renderer/service/products';
@@ -11,6 +11,7 @@ import { faCirclePlus } from '@fortawesome/free-solid-svg-icons';
 import { faPenToSquare, faTrashCan } from '@fortawesome/free-regular-svg-icons';
 import { Product } from 'main/service/productsRealm';
 import { toast } from 'react-toastify';
+import UserContext from 'renderer/context/userContext';
 
 const { console } = window;
 
@@ -21,6 +22,7 @@ const ProductsPage = () => {
     useState<boolean>(false);
   const [showAddQuantityModal, setShowAddQuantityModal] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const { user } = useContext(UserContext);
 
   const handleGetProducts = async (searchText?: string) => {
     const response = await getProducts({ searchText });
@@ -154,13 +156,15 @@ const ProductsPage = () => {
                       size="xl"
                       className="me-2"
                     />
-                    <FontAwesomeIcon
-                      onClick={() => handleShowConfirmationModal(d)}
-                      icon={faTrashCan}
-                      title="Delete"
-                      size="xl"
-                      className="me-2"
-                    />
+                    {user?.role === 'admin' && (
+                      <FontAwesomeIcon
+                        onClick={() => handleShowConfirmationModal(d)}
+                        icon={faTrashCan}
+                        title="Delete"
+                        size="xl"
+                        className="me-2"
+                      />
+                    )}
                   </td>
                 </tr>
               ))}
