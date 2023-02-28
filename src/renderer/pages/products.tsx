@@ -98,7 +98,11 @@ const ProductsPage = () => {
       <ConfirmationModal
         show={showConfirmationModal}
         toggle={setShowConfirmationModal}
-        message={`Are you sure to delete product '${selectedProduct?.name}'`}
+        message={
+          <p className="text-center">
+            Are you sure to delete product name <b>{selectedProduct?.name}</b>
+          </p>
+        }
         onConfirm={handleDeleteProduct}
       />
 
@@ -147,14 +151,14 @@ const ProductsPage = () => {
                       icon={faCirclePlus}
                       title="Add quantity"
                       size="xl"
-                      className="me-2"
+                      className="me-2 cursor-pointer"
                     />
                     <FontAwesomeIcon
                       onClick={() => handleShowSetProductModal(d)}
                       icon={faPenToSquare}
                       title="Edit"
                       size="xl"
-                      className="me-2"
+                      className="me-2 cursor-pointer"
                     />
                     {user?.role === 'admin' && (
                       <FontAwesomeIcon
@@ -162,7 +166,7 @@ const ProductsPage = () => {
                         icon={faTrashCan}
                         title="Delete"
                         size="xl"
-                        className="me-2"
+                        className="me-2 cursor-pointer"
                       />
                     )}
                   </td>

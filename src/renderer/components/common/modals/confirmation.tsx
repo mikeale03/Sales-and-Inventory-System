@@ -1,11 +1,13 @@
+import { ReactNode } from 'react';
 import { Button, Modal } from 'react-bootstrap';
 
 export type Props = {
   show: boolean;
   toggle: (show: boolean) => void;
-  message: string;
+  message: string | ReactNode;
   onConfirm?: () => void;
   onCancel?: () => void;
+  size?: 'sm' | 'lg' | 'xl';
 };
 
 const ConfirmationModal = ({
@@ -14,6 +16,7 @@ const ConfirmationModal = ({
   message,
   onConfirm,
   onCancel,
+  size = 'sm',
 }: Props) => {
   const handleCancel = () => {
     toggle(false);
@@ -26,19 +29,19 @@ const ConfirmationModal = ({
   };
 
   return (
-    <Modal show={show} onHide={() => toggle(false)}>
+    <Modal show={show} onHide={() => toggle(false)} size={size}>
       <Modal.Header>
-        <Modal.Title>Confirmation</Modal.Title>
+        <Modal.Title className="fw-bold text-center d-block w-100">
+          Confirmation
+        </Modal.Title>
       </Modal.Header>
-      <Modal.Body>
-        <p>{message}</p>
-      </Modal.Body>
+      <Modal.Body>{message}</Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={handleCancel}>
-          Close
+          Cancel
         </Button>
         <Button variant="primary" onClick={handleConfirm}>
-          Ok
+          Confirm
         </Button>
       </Modal.Footer>
     </Modal>

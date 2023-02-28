@@ -180,11 +180,11 @@ const SalesPage = () => {
               ))}
             </tbody>
           </Table>
-          {/* {products.length === 0 && (
+          {sales.length === 0 && (
             <span className="ms-2 fw-light fst-italic text-secondary">
-              no products
+              no sales
             </span>
-          )} */}
+          )}
         </Card.Body>
       </Card>
     </div>

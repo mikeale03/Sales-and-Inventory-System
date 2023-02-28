@@ -17,6 +17,8 @@ import UserContext from 'renderer/context/userContext';
 import { getUsersQuantity, login } from 'renderer/service/users';
 import CreateAdminModal from 'renderer/components/login/createAdminModal';
 import { toast } from 'react-toastify';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faLock, faUser } from '@fortawesome/free-solid-svg-icons';
 
 const {
   console,
@@ -66,7 +68,7 @@ const LoginPage = () => {
           <Col md="6" lg="4" className="h-100">
             <div className="d-flex align-items-center h-100">
               <div className="w-100 m-2">
-                <Card>
+                <Card className="shadow m-3">
                   <Card.Body>
                     <Form onSubmit={handleSubmit}>
                       <p className="text-center">Please log in to start</p>
@@ -77,7 +79,7 @@ const LoginPage = () => {
                           onChange={(e) => setUsername(e.target.value)}
                         />
                         <InputGroup.Text>
-                          <i className="fa-solid fa-user" />
+                          <FontAwesomeIcon icon={faUser} />
                         </InputGroup.Text>
                       </InputGroup>
                       <InputGroup className="mb-2">
@@ -88,7 +90,7 @@ const LoginPage = () => {
                           onChange={(e) => setPassword(e.target.value)}
                         />
                         <InputGroup.Text>
-                          <i className="fa-solid fa-lock" />
+                          <FontAwesomeIcon icon={faLock} />
                         </InputGroup.Text>
                       </InputGroup>
                       {canCreateAdmin && (

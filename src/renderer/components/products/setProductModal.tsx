@@ -1,5 +1,5 @@
 import { Product } from 'main/service/productsRealm';
-import { ChangeEvent, FormEvent, useContext, useState } from 'react';
+import { ChangeEvent, FormEvent, useContext, useRef, useState } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import UserContext from 'renderer/context/userContext';
@@ -37,7 +37,7 @@ const SetProductModal = ({
     quantity: '',
     price: '',
   });
-
+  const productNameInputRef = useRef<HTMLInputElement | null>(null);
   const { user } = useContext(UserContext);
 
   const handleOnSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -50,20 +50,34 @@ const SetProductModal = ({
         updated_by: user.username,
         updated_by_user_id: user._id,
       });
-      response.isSuccess && response.result
-        ? onUpdate?.(response.result)
-        : toast.error(response.message);
+      if (response.isSuccess && response.result) {
+        onUpdate?.(response.result);
+        toast.success(response.message);
+        toggle(false);
+        return;
+      }
+      toast.error(response.message);
     } else if (user?.username) {
       const response = await createProduct({
         ...product,
         created_by: user.username,
         created_by_user_id: user._id,
       });
-      response.isSuccess && response.result
-        ? onCreate?.(response.result)
-        : toast.error(response.message);
+      if (response.isSuccess && response.result) {
+        setProduct({
+          name: '',
+          barcode: '',
+          description: '',
+          quantity: '',
+          price: '',
+        });
+        productNameInputRef.current?.focus();
+        toast.success(response.message);
+        onCreate?.(response.result);
+        return;
+      }
+      toast.error(response.message);
     }
-    toggle(false);
   };
 
   const handleChange = (updateFields: Partial<ProductForm>) => {
@@ -89,16 +103,18 @@ const SetProductModal = ({
       </Modal.Header>
       <Form onSubmit={handleOnSubmit}>
         <Modal.Body>
-          <FormInput
-            formGroupProps={{ className: 'mb-2' }}
-            label="Product Name"
-            value={product.name}
-            onChange={(e: ChangeEvent<HTMLFormElement>) =>
-              handleChange({ name: e.target.value })
-            }
-            required
-            autoFocus
-          />
+          <Form.Group className="mb-3">
+            <Form.Label>
+              Product Name <span className="text-danger">*</span>
+            </Form.Label>
+            <Form.Control
+              ref={productNameInputRef}
+              value={product.name}
+              onChange={(e) => handleChange({ name: e.target.value })}
+              required
+              autoFocus
+            />
+          </Form.Group>
           <FormInput
             formGroupProps={{ className: 'mb-2' }}
             label="Barcode"
