@@ -47,3 +47,11 @@ export const getSalesByTransactions = async (filter?: {
   );
   return response;
 };
+
+export const deleteSale = async (saleId: string) => {
+  const response = await ipcRenderer.invoke<Response<undefined>>(
+    Channels.delete,
+    saleId
+  );
+  return response;
+};

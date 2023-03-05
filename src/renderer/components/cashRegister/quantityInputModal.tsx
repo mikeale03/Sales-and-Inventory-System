@@ -1,6 +1,6 @@
 import { Product } from 'main/service/productsRealm';
 import { FormEvent, useState } from 'react';
-import { Button, Form, Modal } from 'react-bootstrap';
+import { Button, Form, Modal, Col, Row } from 'react-bootstrap';
 
 export type Props = {
   show: boolean;
@@ -52,21 +52,35 @@ const QuantityInputModal = ({
 
         <Modal.Body>
           {product?.barcode && (
-            <p className="text-secondary text-center mb-1">
-              <strong>Barcode: </strong> {product.barcode}
-            </p>
+            <Row className="mx-1">
+              <Col xs="6">
+                <p className="m-0">Barcode:</p>
+              </Col>
+              <Col xs="6">
+                <p className="m-0 text-end">{product.barcode}</p>
+              </Col>
+            </Row>
           )}
-          <p className="text-secondary text-center mb-1">
-            <strong>Remaining: </strong>
-            {product?.quantity}
-          </p>
+          <Row className="mx-1">
+            <Col xs="6">
+              <p className="m-0">Remaining:</p>
+            </Col>
+            <Col xs="6">
+              <p className="m-0 text-end">
+                {product?.quantity.toLocaleString()}
+              </p>
+            </Col>
+          </Row>
           {product?.description && (
-            <p className="text-secondary text-center mb-1">
-              <strong>Description: </strong>
-              {product.description}
-            </p>
+            <Row className="mx-1">
+              <Col xs="6">
+                <p className="m-0">Description:</p>
+              </Col>
+              <Col xs="6" className="d-flex justify-content-end">
+                <p className="m-0 d-inline">{product.description}</p>
+              </Col>
+            </Row>
           )}
-
           <Form.Group className="m-3">
             <Form.Label className="d-block fw-bold text-center">
               Quantity of Items

@@ -1,6 +1,7 @@
 import { IpcMain, IpcMainInvokeEvent } from 'electron';
 import { Channels } from '../../globalTypes/channels/salesChannels';
 import {
+  deleteSale,
   getSalesByProducts,
   getSalesByTransactions,
   salesPurchase,
@@ -44,6 +45,13 @@ const setSalesEventHandler = (ipcMain: IpcMain) => {
       }
     ) => {
       const result = await getSalesByTransactions(filter);
+      return result;
+    }
+  );
+  ipcMain.handle(
+    Channels.delete,
+    async (event: IpcMainInvokeEvent, saleId: string) => {
+      const result = await deleteSale(saleId);
       return result;
     }
   );

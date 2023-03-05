@@ -68,27 +68,35 @@ const PaymentCard = ({ items, onPaymentDone }: Props) => {
         toggle={setShowConfirmationModal}
         message={
           <Row className="mb-2">
-            <Col xs="6">line:</Col>
+            <Col xs="6" className="fs-5">
+              line:
+            </Col>
             <Col xs="6">
-              <p className="m-0 mb-1 text-end">
+              <p className="m-0 mb-1 fs-5 text-end">
                 <strong>{lines}</strong>
               </p>
             </Col>
-            <Col xs="6">subtotal:</Col>
+            <Col xs="6" className="fs-5">
+              subtotal:
+            </Col>
             <Col xs="6">
-              <p className="m-0  mb-1 text-end">
+              <p className="m-0 mb-1 fs-5 text-end">
                 <strong>{pesoFormat(total)}</strong>
               </p>
             </Col>
-            <Col xs="6">payment:</Col>
+            <Col xs="6" className="fs-5">
+              payment:
+            </Col>
             <Col xs="6">
-              <p className="m-0  mb-1 text-end">
+              <p className="m-0 mb-1 fs-5 text-end">
                 <strong>{pesoFormat(paymentAmount)}</strong>
               </p>
             </Col>
-            <Col xs="6">change:</Col>
+            <Col xs="6" className="fs-5">
+              change:
+            </Col>
             <Col xs="6">
-              <p className="m-0  mb-1 text-end">
+              <p className="m-0 mb-1 fs-5 text-end">
                 <strong>{pesoFormat(change < 0 ? 0 : change)}</strong>
               </p>
             </Col>

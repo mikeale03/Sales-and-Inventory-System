@@ -10,7 +10,7 @@ import {
   DropdownButton,
   Dropdown,
 } from 'react-bootstrap';
-import { getSalesByTransactions } from 'renderer/service/sales';
+import { deleteSale, getSalesByTransactions } from 'renderer/service/sales';
 import { pesoFormat } from 'renderer/utils/helper';
 import format from 'date-fns/format';
 import { User } from 'main/service/usersRealm';
@@ -18,6 +18,10 @@ import { getUsers } from 'renderer/service/users';
 import DatePicker from 'react-datepicker';
 import UserContext from 'renderer/context/userContext';
 import { useReactToPrint } from 'react-to-print';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import ConfirmationModal from 'renderer/components/common/modals/confirmation';
+import { toast } from 'react-toastify';
 
 const SalesPage = () => {
   const [sales, setSales] = useState<Sales[]>([]);
@@ -31,6 +35,8 @@ const SalesPage = () => {
   const [userOption, setUserOption] = useState<string>('');
   const [totalAmount, setTotalAmount] = useState(0);
   const [totalQuantity, setTotalQuantity] = useState(0);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [selectedSale, setSelectedSale] = useState<Sales | undefined>();
   const selectedDateRef = useRef<Date>(new Date());
   const selectedPeriodRef = useRef('Daily');
   const { user } = useContext(UserContext);
@@ -125,8 +131,29 @@ const SalesPage = () => {
     content: () => printRef.current,
   });
 
+  const handleDeleteSale = async () => {
+    if (!selectedSale) return;
+    const response = await deleteSale(selectedSale._id);
+    if (response.isSuccess) {
+      setSales(sales.filter((item) => item._id !== selectedSale._id));
+    } else toast.error(response.message);
+    console.log(response);
+  };
+
+  const handleShowConfirmationModal = (sale: Sales) => {
+    setSelectedSale(sale);
+    setShowConfirmationModal(true);
+  };
+
   return (
     <div>
+      <ConfirmationModal
+        show={showConfirmationModal}
+        toggle={setShowConfirmationModal}
+        message={<p className="text-center">Are you sure to delete sale</p>}
+        onConfirm={handleDeleteSale}
+      />
+
       <h3>Sales</h3>
       <Row>
         <Col md="2" className="mb-3">
@@ -201,6 +228,7 @@ const SalesPage = () => {
                   <th>Total Price</th>
                   <th>Date</th>
                   <th>Transact By</th>
+                  {user?.role === 'admin' && <th> </th>}
                 </tr>
               </thead>
               <tbody>
@@ -212,6 +240,17 @@ const SalesPage = () => {
                     <td>{pesoFormat(d.total_price)}</td>
                     <td>{format(d.date_created, 'MM/dd/yyyy hh:mm aaa')}</td>
                     <td>{d.transact_by}</td>
+                    {user?.role === 'admin' && (
+                      <td>
+                        <FontAwesomeIcon
+                          onClick={() => handleShowConfirmationModal(d)}
+                          icon={faTrashCan}
+                          title="Delete"
+                          size="xl"
+                          className="me-2 cursor-pointer"
+                        />
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

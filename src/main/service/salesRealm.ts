@@ -216,3 +216,52 @@ export const getSalesByTransactions = async (filter?: {
     };
   }
 };
+
+export const deleteSale = async (salesId: string) => {
+  let salesRealm: Realm | undefined;
+  let productsRealm: Realm | undefined;
+  try {
+    salesRealm = await openSalesRealm();
+    productsRealm = await openProductsRealm();
+    let sale = salesRealm.objectForPrimaryKey<Sales>(
+      SALES,
+      new Realm.BSON.ObjectID(salesId)
+    );
+    if (!sale) {
+      salesRealm?.close();
+      return {
+        isSuccess: false,
+        message: 'Sale id not found',
+      };
+    }
+    const product = productsRealm.objectForPrimaryKey<Product>(
+      PRODUCTS,
+      new Realm.BSON.ObjectID(sale.product_id)
+    );
+
+    if (product) {
+      productsRealm.write(() => {
+        product.quantity += sale?.quantity || 0;
+      });
+    }
+    salesRealm.write(() => {
+      salesRealm?.delete(sale);
+      sale = null;
+    });
+
+    salesRealm?.close();
+    productsRealm.close();
+    return {
+      isSuccess: true,
+      message: 'Successfully deleted a sale',
+    };
+  } catch (error) {
+    salesRealm?.close();
+    productsRealm?.close();
+    return {
+      isSuccess: false,
+      message: 'Failed to delete sale',
+      error,
+    };
+  }
+};
