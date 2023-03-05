@@ -25,7 +25,11 @@ const ProductsPage = () => {
   const { user } = useContext(UserContext);
 
   const handleGetProducts = async (searchText?: string) => {
-    const response = await getProducts({ searchText });
+    const response = await getProducts({
+      searchText,
+      sortProp: 'name',
+      sortAs: 'asc',
+    });
     console.log(response);
     if (response.isSuccess) {
       const data = response.result;

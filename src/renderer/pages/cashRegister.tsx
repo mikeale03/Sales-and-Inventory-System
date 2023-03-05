@@ -41,7 +41,9 @@ function CashRegisterPage() {
       const data = response.result;
       const opts: Value[] = data.map((item) => ({
         value: item._id,
-        label: `${item.name} ${item.barcode ? `- ${item.barcode}` : ''}`,
+        label: `${item.name} - ${pesoFormat(item.price)} ${
+          item.barcode ? `-    #${item.barcode}` : ''
+        }`,
         product: item,
       }));
       return opts;
@@ -167,8 +169,7 @@ function CashRegisterPage() {
         <Col lg="4">
           <PaymentCard
             items={items}
-            onPaymentDone={() => setIsPaymentDone(true)}
-            onReset={() => {
+            onPaymentDone={() => {
               setIsPaymentDone(false);
               setItems({});
             }}

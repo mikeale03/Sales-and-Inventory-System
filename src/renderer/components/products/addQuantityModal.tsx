@@ -47,7 +47,7 @@ const AddQuantityModal = ({
   };
 
   return (
-    <Modal show={show} onHide={onHide} size="sm">
+    <Modal show={show} onHide={onHide} size="sm" centered>
       <Modal.Header closeButton>
         <Modal.Title>Add Quantity</Modal.Title>
       </Modal.Header>
@@ -61,6 +61,7 @@ const AddQuantityModal = ({
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
               required
+              autoFocus
             />
           </Form.Group>
         </Modal.Body>

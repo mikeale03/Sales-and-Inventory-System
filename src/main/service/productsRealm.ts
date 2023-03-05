@@ -1,5 +1,5 @@
 import { Response } from 'globalTypes/realm/response.types';
-import Realm from 'realm';
+import Realm, { ObjectSchema } from 'realm';
 
 const PRODUCTS = 'Products';
 
@@ -21,7 +21,7 @@ export type Product = {
 };
 
 export class ProductsSchema extends Realm.Object {
-  static schema = {
+  static schema: ObjectSchema = {
     name: PRODUCTS,
     properties: {
       _id: { type: 'objectId', default: () => new Realm.BSON.ObjectId() },
@@ -47,7 +47,6 @@ export const openProductsRealm = async () => {
   const products = await Realm.open({
     path: 'realm/products',
     schema: [ProductsSchema],
-    deleteRealmIfMigrationNeeded: true,
   });
   return products;
 };

@@ -126,9 +126,11 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.3.0",
     "react-select": "^5.7.0",
+    "react-to-print": "^2.14.12",
     "react-toastify": "^9.1.1",
     "reactstrap-sortable-table": "^1.1.1",
-    "realm": "^11.4.0"
+    "realm": "^11.4.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.19.2/xlsx-0.19.2.tgz"
   },
   "devDependencies": {
     "@babel/core": "^7.19.1",

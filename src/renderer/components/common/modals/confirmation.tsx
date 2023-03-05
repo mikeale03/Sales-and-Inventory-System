@@ -29,7 +29,7 @@ const ConfirmationModal = ({
   };
 
   return (
-    <Modal show={show} onHide={() => toggle(false)} size={size}>
+    <Modal show={show} onHide={() => toggle(false)} size={size} centered>
       <Modal.Header>
         <Modal.Title className="fw-bold text-center d-block w-100">
           Confirmation

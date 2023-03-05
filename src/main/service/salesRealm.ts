@@ -18,7 +18,7 @@ export type Sales = {
 };
 
 export class SalesSchema extends Realm.Object {
-  static schema = {
+  static schema: Realm.ObjectSchema = {
     name: SALES,
     properties: {
       _id: { type: 'objectId', default: () => new Realm.BSON.ObjectId() },
@@ -39,8 +39,6 @@ export const openSalesRealm = async () => {
   const sales = await Realm.open({
     path: 'realm/sales',
     schema: [SalesSchema],
-    // schemaVersion: 4,
-    deleteRealmIfMigrationNeeded: true,
   });
   return sales;
 };

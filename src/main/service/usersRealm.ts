@@ -1,6 +1,6 @@
 import { Response } from 'globalTypes/realm/response.types';
 import { UserCreate, UserUpdate } from 'globalTypes/realm/user.types';
-import Realm from 'realm';
+import Realm, { ObjectSchema } from 'realm';
 import { isValidPassword, saltAndHash } from '../util';
 
 const USERS = 'Users';
@@ -15,7 +15,7 @@ export type User = {
 };
 
 export class UsersSchema extends Realm.Object {
-  static schema = {
+  static schema: ObjectSchema = {
     name: USERS,
     properties: {
       _id: { type: 'objectId', default: () => new Realm.BSON.ObjectId() },
@@ -34,7 +34,6 @@ export const openUsersRealm = async () => {
     const realm = await Realm.open({
       path: 'realm/users',
       schema: [UsersSchema],
-      deleteRealmIfMigrationNeeded: true,
     });
     return realm;
   } catch (error) {

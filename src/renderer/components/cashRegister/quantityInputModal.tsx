@@ -36,7 +36,13 @@ const QuantityInputModal = ({
   };
 
   return (
-    <Modal show={show} onHide={() => toggle(false)} onShow={onShow} size="sm">
+    <Modal
+      show={show}
+      onHide={() => toggle(false)}
+      onShow={onShow}
+      size="sm"
+      centered
+    >
       <Form onSubmit={handleConfirm}>
         <Modal.Header>
           <Modal.Title className="w-100 text-center fw-bold">

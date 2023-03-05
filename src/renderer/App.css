@@ -9,3 +9,9 @@ a {
 .cursor-pointer {
   cursor: pointer;
 }
+
+@media print {
+  .print-hide {
+    display: none;
+  }
+}

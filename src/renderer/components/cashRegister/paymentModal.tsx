@@ -37,7 +37,8 @@ const PaymentModal = ({ show, toggle, items, onDone, onCancel }: Props) => {
 
     const response = await salesPurchase(
       Object.keys(items).map((key) => items[key]),
-      user.username
+      user.username,
+      user._id
     );
     window.console.log(response);
     if (!response.isSuccess) {
@@ -68,6 +69,7 @@ const PaymentModal = ({ show, toggle, items, onDone, onCancel }: Props) => {
       onShow={onShow}
       size="sm"
       backdrop="static"
+      centered
     >
       <Form onSubmit={handleConfirm}>
         <Modal.Header

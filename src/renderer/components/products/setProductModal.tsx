@@ -97,7 +97,7 @@ const SetProductModal = ({
   };
 
   return (
-    <Modal show={show} onHide={() => toggle(false)} onShow={onShow}>
+    <Modal show={show} onHide={() => toggle(false)} onShow={onShow} centered>
       <Modal.Header closeButton>
         <Modal.Title>{selectedProduct ? 'Edit' : 'Add'} Product</Modal.Title>
       </Modal.Header>
