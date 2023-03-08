@@ -32,7 +32,7 @@ export class UsersSchema extends Realm.Object {
 export const openUsersRealm = async () => {
   try {
     const realm = await Realm.open({
-      path: 'realm/users',
+      path: '../realm/users',
       schema: [UsersSchema],
     });
     return realm;

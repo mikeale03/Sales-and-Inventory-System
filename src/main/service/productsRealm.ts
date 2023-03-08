@@ -45,7 +45,7 @@ export class ProductsSchema extends Realm.Object {
 
 export const openProductsRealm = async () => {
   const products = await Realm.open({
-    path: 'realm/products',
+    path: '../realm/products',
     schema: [ProductsSchema],
   });
   return products;
