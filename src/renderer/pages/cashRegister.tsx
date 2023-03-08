@@ -1,15 +1,17 @@
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Product } from 'main/service/productsRealm';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { Card, Col, Row, Table } from 'react-bootstrap';
 import AsyncSelect from 'react-select/async';
+import { SelectInstance } from 'react-select/dist/declarations/src';
 import PaymentCard from 'renderer/components/cashRegister/paymentCard';
+import PaymentConfirmationModal from 'renderer/components/cashRegister/paymentConfirmationModal';
 import QuantityInputModal from 'renderer/components/cashRegister/quantityInputModal';
 import { getProducts } from 'renderer/service/products';
 import { debounce, pesoFormat } from 'renderer/utils/helper';
 
-type Value = {
+type Opt = {
   value: string;
   label: string;
   product: Product;
@@ -19,19 +21,21 @@ const handleGetProducts = debounce(async (searchText: string) => {
   return getProducts({
     searchText,
     sortProp: 'last_transaction_date',
-    limit: 10,
+    limit: 20,
   });
 }, 300);
 
 function CashRegisterPage() {
   const [showInputQuantityModal, setShowInputQuantityModal] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | undefined>();
-  const [isPaymentDone, setIsPaymentDone] = useState(false);
-  const [value, setValue] = useState<Value | null>(null);
+  const [showPaymentConfirmationModal, setShowPaymentConfirmationModal] =
+    useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product>();
+  const [paymentAmount, setPaymentAmount] = useState('');
+  const [value, setValue] = useState<Opt | null>(null);
   const [items, setItems] = useState<
     Record<string, Product & { totalPrice: number }>
   >({});
-
+  const productSelectRef = useRef<SelectInstance<Opt> | null>(null);
   const itemKeys = useMemo(() => Object.keys(items), [items]);
 
   const handleGetOptions = async (searchText: string) => {
@@ -39,7 +43,7 @@ function CashRegisterPage() {
     window.console.log(response);
     if (response?.isSuccess && response.result) {
       const data = response.result;
-      const opts: Value[] = data.map((item) => ({
+      const opts: Opt[] = data.map((item) => ({
         value: item._id,
         label: `${item.name} - ${pesoFormat(item.price)} ${
           item.barcode ? `-    #${item.barcode}` : ''
@@ -51,11 +55,7 @@ function CashRegisterPage() {
     return [];
   };
 
-  const handleSelect = (option: Value | null) => {
-    if (isPaymentDone) {
-      setItems({});
-      setIsPaymentDone(false);
-    }
+  const handleSelect = (option: Opt | null) => {
     const product = option?.product && { ...option.product };
 
     if (product) {
@@ -67,35 +67,40 @@ function CashRegisterPage() {
     setValue(null);
   };
 
-  const handleConfirmQuantity = async (
-    quantity: string | number
-  ): Promise<undefined | void> => {
-    if (!selectedProduct) return;
+  const handleConfirmQuantity = useCallback(
+    async (quantity: string | number): Promise<undefined | void> => {
+      if (!selectedProduct) return;
 
-    if (items[selectedProduct._id]) {
-      const itemQuantity = items[selectedProduct._id].quantity;
-      const { price } = items[selectedProduct._id];
-      setItems({
-        ...items,
-        [selectedProduct._id]: {
-          ...selectedProduct,
-          quantity: itemQuantity + Number(quantity),
-          totalPrice: price * (itemQuantity + Number(quantity)),
-        },
-      });
-      return;
-    }
-    const product = { ...selectedProduct, totalPrice: selectedProduct.price };
-    product.quantity = +quantity;
-    product.totalPrice = product.price * +quantity;
-    setItems({ ...items, [selectedProduct._id]: product });
-  };
+      if (items[selectedProduct._id]) {
+        const itemQuantity = items[selectedProduct._id].quantity;
+        const { price } = items[selectedProduct._id];
+        setItems({
+          ...items,
+          [selectedProduct._id]: {
+            ...selectedProduct,
+            quantity: itemQuantity + Number(quantity),
+            totalPrice: price * (itemQuantity + Number(quantity)),
+          },
+        });
+        return;
+      }
+      const product = { ...selectedProduct, totalPrice: selectedProduct.price };
+      product.quantity = +quantity;
+      product.totalPrice = product.price * +quantity;
+      setItems({ ...items, [selectedProduct._id]: product });
+    },
+    [items, selectedProduct]
+  );
 
   const handleDeleteItem = (key: keyof typeof items) => {
     const newItems = { ...items };
     delete newItems[items[key]._id];
     setItems(newItems);
   };
+
+  useEffect(() => {
+    productSelectRef.current?.focus();
+  }, [items]);
 
   return (
     <div>
@@ -106,9 +111,24 @@ function CashRegisterPage() {
         onConfirm={handleConfirmQuantity}
       />
 
+      <PaymentConfirmationModal
+        show={showPaymentConfirmationModal}
+        toggle={setShowPaymentConfirmationModal}
+        items={items}
+        paymentAmount={+paymentAmount}
+        onSuccess={useCallback(() => {
+          setPaymentAmount('');
+          setItems({});
+        }, [])}
+        onExited={useCallback(() => {
+          setTimeout(() => productSelectRef.current?.focus(), 50);
+        }, [])}
+      />
+
       <h3>Cash Register</h3>
 
       <AsyncSelect
+        ref={productSelectRef}
         className="flex-grow-1"
         value={value}
         placeholder="Enter product name or barcode"
@@ -169,10 +189,11 @@ function CashRegisterPage() {
         <Col lg="4">
           <PaymentCard
             items={items}
-            onPaymentDone={() => {
-              setIsPaymentDone(false);
-              setItems({});
-            }}
+            paymentAmount={paymentAmount}
+            setPaymentAmount={setPaymentAmount}
+            onPayment={useCallback(() => {
+              setShowPaymentConfirmationModal(true);
+            }, [])}
           />
         </Col>
       </Row>

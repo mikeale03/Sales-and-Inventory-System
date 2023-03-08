@@ -7,6 +7,7 @@ export type Props = {
   message: string | ReactNode;
   onConfirm?: () => void;
   onCancel?: () => void;
+  onExited?: () => void;
   size?: 'sm' | 'lg' | 'xl';
 };
 
@@ -16,6 +17,7 @@ const ConfirmationModal = ({
   message,
   onConfirm,
   onCancel,
+  onExited,
   size = 'sm',
 }: Props) => {
   const handleCancel = () => {
@@ -29,7 +31,13 @@ const ConfirmationModal = ({
   };
 
   return (
-    <Modal show={show} onHide={() => toggle(false)} size={size} centered>
+    <Modal
+      show={show}
+      onHide={() => toggle(false)}
+      size={size}
+      onExited={onExited}
+      centered
+    >
       <Modal.Header>
         <Modal.Title className="fw-bold text-center d-block w-100">
           Confirmation
