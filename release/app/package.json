@@ -1,7 +1,7 @@
 {
-  "name": "electron-react-boilerplate",
+  "name": "sales_and_inventory",
   "version": "4.6.0",
-  "description": "A foundation for scalable desktop apps",
+  "description": "An app for managing your sales and inventory",
   "license": "MIT",
   "author": {
     "name": "Electron React Boilerplate Maintainers",

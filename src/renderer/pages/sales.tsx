@@ -1,27 +1,23 @@
 import { Sales } from 'main/service/salesRealm';
-import { ChangeEvent, useEffect, useState, useRef, useContext } from 'react';
+import { useEffect, useState, useRef, useContext, useCallback } from 'react';
 import {
   Card,
   Table,
-  FormSelect,
   Col,
   Row,
-  FormLabel,
   DropdownButton,
   Dropdown,
 } from 'react-bootstrap';
 import { deleteSale, getSalesByTransactions } from 'renderer/service/sales';
 import { pesoFormat } from 'renderer/utils/helper';
 import format from 'date-fns/format';
-import { User } from 'main/service/usersRealm';
-import { getUsers } from 'renderer/service/users';
-import DatePicker from 'react-datepicker';
 import UserContext from 'renderer/context/userContext';
 import { useReactToPrint } from 'react-to-print';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import ConfirmationModal from 'renderer/components/common/modals/confirmation';
 import { toast } from 'react-toastify';
+import SalesFilter from 'renderer/components/sales/salesFilters';
 
 const SalesPage = () => {
   const [sales, setSales] = useState<Sales[]>([]);
@@ -31,18 +27,13 @@ const SalesPage = () => {
   const [endDate, setEndDate] = useState(
     new Date(new Date().setHours(23, 59, 59, 999))
   );
-  const [users, setUsers] = useState<User[]>([]);
   const [userOption, setUserOption] = useState<string>('');
   const [totalAmount, setTotalAmount] = useState(0);
   const [totalQuantity, setTotalQuantity] = useState(0);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [selectedSale, setSelectedSale] = useState<Sales | undefined>();
-  const selectedDateRef = useRef<Date>(new Date());
-  const selectedPeriodRef = useRef('Daily');
   const { user } = useContext(UserContext);
   const printRef = useRef<HTMLDivElement | null>(null);
-
-  const isDaily = selectedPeriodRef.current === 'Daily';
 
   const handlegetSales = async (filter?: {
     transactByUserId?: string;
@@ -63,7 +54,6 @@ const SalesPage = () => {
       setTotalAmount(amount);
       setTotalQuantity(qty);
     }
-    console.log(response);
   };
 
   useEffect(() => {
@@ -73,59 +63,6 @@ const SalesPage = () => {
       endDate,
     });
   }, [userOption, startDate, endDate]);
-
-  useEffect(() => {
-    if (!user) return;
-    (async () => {
-      const response = await getUsers();
-      if (response.isSuccess && response.result) {
-        setUsers(response.result);
-      }
-    })();
-    setUserOption(user._id);
-  }, [user]);
-
-  const setDateRange = (period: string, selectedDate: Date) => {
-    let sDate: Date;
-    let eDate: Date;
-    if (period === 'Daily') {
-      sDate = new Date(new Date(selectedDate).setHours(0, 0, 0, 0));
-      eDate = new Date(new Date(selectedDate).setHours(23, 59, 59, 999));
-    } else {
-      sDate = new Date(
-        selectedDate.getFullYear(),
-        selectedDate.getMonth(),
-        1,
-        0,
-        0,
-        0,
-        0
-      );
-      eDate = new Date(
-        selectedDate.getFullYear(),
-        selectedDate.getMonth() + 1,
-        0,
-        23,
-        59,
-        59,
-        999
-      );
-    }
-    setStartDate(sDate);
-    setEndDate(eDate);
-  };
-
-  const handlePeriodSelect = (e: ChangeEvent<HTMLSelectElement>) => {
-    const { value } = e.target;
-    selectedPeriodRef.current = value;
-    setDateRange(value, selectedDateRef.current);
-  };
-
-  const handleDateSelect = (date: Date | null) => {
-    if (!date) return;
-    selectedDateRef.current = date;
-    setDateRange(selectedPeriodRef.current, date);
-  };
 
   const handlePrint = useReactToPrint({
     content: () => printRef.current,
@@ -137,12 +74,21 @@ const SalesPage = () => {
     if (response.isSuccess) {
       setSales(sales.filter((item) => item._id !== selectedSale._id));
     } else toast.error(response.message);
-    console.log(response);
   };
 
   const handleShowConfirmationModal = (sale: Sales) => {
     setSelectedSale(sale);
     setShowConfirmationModal(true);
+  };
+
+  const onFilterChange = (filter: {
+    userOption: string;
+    startDate: Date;
+    endDate: Date;
+  }) => {
+    setStartDate(filter.startDate);
+    setEndDate(filter.endDate);
+    setUserOption(filter.userOption);
   };
 
   return (
@@ -155,41 +101,8 @@ const SalesPage = () => {
       />
 
       <h3>Sales</h3>
-      <Row>
-        <Col md="2" className="mb-3">
-          <FormLabel>User</FormLabel>
-          <FormSelect
-            value={userOption}
-            onChange={(e) => setUserOption(e.target.value)}
-          >
-            <option value="">All</option>
-            {users.map((opt) => (
-              <option key={opt._id} value={opt._id}>
-                {opt.username}
-              </option>
-            ))}
-          </FormSelect>
-        </Col>
-        <Col md="2" className="mb-3">
-          <FormLabel>Period</FormLabel>
-          <FormSelect onChange={handlePeriodSelect}>
-            <option>Daily</option>
-            <option>Monthly</option>
-          </FormSelect>
-        </Col>
-        <Col md="2" className="mb-3">
-          <FormLabel>Select {isDaily ? 'Date' : 'Month'}</FormLabel>
-          <DatePicker
-            className="form-control"
-            selected={selectedDateRef.current}
-            onChange={handleDateSelect}
-            dateFormat={
-              selectedPeriodRef.current === 'Daily' ? 'MM/dd/yyyy' : 'MM/yyyy'
-            }
-            showMonthYearPicker={selectedPeriodRef.current === 'Monthly'}
-          />
-        </Col>
-      </Row>
+
+      <SalesFilter onChange={useCallback(onFilterChange, [])} />
 
       <div ref={printRef}>
         <Card className="d-flex">

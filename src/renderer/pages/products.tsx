@@ -12,6 +12,7 @@ import { faPenToSquare, faTrashCan } from '@fortawesome/free-regular-svg-icons';
 import { Product } from 'main/service/productsRealm';
 import { toast } from 'react-toastify';
 import UserContext from 'renderer/context/userContext';
+import format from 'date-fns/format';
 
 const { console } = window;
 
@@ -139,6 +140,8 @@ const ProductsPage = () => {
                 <th>Barcode</th>
                 <th>Price</th>
                 <th>Quantity</th>
+                <th>Last Updated By</th>
+                <th>Last Updated Dated</th>
                 <th> </th>
               </tr>
             </thead>
@@ -149,6 +152,11 @@ const ProductsPage = () => {
                   <td>{d.barcode}</td>
                   <td>{pesoFormat(d.price)}</td>
                   <td>{d.quantity.toLocaleString()}</td>
+                  <td>{d.updated_by}</td>
+                  <td>
+                    {d.date_updated &&
+                      format(d.date_updated, 'MM/dd/yyy hh:mm aaa')}
+                  </td>
                   <td>
                     <FontAwesomeIcon
                       onClick={() => handleShowAddQuantityModal(d)}
