@@ -141,7 +141,7 @@ const ProductsPage = () => {
                 <th>Price</th>
                 <th>Quantity</th>
                 <th>Last Updated By</th>
-                <th>Last Updated Dated</th>
+                <th>Last Updated Date</th>
                 <th> </th>
               </tr>
             </thead>
