@@ -14,9 +14,15 @@ const setSalesEventHandler = (ipcMain: IpcMain) => {
       event: IpcMainInvokeEvent,
       items: { _id: string; quantity: number }[],
       transactBy: string,
-      transactByUserId: string
+      transactByUserId: string,
+      payment: 'cash' | 'gcash'
     ) => {
-      const result = await salesPurchase(items, transactBy, transactByUserId);
+      const result = await salesPurchase(
+        items,
+        transactBy,
+        transactByUserId,
+        payment
+      );
       return result;
     }
   );
@@ -42,6 +48,7 @@ const setSalesEventHandler = (ipcMain: IpcMain) => {
         transactByUserId: string;
         startDate: Date;
         endDate: Date;
+        productName: string;
       }
     ) => {
       const result = await getSalesByTransactions(filter);

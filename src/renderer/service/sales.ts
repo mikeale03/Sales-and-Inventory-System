@@ -12,13 +12,15 @@ export const salesPurchase = async (
     quantity: string | number;
   }[],
   transactBy: string,
-  transactByUserId: string
+  transactByUserId: string,
+  payment: 'cash' | 'gcash'
 ) => {
   const response = await ipcRenderer.invoke<Response<undefined>>(
     Channels.purchase,
     items,
     transactBy,
-    transactByUserId
+    transactByUserId,
+    payment
   );
   return response;
 };
@@ -39,6 +41,7 @@ export const getSalesByTransactions = async (filter?: {
   transactByUserId?: string;
   startDate?: Date;
   endDate?: Date;
+  productName?: string;
 }) => {
   console.log(filter);
   const response = await ipcRenderer.invoke<Response<Sales[]>>(

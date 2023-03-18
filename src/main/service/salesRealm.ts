@@ -12,6 +12,7 @@ export type Sales = {
   quantity: number;
   price: number;
   total_price: number;
+  payment: 'cash' | 'gcash';
   date_created: Date;
   transact_by: string;
   transact_by_user_id: string;
@@ -27,6 +28,7 @@ export class SalesSchema extends Realm.Object {
       quantity: 'int',
       price: 'float',
       total_price: 'float',
+      payment: 'string',
       date_created: 'date',
       transact_by: 'string',
       transact_by_user_id: 'string',
@@ -39,6 +41,7 @@ export const openSalesRealm = async () => {
   const sales = await Realm.open({
     path: '../realm/sales',
     schema: [SalesSchema],
+    schemaVersion: 2,
   });
   return sales;
 };
@@ -46,7 +49,8 @@ export const openSalesRealm = async () => {
 export const salesPurchase = async (
   items: { _id: string; quantity: number }[],
   transactBy: string,
-  transactByUserId: string
+  transactByUserId: string,
+  payment: 'cash' | 'gcash'
 ) => {
   let productsRealm: Realm | undefined;
   let salesRealm: Realm | undefined;
@@ -66,6 +70,7 @@ export const salesPurchase = async (
             quantity: item.quantity,
             price: product.price,
             total_price: item.quantity * product.price,
+            payment,
             date_created: new Date(),
             transact_by: transactBy,
             transact_by_user_id: transactByUserId,
@@ -174,6 +179,7 @@ export const getSalesByTransactions = async (filter?: {
   transactByUserId?: string;
   startDate?: Date;
   endDate?: Date;
+  productName?: string;
 }): Promise<Response<Sales[]>> => {
   let realm: Realm | undefined;
   try {
@@ -183,9 +189,15 @@ export const getSalesByTransactions = async (filter?: {
     const transactBy = filter?.transactByUserId;
     const startDate = filter?.startDate;
     const endDate = filter?.endDate;
+    const productName = filter?.productName;
 
     const query: string[] = [];
     const args = [];
+
+    if (productName) {
+      query.push(`product_name CONTAINS[c] $${args.length}`);
+      args.push(productName);
+    }
 
     if (transactBy) {
       query.push(`transact_by_user_id == $${args.length}`);
