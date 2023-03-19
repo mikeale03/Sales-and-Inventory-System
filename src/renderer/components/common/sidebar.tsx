@@ -25,6 +25,15 @@ const Sidebar = () => {
             <p className="m-0 text-center">Cash Register</p>
           </li>
         </NavLink>
+        <NavLink to="gcash-register">
+          <li
+            className="nav-link cursor-pointer text-center rounded bg-white mx-3 mb-3 py-3 px-0 shadow-sm"
+            style={{ fontSize: '0.8em' }}
+          >
+            <FontAwesomeIcon icon={faCashRegister} size="xl" />
+            <p className="m-0 text-center">GCash Register</p>
+          </li>
+        </NavLink>
         <NavLink to="products">
           <li
             className="nav-link cursor-pointer text-center rounded bg-white mx-3 mb-3 py-3 px-0 shadow-sm"

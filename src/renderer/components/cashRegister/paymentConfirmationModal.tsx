@@ -32,7 +32,7 @@ const PaymentConfirmationModal = ({
   const [total, setTotal] = useState(0);
   const [showGcashConfirmation, setShowGcashConfirmation] = useState(false);
   const { user } = useContext(UserContext);
-  const confirmRef = useRef<HTMLButtonElement | null>(null);
+  const cancelRef = useRef<HTMLButtonElement | null>(null);
   const change = paymentAmount - total;
 
   useEffect(() => {
@@ -82,8 +82,8 @@ const PaymentConfirmationModal = ({
       <Modal
         show={show}
         onHide={() => toggle(false)}
-        onShow={() => confirmRef.current?.focus()}
-        size="sm"
+        onShow={() => cancelRef.current?.focus()}
+        size="md"
         onExited={onExited}
         centered
       >
@@ -127,10 +127,11 @@ const PaymentConfirmationModal = ({
               </p>
             </Col>
           </Row>
+        </Modal.Body>
+        <Modal.Footer className="d-flex justify-content-between">
           <Button
             variant="outline-primary"
             size="sm"
-            tabIndex={0}
             onClick={() => {
               setShowGcashConfirmation(true);
               toggle(false);
@@ -138,18 +139,23 @@ const PaymentConfirmationModal = ({
           >
             GCash Payment
           </Button>
-        </Modal.Body>
-        <Modal.Footer className="d-flex justify-content-between">
-          <Button variant="secondary" onClick={() => toggle(false)}>
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            ref={confirmRef}
-            onClick={() => handlePayment(false)}
-          >
-            Confirm
-          </Button>
+          <div>
+            <Button
+              variant="secondary"
+              onClick={() => toggle(false)}
+              className="me-2"
+              ref={cancelRef}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => handlePayment(false)}
+              tabIndex={0}
+            >
+              Confirm
+            </Button>
+          </div>
         </Modal.Footer>
       </Modal>
     </>
