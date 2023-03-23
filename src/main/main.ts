@@ -17,6 +17,7 @@ import { resolveHtmlPath } from './util';
 import setUserEventHandler from './eventHandlers/users';
 import setProductEventHandler from './eventHandlers/products';
 import setSalesEventHandler from './eventHandlers/sales';
+import setGcashEventHandler from './eventHandlers/gcash';
 
 class AppUpdater {
   constructor() {
@@ -37,6 +38,7 @@ ipcMain.on('ipc-example', async (event, arg) => {
 setUserEventHandler(ipcMain);
 setProductEventHandler(ipcMain);
 setSalesEventHandler(ipcMain);
+setGcashEventHandler(ipcMain);
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');

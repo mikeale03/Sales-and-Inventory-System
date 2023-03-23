@@ -1,16 +1,16 @@
-import { useState } from 'react';
+import { faPenToSquare, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { GcashCreate } from 'globalTypes/realm/gcash.types';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { Button, Card, Col, Row, Table } from 'react-bootstrap';
+import { toast } from 'react-toastify';
 import ConfirmationModal from 'renderer/components/common/modals/confirmation';
-import CashInOutModal from 'renderer/components/gcashRegister/cashInOutModal';
+import SetCashInOutModal, {
+  GCashItem,
+} from 'renderer/components/gcashRegister/setCashInOutModal';
+import UserContext from 'renderer/context/userContext';
+import { createGcashTransactions } from 'renderer/service/gcash';
 import { pesoFormat } from 'renderer/utils/helper';
-
-type GCashItem = {
-  key: number;
-  number: number;
-  amount: number;
-  charge: number;
-  type: 'cash in' | 'cash out';
-};
 
 let key = 0;
 
@@ -18,62 +18,107 @@ const GcashRegisterPage = () => {
   const [showCashInOutModal, setShowCashInOutModal] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [type, setType] = useState<'cash in' | 'cash out'>('cash in');
-  const [cashIn, setCashIn] = useState<GCashItem[]>([]);
-  const [cashOut, setCashOut] = useState<GCashItem[]>([]);
+  // const [cashIn, setCashIn] = useState<GCashItem[]>([]);
+  // const [cashOut, setCashOut] = useState<GCashItem[]>([]);
+  const [items, setItems] = useState<GCashItem[]>([]);
+  const [selectedItem, setSelectedItem] = useState<GCashItem | undefined>();
   const [totalCashIn, setTotalCashIn] = useState(0);
   const [totalCashOut, setTotalCashOut] = useState(0);
   const [totalCharge, setTotalCharge] = useState(0);
   const [totalAmount, setTotalAmount] = useState(0);
 
-  const items = cashIn.concat(cashOut);
+  const { user } = useContext(UserContext);
+  // const items = useMemo(() => cashIn.concat(cashOut), [cashIn, cashOut]);
 
-  const handleCashIn = () => {
-    setShowCashInOutModal(true);
-    setType('cash in');
-  };
+  useEffect(() => {
+    let tCashIn = 0;
+    let tCashOut = 0;
+    let tCharge = 0;
+    let tAmount = 0;
+    items.forEach((item) => {
+      if (item.type === 'cash in') tCashIn += item.amount;
+      else tCashOut += item.amount;
 
-  const handleCashOut = () => {
-    setShowCashInOutModal(true);
-    setType('cash out');
-  };
+      tCharge += item.charge;
+      tAmount += item.amount + item.charge;
+    });
+    setTotalCashIn(tCashIn);
+    setTotalCashOut(tCashOut);
+    setTotalCharge(tCharge);
+    setTotalAmount(tAmount);
+    console.log(items);
+  }, [items]);
 
-  const handleAddItem = (
-    number: number,
-    amount: number,
-    _type: 'cash in' | 'cash out'
+  const handleSetCashInCashOutModal = (
+    _type: 'cash in' | 'cash out',
+    item?: GCashItem
   ) => {
+    setSelectedItem(item);
+    setType(_type);
+    setShowCashInOutModal(true);
+  };
+
+  const handleSetItem = (_type: 'cash in' | 'cash out', item: GCashItem) => {
+    console.log({ item, _type });
+    if (item.key) {
+      setItems(
+        items.map((itm) =>
+          itm.key === item.key
+            ? {
+                ...itm,
+                ...item,
+                charge: Math.ceil(item.amount / 500) * 10,
+              }
+            : itm
+        )
+      );
+      return;
+    }
+
     key += 1;
     const itm = {
+      ...item,
       key,
-      number,
-      amount,
-      charge: Math.ceil(amount / 500) * 10,
+      charge: Math.ceil(item.amount / 500) * 10,
       type: _type,
     };
-    _type === 'cash in'
-      ? setCashIn([itm, ...cashIn])
-      : setCashOut([itm, ...cashOut]);
-    _type === 'cash in'
-      ? setTotalCashIn((value) => value + itm.amount)
-      : setTotalCashOut((value) => value + itm.amount);
+    setItems([itm, ...items]);
+  };
 
-    setTotalCharge((value) => value + itm.charge);
-    setTotalAmount((value) => value + itm.amount + itm.charge);
+  const handleSubmit = async () => {
+    if (!user) return;
+
+    const gcashTrans: GcashCreate[] = items.map((item) => ({
+      ...item,
+      transact_by: user.username,
+      transact_by_user_id: user._id,
+    }));
+
+    const response = await createGcashTransactions(gcashTrans);
+    if (response.isSuccess) {
+      toast.success(response.message);
+    }
+  };
+
+  const handleDeleteItem = (item: GCashItem) => {
+    setItems(items.filter((itm) => item.key !== itm.key));
   };
 
   return (
     <div>
-      <CashInOutModal
+      <SetCashInOutModal
         show={showCashInOutModal}
         toggle={setShowCashInOutModal}
         type={type}
-        onConfirm={handleAddItem}
+        selectedItem={selectedItem}
+        onConfirm={handleSetItem}
       />
 
       <ConfirmationModal
         show={showConfirmationModal}
         toggle={setShowConfirmationModal}
         size="md"
+        onConfirm={handleSubmit}
         message={
           <Row className="mb-2">
             <Col>
@@ -128,10 +173,17 @@ const GcashRegisterPage = () => {
 
       <h3>GCash Register</h3>
       <div className="my-3">
-        <Button className="me-2" style={{ width: 100 }} onClick={handleCashIn}>
+        <Button
+          className="me-2"
+          style={{ width: 100 }}
+          onClick={() => handleSetCashInCashOutModal('cash in')}
+        >
           Cash In
         </Button>
-        <Button style={{ width: 100 }} onClick={handleCashOut}>
+        <Button
+          style={{ width: 100 }}
+          onClick={() => handleSetCashInCashOutModal('cash out')}
+        >
           Cash Out
         </Button>
       </div>
@@ -146,6 +198,7 @@ const GcashRegisterPage = () => {
                 <th>Charge</th>
                 <th>Type</th>
                 <th>Total</th>
+                <th> </th>
               </tr>
             </thead>
             <tbody>
@@ -156,6 +209,23 @@ const GcashRegisterPage = () => {
                   <td>{pesoFormat(item.charge)}</td>
                   <td className="text-capitalize">{item.type}</td>
                   <td>{pesoFormat(item.amount + item.charge)}</td>
+
+                  <td className="align-middle text-center">
+                    <FontAwesomeIcon
+                      onClick={() =>
+                        handleSetCashInCashOutModal(item.type, item)
+                      }
+                      icon={faPenToSquare}
+                      title="Edit"
+                      className="me-2 cursor-pointer"
+                    />
+                    <FontAwesomeIcon
+                      title="remove"
+                      icon={faXmark}
+                      className="btn"
+                      onClick={() => handleDeleteItem(item)}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>

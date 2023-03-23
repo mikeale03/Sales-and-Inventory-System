@@ -48,7 +48,6 @@ const SalesPage = () => {
     let amount = 0;
     let gcash = 0;
     const response = await getSalesByTransactions(filter);
-    console.log(response);
     if (response.isSuccess && response.result) {
       setSales(
         response.result.map((sale) => {

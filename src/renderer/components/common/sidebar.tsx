@@ -2,6 +2,8 @@ import { useContext } from 'react';
 import {
   faCartShopping,
   faCashRegister,
+  faMobileRetro,
+  faMoneyBillTransfer,
   faPesoSign,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -30,7 +32,7 @@ const Sidebar = () => {
             className="nav-link cursor-pointer text-center rounded bg-white mx-3 mb-3 py-3 px-0 shadow-sm"
             style={{ fontSize: '0.8em' }}
           >
-            <FontAwesomeIcon icon={faCashRegister} size="xl" />
+            <FontAwesomeIcon icon={faMobileRetro} size="xl" />
             <p className="m-0 text-center">GCash Register</p>
           </li>
         </NavLink>
@@ -50,6 +52,15 @@ const Sidebar = () => {
           >
             <FontAwesomeIcon icon={faPesoSign} size="xl" />
             <p className="m-0 text-center">Sales</p>
+          </li>
+        </NavLink>
+        <NavLink to="gcash-transactions">
+          <li
+            className="nav-link cursor-pointer text-center rounded bg-white mx-3 mb-3 py-3 px-0 shadow-sm"
+            style={{ fontSize: '0.8em' }}
+          >
+            <FontAwesomeIcon icon={faMoneyBillTransfer} size="xl" />
+            <p className="m-0 text-center">GCash Trans.</p>
           </li>
         </NavLink>
         {/* <NavLink to="reporting">

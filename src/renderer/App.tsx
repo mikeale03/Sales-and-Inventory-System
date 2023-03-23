@@ -16,6 +16,7 @@ import UserContext from './context/userContext';
 import AdminPage from './pages/admin';
 import UsersPage from './pages/admin/users';
 import GcashRegisterPage from './pages/gcashRegister';
+import GcashTransactionsPage from './pages/gcashTransactions';
 
 export default function App() {
   const [user, setUser] = useState<User | undefined>();
@@ -30,6 +31,10 @@ export default function App() {
             <Route path="gcash-register" element={<GcashRegisterPage />} />
             <Route path="products" element={<ProductsPage />} />
             <Route path="sales" element={<SalesPage />} />
+            <Route
+              path="gcash-transactions"
+              element={<GcashTransactionsPage />}
+            />
             <Route path="reporting" element={<ReportingPage />} />
             <Route path="admin" element={<AdminPage />} />
             <Route path="admin/users" element={<UsersPage />} />

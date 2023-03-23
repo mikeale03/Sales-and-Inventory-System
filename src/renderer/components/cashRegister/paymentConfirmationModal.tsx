@@ -2,6 +2,7 @@ import { useContext, useEffect, useState, memo, useRef } from 'react';
 import { Button, Col, Modal, Row } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import UserContext from 'renderer/context/userContext';
+import { createGcashTransactions } from 'renderer/service/gcash';
 import { salesPurchase } from 'renderer/service/sales';
 import { pesoFormat } from 'renderer/utils/helper';
 import ConfirmationModal from '../common/modals/confirmation';
@@ -48,19 +49,39 @@ const PaymentConfirmationModal = ({
   const handlePayment = async (isGcash: boolean) => {
     if (!user?.username) return;
 
-    const response = await salesPurchase(
+    const salesPromise = salesPurchase(
       Object.keys(items).map((key) => items[key]),
       user.username,
       user._id,
       isGcash ? 'gcash' : 'cash'
     );
-    if (!response.isSuccess) {
-      toast.error(response.message);
+
+    const gcashPromise = createGcashTransactions([
+      {
+        type: 'gcash pay',
+        amount: total,
+        charge: 0,
+        transact_by: user.username,
+        transact_by_user_id: user._id,
+      },
+    ]);
+
+    const [res1, res2] = await Promise.all([salesPromise, gcashPromise]);
+    window.console.log({ res1, res2 });
+    if (!res1.isSuccess) {
+      toast.error(res1.message);
       onError?.();
       toggle(false);
       return;
     }
-    toast.success(response.message);
+
+    if (!res2.isSuccess) {
+      toast.error(res2.message);
+      onError?.();
+      toggle(false);
+      return;
+    }
+    toast.success(res1.message);
     onSuccess();
     toggle(false);
   };

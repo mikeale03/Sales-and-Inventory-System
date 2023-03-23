@@ -46,6 +46,19 @@ export const openSalesRealm = async () => {
   return sales;
 };
 
+export const createSales = async (
+  sales: Omit<Sales, '_id'>[],
+  salesRealm?: Realm
+) => {
+  const realm = salesRealm || (await openSalesRealm());
+
+  realm.write(() => {
+    sales.forEach((sale) => {
+      realm.create<Sales>(SALES, sale);
+    });
+  });
+};
+
 export const salesPurchase = async (
   items: { _id: string; quantity: number }[],
   transactBy: string,
@@ -63,13 +76,14 @@ export const salesPurchase = async (
         new Realm.BSON.ObjectID(item._id)
       );
       if (product) {
+        const total_price = item.quantity * product.price;
         salesRealm?.write(() => {
           salesRealm?.create<Sales>(SALES, {
             product_id: product._id.toString(),
             product_name: product.name,
             quantity: item.quantity,
             price: product.price,
-            total_price: item.quantity * product.price,
+            total_price,
             payment,
             date_created: new Date(),
             transact_by: transactBy,
