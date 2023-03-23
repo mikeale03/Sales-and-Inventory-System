@@ -12,7 +12,7 @@ const Header = () => {
   return (
     <header
       className="position-fixed w-100 bg-white px-3 d-flex justify-content-between top-0 start-0 align-items-center shadow-sm"
-      style={{ height: '50px' }}
+      style={{ height: '50px', zIndex: 999 }}
     >
       <div>
         <p className="m-0">Sales And Inventory System</p>

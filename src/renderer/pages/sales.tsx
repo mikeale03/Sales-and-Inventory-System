@@ -64,6 +64,7 @@ const SalesPage = () => {
       setTotalQuantity(qty);
       setTotalGcash(gcash);
       setTotalCash(cash);
+      console.log(response.result);
     }
   };
 

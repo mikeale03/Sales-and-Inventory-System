@@ -20,7 +20,7 @@ const GcashTransactionsPage = () => {
   const [totalCashOut, setTotalCashOut] = useState(0);
   const [totalGcashPay, setTotalGcashPay] = useState(0);
   const [totalCharge, setTotalCharge] = useState(0);
-  const [totalAmount, setTotalAmount] = useState(0);
+  const [endingBalance, setEndingBalance] = useState(0);
 
   const handleGetGcashTransactions = async (filter?: TransFilter) => {
     const response = await getGcashTransactions(filter);
@@ -30,14 +30,12 @@ const GcashTransactionsPage = () => {
       let cashOut = 0;
       let gcashPay = 0;
       let charge = 0;
-      let amount = 0;
       setTransactions(
         response.result.map<Gcash>((item) => {
           cashIn += item.type === 'cash in' ? item.amount : 0;
           cashOut += item.type === 'cash out' ? item.amount : 0;
           gcashPay += item.type === 'gcash pay' ? item.amount : 0;
           charge += item.charge;
-          amount += item.amount;
           return item;
         })
       );
@@ -45,7 +43,7 @@ const GcashTransactionsPage = () => {
       setTotalCashOut(cashOut);
       setTotalGcashPay(gcashPay);
       setTotalCharge(charge);
-      setTotalAmount(amount);
+      setEndingBalance(cashIn - cashOut);
     } else toast.error(response.message);
   };
 
@@ -92,7 +90,7 @@ const GcashTransactionsPage = () => {
             <p className="m-0">Total Cash Out: {pesoFormat(totalCashOut)}</p>
             <p className="m-0">Total GCash Pay: {pesoFormat(totalGcashPay)}</p>
             <p className="m-0">Total Charge: {pesoFormat(totalCharge)}</p>
-            <p className="m-0">Total Amount: {pesoFormat(totalAmount)}</p>
+            <p className="m-0">Ending Balance: {pesoFormat(endingBalance)}</p>
             <p className="m-0">
               Quantity: {transactions.length.toLocaleString()}
             </p>

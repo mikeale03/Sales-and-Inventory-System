@@ -4,7 +4,11 @@ import { Product } from 'main/service/productsRealm';
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { Card, Col, Row, Table } from 'react-bootstrap';
 import AsyncSelect from 'react-select/async';
-import { SelectInstance } from 'react-select/dist/declarations/src';
+import {
+  GroupBase,
+  OptionsOrGroups,
+  SelectInstance,
+} from 'react-select/dist/declarations/src';
 import PaymentCard from 'renderer/components/cashRegister/paymentCard';
 import PaymentConfirmationModal from 'renderer/components/cashRegister/paymentConfirmationModal';
 import QuantityInputModal from 'renderer/components/cashRegister/quantityInputModal';
@@ -35,10 +39,15 @@ function CashRegisterPage() {
   const [items, setItems] = useState<
     Record<string, Product & { totalPrice: number }>
   >({});
+  const [defaultOptions, setDefaultOptions] = useState<
+    OptionsOrGroups<Opt, GroupBase<Opt>> | undefined
+  >();
   const productSelectRef = useRef<SelectInstance<Opt> | null>(null);
   const itemKeys = useMemo(() => Object.keys(items), [items]);
 
-  const handleGetOptions = async (searchText: string) => {
+  const handleGetOptions = async (
+    searchText: string
+  ): Promise<OptionsOrGroups<Opt, GroupBase<Opt>>> => {
     const response = await handleGetProducts(searchText);
     window.console.log(response);
     if (response?.isSuccess && response.result) {
@@ -116,9 +125,11 @@ function CashRegisterPage() {
         toggle={setShowPaymentConfirmationModal}
         items={items}
         paymentAmount={+paymentAmount}
-        onSuccess={useCallback(() => {
+        onSuccess={useCallback(async () => {
           setPaymentAmount('');
           setItems({});
+          const opts = await handleGetOptions('');
+          setDefaultOptions(opts);
         }, [])}
         onExited={useCallback(() => {
           setTimeout(() => productSelectRef.current?.focus(), 50);
@@ -134,9 +145,8 @@ function CashRegisterPage() {
         placeholder="Enter product name or barcode"
         onChange={handleSelect}
         loadOptions={handleGetOptions}
-        defaultOptions
+        defaultOptions={defaultOptions ?? true}
         isSearchable
-        cacheOptions
         autoFocus
       />
       <Row className="my-3">

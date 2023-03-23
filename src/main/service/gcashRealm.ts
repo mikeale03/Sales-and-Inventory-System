@@ -67,7 +67,9 @@ export const createGcashTransactions = async (
         task.type !== 'gcash pay' &&
         sales.push({
           product_id: 'gcash',
-          product_name: `GCash-${gcashTran.amount}`,
+          product_name: `GCash-${task.type === 'cash in' ? 'In' : 'Out'} - ${
+            gcashTran.amount
+          }`,
           quantity: 1,
           price: gcashTran.charge,
           total_price: gcashTran.charge,

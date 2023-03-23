@@ -1,7 +1,7 @@
 import { faPenToSquare, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { GcashCreate } from 'globalTypes/realm/gcash.types';
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Button, Card, Col, Row, Table } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import ConfirmationModal from 'renderer/components/common/modals/confirmation';
@@ -43,7 +43,6 @@ const GcashRegisterPage = () => {
     setTotalCashOut(tCashOut);
     setTotalCharge(tCharge);
     setTotalAmount(tAmount);
-    console.log(items);
   }, [items]);
 
   const handleSetCashInCashOutModal = (
@@ -56,7 +55,6 @@ const GcashRegisterPage = () => {
   };
 
   const handleSetItem = (_type: 'cash in' | 'cash out', item: GCashItem) => {
-    console.log({ item, _type });
     if (item.key) {
       setItems(
         items.map((itm) =>

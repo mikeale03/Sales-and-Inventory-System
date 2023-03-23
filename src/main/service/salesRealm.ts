@@ -260,10 +260,13 @@ export const deleteSale = async (salesId: string) => {
         message: 'Sale id not found',
       };
     }
-    const product = productsRealm.objectForPrimaryKey<Product>(
-      PRODUCTS,
-      new Realm.BSON.ObjectID(sale.product_id)
-    );
+    const product =
+      sale.product_id === 'gcash'
+        ? null
+        : productsRealm.objectForPrimaryKey<Product>(
+            PRODUCTS,
+            new Realm.BSON.ObjectID(sale.product_id)
+          );
 
     if (product) {
       productsRealm.write(() => {
