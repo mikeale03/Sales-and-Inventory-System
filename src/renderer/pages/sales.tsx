@@ -31,6 +31,7 @@ const SalesPage = () => {
   const [userOption, setUserOption] = useState<string>('');
   const [totalAmount, setTotalAmount] = useState(0);
   const [totalQuantity, setTotalQuantity] = useState(0);
+  const [totalCash, setTotalCash] = useState(0);
   const [totalGcash, setTotalGcash] = useState(0);
   const [searchText, setSearchText] = useState('');
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
@@ -47,6 +48,7 @@ const SalesPage = () => {
     let qty = 0;
     let amount = 0;
     let gcash = 0;
+    let cash = 0;
     const response = await getSalesByTransactions(filter);
     if (response.isSuccess && response.result) {
       setSales(
@@ -54,12 +56,14 @@ const SalesPage = () => {
           qty += sale.quantity;
           amount += sale.total_price;
           gcash += sale.payment === 'gcash' ? sale.total_price : 0;
+          cash += sale.payment === 'cash' ? sale.price : 0;
           return sale;
         })
       );
       setTotalAmount(amount);
       setTotalQuantity(qty);
       setTotalGcash(gcash);
+      setTotalCash(cash);
     }
   };
 
@@ -138,20 +142,15 @@ const SalesPage = () => {
                 />
               </Col>
             </Row>
-            <Row>
-              <Col lg="3">
-                <span>Total Amount: {pesoFormat(totalAmount)}</span>
-              </Col>
-              <Col lg="3">
-                <span>Total Quantity: {totalQuantity.toLocaleString()}</span>
-              </Col>
-              <Col lg="3">
-                <span>Total Gcash: {pesoFormat(totalGcash)}</span>
-              </Col>
-              <Col lg="3">
-                <span>Total Rows: {sales.length.toLocaleString()}</span>
-              </Col>
-            </Row>
+            <div className="d-lg-flex justify-content-between">
+              <p className="m-0">Total Cash: {pesoFormat(totalCash)}</p>
+              <p className="m-0">Total Gcash: {pesoFormat(totalGcash)}</p>
+              <p className="m-0">Total Amount: {pesoFormat(totalAmount)}</p>
+              <p className="m-0">
+                Total Quantity: {totalQuantity.toLocaleString()}
+              </p>
+              <p className="m-0">Total Rows: {sales.length.toLocaleString()}</p>
+            </div>
             <hr />
             <Table responsive>
               <thead>

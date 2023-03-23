@@ -96,7 +96,8 @@ const PaymentConfirmationModal = ({
         message={
           <p className="text-center">
             Are you sure to pay with{' '}
-            <span className="text-primary fw-bold">GCash</span>
+            <span className="text-primary fw-bold">GCash</span> amounting{' '}
+            <span className="text-primary fw-bold">{pesoFormat(total)}</span>
           </p>
         }
       />

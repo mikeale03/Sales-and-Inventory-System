@@ -18,8 +18,6 @@ const GcashRegisterPage = () => {
   const [showCashInOutModal, setShowCashInOutModal] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [type, setType] = useState<'cash in' | 'cash out'>('cash in');
-  // const [cashIn, setCashIn] = useState<GCashItem[]>([]);
-  // const [cashOut, setCashOut] = useState<GCashItem[]>([]);
   const [items, setItems] = useState<GCashItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<GCashItem | undefined>();
   const [totalCashIn, setTotalCashIn] = useState(0);
@@ -28,7 +26,6 @@ const GcashRegisterPage = () => {
   const [totalAmount, setTotalAmount] = useState(0);
 
   const { user } = useContext(UserContext);
-  // const items = useMemo(() => cashIn.concat(cashOut), [cashIn, cashOut]);
 
   useEffect(() => {
     let tCashIn = 0;
@@ -97,6 +94,9 @@ const GcashRegisterPage = () => {
     const response = await createGcashTransactions(gcashTrans);
     if (response.isSuccess) {
       toast.success(response.message);
+      setItems([]);
+    } else {
+      toast.error(response.message);
     }
   };
 
@@ -232,7 +232,7 @@ const GcashRegisterPage = () => {
           </Table>
           {items.length === 0 && (
             <span className="ms-2 fw-light fst-italic text-secondary">
-              no transaction
+              no transactions
             </span>
           )}
         </Card.Body>
