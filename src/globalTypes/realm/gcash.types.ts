@@ -11,7 +11,9 @@ export type Gcash = {
   updated_by_user_id?: string;
 };
 
-export type GcashCreate = Omit<Gcash, '_id' | 'date_created'>;
+export type GcashCreate = Omit<Gcash, '_id' | 'date_created'> & {
+  charge_payment: 'cash' | 'gcash';
+};
 
 export type GcashTransFilter = {
   transactBy?: string;

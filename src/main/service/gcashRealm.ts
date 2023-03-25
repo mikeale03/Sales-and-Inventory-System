@@ -62,6 +62,18 @@ export const createGcashTransactions = async (
         date_created: new Date(),
       });
 
+      if (gcashTran.charge_payment === 'gcash') {
+        const task2 = create(realm, GCASH, {
+          type: 'gcash pay',
+          amount: gcashTran.charge,
+          charge: 0,
+          transact_by: gcashTran.transact_by,
+          transact_by_user_id: gcashTran.transact_by_user_id,
+          date_created: new Date(),
+        });
+        trans.push(task2?.toJSON() as Gcash);
+      }
+
       trans.push(task?.toJSON() as Gcash);
       task &&
         task.type !== 'gcash pay' &&
@@ -73,7 +85,7 @@ export const createGcashTransactions = async (
           quantity: 1,
           price: gcashTran.charge,
           total_price: gcashTran.charge,
-          payment: 'cash',
+          payment: gcashTran.charge_payment,
           date_created: new Date(),
           transact_by: gcashTran.transact_by,
           transact_by_user_id: gcashTran.transact_by_user_id,

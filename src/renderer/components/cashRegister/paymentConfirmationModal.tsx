@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 import { useContext, useEffect, useState, memo, useRef } from 'react';
 import { Button, Col, Modal, Row } from 'react-bootstrap';
 import { toast } from 'react-toastify';
@@ -49,39 +50,42 @@ const PaymentConfirmationModal = ({
   const handlePayment = async (isGcash: boolean) => {
     if (!user?.username) return;
 
+    const promises = [];
     const salesPromise = salesPurchase(
       Object.keys(items).map((key) => items[key]),
       user.username,
       user._id,
       isGcash ? 'gcash' : 'cash'
     );
+    promises.push(salesPromise);
 
-    const gcashPromise = createGcashTransactions([
-      {
-        type: 'gcash pay',
-        amount: total,
-        charge: 0,
-        transact_by: user.username,
-        transact_by_user_id: user._id,
-      },
-    ]);
-
-    const [res1, res2] = await Promise.all([salesPromise, gcashPromise]);
-    window.console.log({ res1, res2 });
-    if (!res1.isSuccess) {
-      toast.error(res1.message);
-      onError?.();
-      toggle(false);
-      return;
+    if (isGcash) {
+      const gcashPromise = createGcashTransactions([
+        {
+          type: 'gcash pay',
+          amount: total,
+          charge: 0,
+          charge_payment: 'cash',
+          transact_by: user.username,
+          transact_by_user_id: user._id,
+        },
+      ]);
+      promises.push(gcashPromise);
     }
 
-    if (!res2.isSuccess) {
-      toast.error(res2.message);
-      onError?.();
-      toggle(false);
-      return;
+    const responses = await Promise.all(promises);
+    window.console.log(responses);
+
+    for (const res of responses) {
+      if (!res.isSuccess) {
+        toast.error(res.message);
+        onError?.();
+        toggle(false);
+        return;
+      }
     }
-    toast.success(res1.message);
+
+    toast.success(responses[0].message);
     onSuccess();
     toggle(false);
   };
