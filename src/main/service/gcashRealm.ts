@@ -163,7 +163,7 @@ export const getGcashTransactions = async (
     const task = realm?.objects<Gcash>(GCASH);
     const query = filter && createGcashTransQuery(filter);
     const filtered = query?.query
-      ? task.filtered(query.query, ...query.params)
+      ? task.filtered(`${query.query} SORT(date_created DESC)`, ...query.params)
       : task;
     const gcashTrans = filtered.toJSON() as Gcash[];
     realm.close();
@@ -180,6 +180,47 @@ export const getGcashTransactions = async (
     return {
       isSuccess: false,
       message: 'Failed to get GCash transactions',
+      error,
+    };
+  }
+};
+
+export const deleteGcashTransaction = async (
+  id: string
+): Promise<Response<undefined>> => {
+  const realm = await openGcashRealm();
+  if (!realm)
+    return {
+      isSuccess: false,
+      message: 'Error opening Sales realm db',
+    };
+  try {
+    let gcash = realm.objectForPrimaryKey<Gcash>(
+      GCASH,
+      new Realm.BSON.ObjectID(id)
+    );
+    if (!gcash) {
+      realm.close();
+      return {
+        isSuccess: false,
+        message: 'GCash transaction not found',
+      };
+    }
+
+    realm.write(() => {
+      realm.delete(gcash);
+      gcash = null;
+    });
+    realm?.close();
+    return {
+      isSuccess: true,
+      message: 'Successfully deleted a GCash transaction',
+    };
+  } catch (error) {
+    realm?.close();
+    return {
+      isSuccess: false,
+      message: 'Failed to delete a GCash transaction',
       error,
     };
   }

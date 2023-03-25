@@ -66,7 +66,6 @@ const GcashRegisterPage = () => {
             ? {
                 ...itm,
                 ...item,
-                charge: Math.ceil(item.amount / 500) * 10,
               }
             : itm
         )
@@ -78,7 +77,6 @@ const GcashRegisterPage = () => {
     const itm = {
       ...item,
       key,
-      charge: Math.ceil(item.amount / 500) * 10,
       type: _type,
     };
     setItems([itm, ...items]);

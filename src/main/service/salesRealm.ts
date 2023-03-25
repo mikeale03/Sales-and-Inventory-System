@@ -225,7 +225,9 @@ export const getSalesByTransactions = async (filter?: {
       query.push(`date_created <= $${args.length}`);
       args.push(endDate);
     }
-    sales = args.length ? sales.filtered(query.join(' && '), ...args) : sales;
+    sales = args.length
+      ? sales.filtered(`${query.join(' && ')} SORT(date_created DESC)`, ...args)
+      : sales;
     const salesObj = sales.toJSON() as Sales[];
     realm?.close();
     return {

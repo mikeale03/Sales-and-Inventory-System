@@ -25,3 +25,11 @@ export const createGcashTransactions = async (gcashTrans: GcashCreate[]) => {
   );
   return response;
 };
+
+export const deleteGcashTransaction = async (id: string) => {
+  const response = await ipcRenderer.invoke<Response<Gcash[]>>(
+    Channels.deleteTransaction,
+    id
+  );
+  return response;
+};
