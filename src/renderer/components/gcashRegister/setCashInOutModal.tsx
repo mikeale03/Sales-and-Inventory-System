@@ -1,11 +1,13 @@
 import { useState, FormEvent } from 'react';
 import { Button, Modal, Form, FormSelect } from 'react-bootstrap';
+import { pesoFormat } from 'renderer/utils/helper';
 
 type GCashForm = {
   key?: number;
   number: string;
   amount: number | string;
   charge: number;
+  charge_payment: string;
   type: string;
 };
 
@@ -14,6 +16,7 @@ export type GCashItem = {
   number: string;
   amount: number;
   charge: number;
+  charge_payment: 'cash' | 'gcash';
   type: 'cash in' | 'cash out';
 };
 
@@ -31,6 +34,8 @@ const initItem = {
   number: '',
   amount: '',
   charge: 0,
+  charge_payment: 'cash',
+  type: '',
 };
 
 const SetCashInOutModal = ({
@@ -42,12 +47,7 @@ const SetCashInOutModal = ({
   onCancel,
   onExited,
 }: Props) => {
-  const [item, setItem] = useState<GCashForm>({
-    number: '',
-    amount: '',
-    charge: 0,
-    type,
-  });
+  const [item, setItem] = useState<GCashForm>(initItem);
 
   const handleCancel = () => {
     toggle(false);
@@ -58,9 +58,12 @@ const SetCashInOutModal = ({
     e.stopPropagation();
     e.preventDefault();
     toggle(false);
-    const { type: typ, amount } = item;
-    if (typ === 'cash in' || typ === 'cash out')
-      onConfirm(type, { ...item, amount: +amount, type: typ });
+    const { type: typ, amount, charge_payment } = item;
+    if (
+      (typ === 'cash in' || typ === 'cash out') &&
+      (charge_payment === 'cash' || charge_payment === 'gcash')
+    )
+      onConfirm(type, { ...item, amount: +amount, type: typ, charge_payment });
   };
 
   const onShow = () => {
@@ -68,6 +71,7 @@ const SetCashInOutModal = ({
   };
 
   const handleChange = (update: Partial<GCashForm>) => {
+    if (update.type === 'cash in') update.charge_payment = 'cash';
     setItem({ ...item, ...update });
   };
 
@@ -108,13 +112,14 @@ const SetCashInOutModal = ({
             </Form.Label>
             <Form.Control
               value={item.amount}
-              type="number"
+              type="amount"
               step={1}
               min={0}
               onChange={(e) => handleChange({ amount: e.target.value })}
               required
             />
           </Form.Group>
+          <p>Charge: {pesoFormat(Math.ceil(+item.amount / 500) * 10)}</p>
           {selectedItem && (
             <Form.Group className="mb-3">
               <Form.Label>Type</Form.Label>
@@ -128,6 +133,17 @@ const SetCashInOutModal = ({
               </FormSelect>
             </Form.Group>
           )}
+          <Form.Group className="mb-3">
+            <Form.Label>Charge Payment</Form.Label>
+            <FormSelect
+              value={item.charge_payment}
+              disabled={item.type === 'cash in'}
+              onChange={(e) => handleChange({ charge_payment: e.target.value })}
+            >
+              <option value="cash">Cash</option>
+              <option value="gcash">GCash</option>
+            </FormSelect>
+          </Form.Group>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCancel}>

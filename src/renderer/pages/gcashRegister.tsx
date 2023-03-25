@@ -22,7 +22,8 @@ const GcashRegisterPage = () => {
   const [selectedItem, setSelectedItem] = useState<GCashItem | undefined>();
   const [totalCashIn, setTotalCashIn] = useState(0);
   const [totalCashOut, setTotalCashOut] = useState(0);
-  const [totalCharge, setTotalCharge] = useState(0);
+  const [totalChargeCash, setTotalChargeCash] = useState(0);
+  const [totalChargeGcash, setTotalChargeGcash] = useState(0);
   const [totalAmount, setTotalAmount] = useState(0);
 
   const { user } = useContext(UserContext);
@@ -30,18 +31,21 @@ const GcashRegisterPage = () => {
   useEffect(() => {
     let tCashIn = 0;
     let tCashOut = 0;
-    let tCharge = 0;
+    let tChargeCash = 0;
+    let tChargeGcash = 0;
     let tAmount = 0;
     items.forEach((item) => {
       if (item.type === 'cash in') tCashIn += item.amount;
       else tCashOut += item.amount;
 
-      tCharge += item.charge;
+      tChargeCash += item.charge_payment === 'cash' ? item.charge : 0;
+      tChargeGcash += item.charge_payment !== 'cash' ? item.charge : 0;
       tAmount += item.amount + item.charge;
     });
     setTotalCashIn(tCashIn);
     setTotalCashOut(tCashOut);
-    setTotalCharge(tCharge);
+    setTotalChargeCash(tChargeCash);
+    setTotalChargeGcash(tChargeGcash);
     setTotalAmount(tAmount);
   }, [items]);
 
@@ -146,11 +150,21 @@ const GcashRegisterPage = () => {
               )}
               <Row>
                 <Col xs="6" className="fs-5">
-                  Total Charge:
+                  Total Charge in Cash:
                 </Col>
                 <Col xs="6">
                   <p className="m-0 mb-1 fs-5 text-end">
-                    <strong>{pesoFormat(totalCharge)}</strong>
+                    <strong>{pesoFormat(totalChargeCash)}</strong>
+                  </p>
+                </Col>
+              </Row>
+              <Row>
+                <Col xs="6" className="fs-5">
+                  Total Charge in GCash:
+                </Col>
+                <Col xs="6">
+                  <p className="m-0 mb-1 fs-5 text-end">
+                    <strong>{pesoFormat(totalChargeGcash)}</strong>
                   </p>
                 </Col>
               </Row>
@@ -204,7 +218,14 @@ const GcashRegisterPage = () => {
                 <tr key={`${item.key}`}>
                   <td>{item.number}</td>
                   <td>{pesoFormat(item.amount)}</td>
-                  <td>{pesoFormat(item.charge)}</td>
+                  <td>
+                    {pesoFormat(item.charge)}
+                    {item.charge_payment === 'gcash' ? (
+                      <span className="text-primary"> (GCash)</span>
+                    ) : (
+                      ' (Cash)'
+                    )}
+                  </td>
                   <td className="text-capitalize">{item.type}</td>
                   <td>{pesoFormat(item.amount + item.charge)}</td>
 

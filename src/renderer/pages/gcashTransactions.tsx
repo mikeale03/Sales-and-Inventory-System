@@ -24,7 +24,6 @@ const GcashTransactionsPage = () => {
 
   const handleGetGcashTransactions = async (filter?: TransFilter) => {
     const response = await getGcashTransactions(filter);
-    window.console.log(response);
     if (response.isSuccess && response.result) {
       let cashIn = 0;
       let cashOut = 0;

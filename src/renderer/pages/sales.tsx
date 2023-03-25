@@ -55,8 +55,11 @@ const SalesPage = () => {
         response.result.map((sale) => {
           qty += sale.quantity;
           amount += sale.total_price;
-          gcash += sale.payment === 'gcash' ? sale.total_price : 0;
-          cash += sale.payment === 'cash' ? sale.price : 0;
+          if (sale.payment === 'gcash') {
+            gcash += sale.total_price;
+          } else {
+            cash += sale.total_price;
+          }
           return sale;
         })
       );
@@ -64,7 +67,6 @@ const SalesPage = () => {
       setTotalQuantity(qty);
       setTotalGcash(gcash);
       setTotalCash(cash);
-      console.log(response.result);
     }
   };
 
@@ -173,7 +175,9 @@ const SalesPage = () => {
                     <td>{d.quantity.toLocaleString()}</td>
                     <td>{pesoFormat(d.price)}</td>
                     <td>{pesoFormat(d.total_price)}</td>
-                    <td>{d.payment === 'gcash' ? 'GCash' : 'Cash'}</td>
+                    <td className={d.payment === 'gcash' ? 'text-primary' : ''}>
+                      {d.payment === 'gcash' ? 'GCash' : 'Cash'}
+                    </td>
                     <td>{format(d.date_created, 'MM/dd/yyyy hh:mm aaa')}</td>
                     <td>{d.transact_by}</td>
                     {user?.role === 'admin' && (
