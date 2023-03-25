@@ -45,30 +45,35 @@ const SalesPage = () => {
     endDate?: Date;
     productName: string;
   }) => {
+    const response = await getSalesByTransactions(filter);
+    if (response.isSuccess && response.result) {
+      setSales(response.result);
+    } else {
+      toast.error(response.message);
+    }
+  };
+
+  useEffect(() => {
     let qty = 0;
     let amount = 0;
     let gcash = 0;
     let cash = 0;
-    const response = await getSalesByTransactions(filter);
-    if (response.isSuccess && response.result) {
-      setSales(
-        response.result.map((sale) => {
-          qty += sale.quantity;
-          amount += sale.total_price;
-          if (sale.payment === 'gcash') {
-            gcash += sale.total_price;
-          } else {
-            cash += sale.total_price;
-          }
-          return sale;
-        })
-      );
-      setTotalAmount(amount);
-      setTotalQuantity(qty);
-      setTotalGcash(gcash);
-      setTotalCash(cash);
-    }
-  };
+    sales.forEach((sale) => {
+      qty += sale.quantity;
+      amount += sale.total_price;
+      if (sale.payment === 'gcash') {
+        gcash += sale.total_price;
+      } else {
+        cash += sale.total_price;
+      }
+      return sale;
+    });
+
+    setTotalAmount(amount);
+    setTotalQuantity(qty);
+    setTotalGcash(gcash);
+    setTotalCash(cash);
+  }, [sales]);
 
   useEffect(() => {
     handleGetSales({

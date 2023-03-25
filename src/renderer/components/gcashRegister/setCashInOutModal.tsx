@@ -1,12 +1,17 @@
+import {
+  faPenToSquare,
+  faRotateRight,
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState, FormEvent } from 'react';
-import { Button, Modal, Form, FormSelect } from 'react-bootstrap';
+import { Button, Modal, Form, FormSelect, FormControl } from 'react-bootstrap';
 import { pesoFormat } from 'renderer/utils/helper';
 
 type GCashForm = {
   key?: number;
   number: string;
   amount: number | string;
-  charge: number;
+  charge: number | string;
   charge_payment: string;
   type: string;
 };
@@ -48,6 +53,7 @@ const SetCashInOutModal = ({
   onExited,
 }: Props) => {
   const [item, setItem] = useState<GCashForm>(initItem);
+  const [isEditCharge, setIsEditCharge] = useState(false);
 
   const handleCancel = () => {
     toggle(false);
@@ -58,12 +64,18 @@ const SetCashInOutModal = ({
     e.stopPropagation();
     e.preventDefault();
     toggle(false);
-    const { type: typ, amount, charge_payment } = item;
+    const { type: typ, amount, charge_payment, charge } = item;
     if (
       (typ === 'cash in' || typ === 'cash out') &&
       (charge_payment === 'cash' || charge_payment === 'gcash')
     )
-      onConfirm(type, { ...item, amount: +amount, type: typ, charge_payment });
+      onConfirm(type, {
+        ...item,
+        amount: +amount,
+        type: typ,
+        charge_payment,
+        charge: +charge,
+      });
   };
 
   const onShow = () => {
@@ -72,6 +84,9 @@ const SetCashInOutModal = ({
 
   const handleChange = (update: Partial<GCashForm>) => {
     if (update.type === 'cash in') update.charge_payment = 'cash';
+    if (update.amount !== undefined)
+      update.charge = Math.ceil(+update.amount / 500) * 10;
+
     setItem({ ...item, ...update });
   };
 
@@ -112,14 +127,43 @@ const SetCashInOutModal = ({
             </Form.Label>
             <Form.Control
               value={item.amount}
-              type="amount"
+              type="number"
               step={1}
               min={0}
               onChange={(e) => handleChange({ amount: e.target.value })}
               required
             />
           </Form.Group>
-          <p>Charge: {pesoFormat(Math.ceil(+item.amount / 500) * 10)}</p>
+          <p className="m-0 mb-1">
+            <span className="me-2">Charge</span>
+            <FontAwesomeIcon
+              onClick={() => setIsEditCharge(true)}
+              icon={faPenToSquare}
+              title="Edit charge"
+              className="me-2 cursor-pointer"
+            />
+            <FontAwesomeIcon
+              onClick={() => {
+                handleChange({ charge: Math.ceil(+item.amount / 500) * 10 });
+                setIsEditCharge(false);
+              }}
+              icon={faRotateRight}
+              title="Restore default"
+              className="me-2 cursor-pointer"
+            />
+          </p>
+          {!isEditCharge ? (
+            <p className="ms-1 mb-3">{pesoFormat(+item.charge)}</p>
+          ) : (
+            <FormControl
+              className="mb-3"
+              type="number"
+              value={item.charge}
+              onChange={(e) => handleChange({ charge: e.target.value })}
+              onBlur={() => setIsEditCharge(false)}
+              autoFocus
+            />
+          )}
           {selectedItem && (
             <Form.Group className="mb-3">
               <Form.Label>Type</Form.Label>

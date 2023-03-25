@@ -1,14 +1,26 @@
+import { faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import format from 'date-fns/format';
 import {
   Gcash,
   GcashTransFilter as TransFilter,
 } from 'globalTypes/realm/gcash.types';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Card, Col, FormControl, Row, Table } from 'react-bootstrap';
 import { toast } from 'react-toastify';
+import ConfirmationModal from 'renderer/components/common/modals/confirmation';
 import GcashTransFilter from 'renderer/components/gcashTransactions/gcashTransFilter';
-import { getGcashTransactions } from 'renderer/service/gcash';
+import UserContext from 'renderer/context/userContext';
+import {
+  deleteGcashTransaction,
+  getGcashTransactions,
+} from 'renderer/service/gcash';
 import { debounce, pesoFormat } from 'renderer/utils/helper';
+
+const isEdited = (item: Gcash) => {
+  if (item.type === 'gcash pay') return false;
+  return item.charge !== Math.ceil(item.amount / 500) * 10;
+};
 
 const GcashTransactionsPage = () => {
   const [transactions, setTransactions] = useState<Gcash[]>([]);
@@ -21,30 +33,34 @@ const GcashTransactionsPage = () => {
   const [totalGcashPay, setTotalGcashPay] = useState(0);
   const [totalCharge, setTotalCharge] = useState(0);
   const [endingBalance, setEndingBalance] = useState(0);
+  const [selectedTrans, setSelectedTrans] = useState<Gcash | undefined>();
+  const [confirmationModal, setConfirmationModal] = useState(false);
+  const { user } = useContext(UserContext);
 
   const handleGetGcashTransactions = async (filter?: TransFilter) => {
     const response = await getGcashTransactions(filter);
     if (response.isSuccess && response.result) {
-      let cashIn = 0;
-      let cashOut = 0;
-      let gcashPay = 0;
-      let charge = 0;
-      setTransactions(
-        response.result.map<Gcash>((item) => {
-          cashIn += item.type === 'cash in' ? item.amount : 0;
-          cashOut += item.type === 'cash out' ? item.amount : 0;
-          gcashPay += item.type === 'gcash pay' ? item.amount : 0;
-          charge += item.charge;
-          return item;
-        })
-      );
-      setTotalCashIn(cashIn);
-      setTotalCashOut(cashOut);
-      setTotalGcashPay(gcashPay);
-      setTotalCharge(charge);
-      setEndingBalance(cashIn - cashOut);
+      setTransactions(response.result);
     } else toast.error(response.message);
   };
+
+  useEffect(() => {
+    let cashIn = 0;
+    let cashOut = 0;
+    let gcashPay = 0;
+    let charge = 0;
+    transactions.forEach((item) => {
+      cashIn += item.type === 'cash in' ? item.amount : 0;
+      cashOut += item.type === 'cash out' ? item.amount : 0;
+      gcashPay += item.type === 'gcash pay' ? item.amount : 0;
+      charge += item.charge;
+    });
+    setTotalCashIn(cashIn);
+    setTotalCashOut(cashOut);
+    setTotalGcashPay(gcashPay);
+    setTotalCharge(charge);
+    setEndingBalance(cashIn - cashOut);
+  }, [transactions]);
 
   useEffect(() => {
     handleGetGcashTransactions({
@@ -69,8 +85,36 @@ const GcashTransactionsPage = () => {
     setSearch(e.target.value);
   }, 300);
 
+  const handleShowConfirmationModal = (trans: Gcash) => {
+    setSelectedTrans(trans);
+    setConfirmationModal(true);
+  };
+
+  const handleDeleteTrans = async () => {
+    if (!selectedTrans) return;
+    const response = await deleteGcashTransaction(selectedTrans._id);
+    if (!response?.isSuccess) {
+      toast.error(response.message);
+      return;
+    }
+    setTransactions(
+      transactions.filter((item) => item._id !== selectedTrans._id)
+    );
+  };
+
   return (
     <div>
+      <ConfirmationModal
+        show={confirmationModal}
+        toggle={setConfirmationModal}
+        message={
+          <p className="text-center">
+            Are you sure to delete GCash Transaction?
+          </p>
+        }
+        onConfirm={handleDeleteTrans}
+      />
+
       <h3>GCash Transactions</h3>
       <GcashTransFilter onChange={onFilterChange} />
       <Card>
@@ -104,6 +148,7 @@ const GcashTransactionsPage = () => {
                 <th>Number</th>
                 <th>Date</th>
                 <th>Transact By</th>
+                <th> </th>
               </tr>
             </thead>
             <tbody>
@@ -111,10 +156,23 @@ const GcashTransactionsPage = () => {
                 <tr key={`${item._id}`}>
                   <td className="text-capitalize">{item.type}</td>
                   <td>{pesoFormat(item.amount)}</td>
-                  <td>{pesoFormat(item.charge)}</td>
+                  <td className={isEdited(item) ? 'text-danger' : ''}>
+                    {pesoFormat(item.charge)}
+                  </td>
                   <td>{item.number}</td>
                   <td>{format(item.date_created, 'MM/dd/yyyy hh:mm aaa')}</td>
                   <td>{item.transact_by}</td>
+                  {user?.role === 'admin' && (
+                    <td>
+                      <FontAwesomeIcon
+                        onClick={() => handleShowConfirmationModal(item)}
+                        icon={faTrashCan}
+                        title="Delete"
+                        size="xl"
+                        className="me-2 cursor-pointer"
+                      />
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
