@@ -63,12 +63,13 @@ const GcashTransactionsPage = () => {
   }, [transactions]);
 
   useEffect(() => {
-    handleGetGcashTransactions({
-      transactBy: userOption,
-      number: search,
-      startDate,
-      endDate,
-    });
+    userOption &&
+      handleGetGcashTransactions({
+        transactBy: userOption === 'all' ? undefined : userOption,
+        number: search,
+        startDate,
+        endDate,
+      });
   }, [userOption, startDate, endDate, search]);
 
   const onFilterChange = (filter: {

@@ -76,12 +76,13 @@ const SalesPage = () => {
   }, [sales]);
 
   useEffect(() => {
-    handleGetSales({
-      transactByUserId: userOption || undefined,
-      startDate,
-      endDate,
-      productName: searchText,
-    });
+    if (userOption)
+      handleGetSales({
+        transactByUserId: userOption === 'all' ? undefined : userOption,
+        startDate,
+        endDate,
+        productName: searchText,
+      });
   }, [userOption, startDate, endDate, searchText]);
 
   const handlePrint = useReactToPrint({

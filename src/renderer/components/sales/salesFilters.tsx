@@ -18,7 +18,7 @@ const SalesFilter = ({ onChange }: Props) => {
   const selectedDateRef = useRef<Date>(new Date());
   const selectedPeriodRef = useRef('Daily');
   const isDaily = selectedPeriodRef.current === 'Daily';
-  const [userOption, setUserOption] = useState<string>('');
+  const [userOption, setUserOption] = useState<string | undefined>();
   const [users, setUsers] = useState<User[]>([]);
   const [startDate, setStartDate] = useState(
     new Date(new Date().setHours(0, 0, 0, 0))
@@ -41,11 +41,12 @@ const SalesFilter = ({ onChange }: Props) => {
   }, [user]);
 
   useEffect(() => {
-    onChange({
-      userOption,
-      startDate,
-      endDate,
-    });
+    userOption &&
+      onChange({
+        userOption,
+        startDate,
+        endDate,
+      });
   }, [userOption, startDate, endDate, onChange]);
 
   const setDateRange = (period: string, selectedDate: Date) => {
@@ -99,7 +100,7 @@ const SalesFilter = ({ onChange }: Props) => {
           value={userOption}
           onChange={(e) => setUserOption(e.target.value)}
         >
-          <option value="">All</option>
+          <option value="all">All</option>
           {users.map((opt) => (
             <option key={opt._id} value={opt._id}>
               {opt.username}

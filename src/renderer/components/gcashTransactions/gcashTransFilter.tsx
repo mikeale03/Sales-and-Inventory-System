@@ -41,11 +41,12 @@ const GcashTransFilter = ({ onChange }: Props) => {
   }, [user]);
 
   useEffect(() => {
-    onChange({
-      userOption,
-      startDate,
-      endDate,
-    });
+    userOption &&
+      onChange({
+        userOption,
+        startDate,
+        endDate,
+      });
   }, [userOption, startDate, endDate, onChange]);
 
   const setDateRange = (period: string, selectedDate: Date) => {
@@ -99,7 +100,7 @@ const GcashTransFilter = ({ onChange }: Props) => {
           value={userOption}
           onChange={(e) => setUserOption(e.target.value)}
         >
-          <option value="">All</option>
+          <option value="all">All</option>
           {users.map((opt) => (
             <option key={opt._id} value={opt._id}>
               {opt.username}

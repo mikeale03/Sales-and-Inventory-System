@@ -18,58 +18,66 @@ const Sidebar = () => {
       style={{ width: '120px', left: 0, top: 0, paddingTop: '50px' }}
     >
       <ul className="nav flex-column mt-3">
-        <NavLink to="cash-register">
-          <li
-            className="nav-link cursor-pointer text-center rounded bg-white mx-3 mb-3 py-3 px-0 shadow-sm"
-            style={{ fontSize: '0.8em' }}
-          >
-            <FontAwesomeIcon icon={faCashRegister} size="xl" />
-            <p className="m-0 text-center">Cash Register</p>
-          </li>
+        <NavLink to="cash-register" className="mb-3">
+          {({ isActive }) => (
+            <li
+              className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 shadow-sm transition-all
+              ${isActive && 'active'}`}
+              style={{ fontSize: '0.8em' }}
+            >
+              <FontAwesomeIcon icon={faCashRegister} size="xl" />
+              <p className="m-0 text-center">Cash Register</p>
+            </li>
+          )}
         </NavLink>
-        <NavLink to="gcash-register">
-          <li
-            className="nav-link cursor-pointer text-center rounded bg-white mx-3 mb-3 py-3 px-0 shadow-sm"
-            style={{ fontSize: '0.8em' }}
-          >
-            <FontAwesomeIcon icon={faMobileRetro} size="xl" />
-            <p className="m-0 text-center">GCash Register</p>
-          </li>
+        <NavLink to="gcash-register" className="mb-3">
+          {({ isActive }) => (
+            <li
+              className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 shadow-sm transition-all
+            ${isActive && 'active'}`}
+              style={{ fontSize: '0.8em' }}
+            >
+              <FontAwesomeIcon icon={faMobileRetro} size="xl" />
+              <p className="m-0 text-center">GCash Register</p>
+            </li>
+          )}
         </NavLink>
-        <NavLink to="products">
-          <li
-            className="nav-link cursor-pointer text-center rounded bg-white mx-3 mb-3 py-3 px-0 shadow-sm"
-            style={{ fontSize: '0.8em' }}
-          >
-            <FontAwesomeIcon icon={faCartShopping} size="xl" />
-            <p className="m-0 text-center">Products</p>
-          </li>
+        <NavLink to="products" className="mb-3">
+          {({ isActive }) => (
+            <li
+              className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 shadow-sm transition-all
+            ${isActive && 'active'}`}
+              style={{ fontSize: '0.8em' }}
+            >
+              <FontAwesomeIcon icon={faCartShopping} size="xl" />
+              <p className="m-0 text-center">Products</p>
+            </li>
+          )}
         </NavLink>
-        <NavLink to="sales">
-          <li
-            className="nav-link cursor-pointer text-center rounded bg-white mx-3 mb-3 py-3 px-0 shadow-sm"
-            style={{ fontSize: '0.8em' }}
-          >
-            <FontAwesomeIcon icon={faPesoSign} size="xl" />
-            <p className="m-0 text-center">Sales</p>
-          </li>
+        <NavLink to="sales" className="mb-3">
+          {({ isActive }) => (
+            <li
+              className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 shadow-sm transition-all
+            ${isActive && 'active'}`}
+              style={{ fontSize: '0.8em' }}
+            >
+              <FontAwesomeIcon icon={faPesoSign} size="xl" />
+              <p className="m-0 text-center">Sales</p>
+            </li>
+          )}
         </NavLink>
         <NavLink to="gcash-transactions">
-          <li
-            className="nav-link cursor-pointer text-center rounded bg-white mx-3 mb-3 py-3 px-0 shadow-sm"
-            style={{ fontSize: '0.8em' }}
-          >
-            <FontAwesomeIcon icon={faMoneyBillTransfer} size="xl" />
-            <p className="m-0 text-center">GCash Trans.</p>
-          </li>
+          {({ isActive }) => (
+            <li
+              className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 shadow-sm transition-all
+            ${isActive && 'active'}`}
+              style={{ fontSize: '0.8em' }}
+            >
+              <FontAwesomeIcon icon={faMoneyBillTransfer} size="xl" />
+              <p className="m-0 text-center">GCash Trans.</p>
+            </li>
+          )}
         </NavLink>
-        {/* <NavLink to="reporting">
-          <li>
-            <span className="nav-link cursor-pointer">
-              <i className="fa-solid fa-money-bill-wave" /> Reporting
-            </span>
-          </li>
-        </NavLink> */}
       </ul>
       {user?.role === 'admin' && (
         <div className="container bg-white position-absolute bottom-0 start-0 p-2">

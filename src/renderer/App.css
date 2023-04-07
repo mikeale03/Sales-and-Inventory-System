@@ -6,6 +6,15 @@ a {
   text-decoration: none;
 }
 
+.nav-link.active {
+  box-shadow: 5px 5px 5px gray !important;
+  outline: thin solid gray;
+}
+
+.transition-all {
+  transition: all 0.3s !important;
+}
+
 .cursor-pointer {
   cursor: pointer;
 }
