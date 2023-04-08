@@ -1,33 +1,18 @@
 import { User } from 'globalTypes/realm/user.types';
-import { useContext, useEffect, useState, useRef, ChangeEvent } from 'react';
+import { useContext, useEffect, useState, ChangeEvent } from 'react';
 import { Col, FormLabel, FormSelect, Row } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
+import FilterContext from 'renderer/context/filterContext';
 import UserContext from 'renderer/context/userContext';
 import { getUsers } from 'renderer/service/users';
 
-type Props = {
-  onChange: (filter: {
-    userOption: string;
-    startDate: Date;
-    endDate: Date;
-  }) => void;
-};
-
-const SalesFilter = ({ onChange }: Props) => {
+const SalesFilter = () => {
   const { user } = useContext(UserContext);
-  const selectedDateRef = useRef<Date>(new Date());
-  const selectedPeriodRef = useRef('Daily');
-  const isDaily = selectedPeriodRef.current === 'Daily';
-  const [userOption, setUserOption] = useState<string | undefined>();
+  const { salesFilter, setSalesFilter } = useContext(FilterContext);
+  const isDaily = salesFilter.selectedPeriod === 'Daily';
   const [users, setUsers] = useState<User[]>([]);
-  const [startDate, setStartDate] = useState(
-    new Date(new Date().setHours(0, 0, 0, 0))
-  );
-  const [endDate, setEndDate] = useState(
-    new Date(new Date().setHours(23, 59, 59, 999))
-  );
-  const [minDate, setMinDate] = useState<Date>(startDate);
-  const [maxDate, setMaxDate] = useState<Date>(endDate);
+  const [minDate, setMinDate] = useState<Date>(salesFilter.startDate);
+  const [maxDate, setMaxDate] = useState<Date>(salesFilter.endDate);
 
   useEffect(() => {
     if (!user) return;
@@ -37,17 +22,15 @@ const SalesFilter = ({ onChange }: Props) => {
         setUsers(response.result);
       }
     })();
-    setUserOption(user._id);
-  }, [user]);
-
-  useEffect(() => {
-    userOption &&
-      onChange({
-        userOption,
-        startDate,
-        endDate,
+    if (!salesFilter.userOption) {
+      setSalesFilter({
+        ...salesFilter,
+        userOption: user._id,
       });
-  }, [userOption, startDate, endDate, onChange]);
+      setMinDate(salesFilter.startDate);
+      setMaxDate(salesFilter.endDate);
+    }
+  }, [user, salesFilter, setSalesFilter]);
 
   const setDateRange = (period: string, selectedDate: Date) => {
     let sDate: Date;
@@ -75,30 +58,37 @@ const SalesFilter = ({ onChange }: Props) => {
         999
       );
     }
-    setStartDate(sDate);
-    setEndDate(eDate);
     setMinDate(sDate);
     setMaxDate(eDate);
+    setSalesFilter({
+      ...salesFilter,
+      selectedDate,
+      selectedPeriod: period,
+      startDate: sDate,
+      endDate: eDate,
+    });
   };
 
   const handlePeriodSelect = (e: ChangeEvent<HTMLSelectElement>) => {
+    if (!salesFilter) return;
     const { value } = e.target;
-    selectedPeriodRef.current = value;
-    setDateRange(value, selectedDateRef.current);
+    setDateRange(value, salesFilter.selectedDate);
   };
 
   const handleDateSelect = (date: Date | null) => {
     if (!date) return;
-    selectedDateRef.current = date;
-    setDateRange(selectedPeriodRef.current, date);
+    setDateRange(salesFilter.selectedPeriod, date);
   };
+
   return (
     <Row>
       <Col md="2" className="mb-3">
         <FormLabel>User</FormLabel>
         <FormSelect
-          value={userOption}
-          onChange={(e) => setUserOption(e.target.value)}
+          value={salesFilter.userOption}
+          onChange={(e) =>
+            setSalesFilter({ ...salesFilter, userOption: e.target.value })
+          }
         >
           <option value="all">All</option>
           {users.map((opt) => (
@@ -110,7 +100,10 @@ const SalesFilter = ({ onChange }: Props) => {
       </Col>
       <Col md="2" className="mb-3">
         <FormLabel>Period</FormLabel>
-        <FormSelect onChange={handlePeriodSelect}>
+        <FormSelect
+          value={salesFilter.selectedPeriod}
+          onChange={handlePeriodSelect}
+        >
           <option>Daily</option>
           <option>Monthly</option>
         </FormSelect>
@@ -119,22 +112,27 @@ const SalesFilter = ({ onChange }: Props) => {
         <FormLabel>Select {isDaily ? 'Date' : 'Month'}</FormLabel>
         <DatePicker
           className="form-control"
-          selected={selectedDateRef.current}
+          selected={salesFilter?.selectedDate}
           onChange={handleDateSelect}
           dateFormat={
-            selectedPeriodRef.current === 'Daily' ? 'MM/dd/yyyy' : 'MM/yyyy'
+            salesFilter?.selectedPeriod === 'Daily' ? 'MM/dd/yyyy' : 'MM/yyyy'
           }
-          showMonthYearPicker={selectedPeriodRef.current === 'Monthly'}
+          showMonthYearPicker={salesFilter?.selectedPeriod === 'Monthly'}
+          todayButton="Today"
         />
       </Col>
       <Col md="3" className="mb-3">
         <FormLabel>Start {isDaily ? 'Time' : 'Date'}</FormLabel>
         <DatePicker
           className="form-control"
-          selected={startDate}
-          onChange={(date) => date && setStartDate(date)}
+          selected={salesFilter?.startDate}
+          onChange={(date) =>
+            date &&
+            salesFilter &&
+            setSalesFilter({ ...salesFilter, startDate: date })
+          }
           minDate={minDate}
-          maxDate={endDate}
+          maxDate={salesFilter?.endDate}
           showTimeSelect
           showTimeSelectOnly={isDaily}
           timeIntervals={30}
@@ -146,9 +144,13 @@ const SalesFilter = ({ onChange }: Props) => {
         <FormLabel>End {isDaily ? 'Time' : 'Date'}</FormLabel>
         <DatePicker
           className="form-control"
-          selected={endDate}
-          onChange={(date) => date && setEndDate(date)}
-          minDate={startDate}
+          selected={salesFilter?.endDate}
+          onChange={(date) =>
+            date &&
+            salesFilter &&
+            setSalesFilter({ ...salesFilter, endDate: date })
+          }
+          minDate={salesFilter?.startDate}
           maxDate={maxDate}
           showTimeSelect
           showTimeSelectOnly={isDaily}
@@ -157,7 +159,7 @@ const SalesFilter = ({ onChange }: Props) => {
           dateFormat={isDaily ? 'h:mm aa' : 'MM/dd/yyyy h:mm aa'}
           injectTimes={[
             new Date(
-              new Date(selectedDateRef.current).setHours(23, 59, 59, 999)
+              new Date(salesFilter.selectedDate).setHours(23, 59, 59, 999)
             ),
           ]}
         />

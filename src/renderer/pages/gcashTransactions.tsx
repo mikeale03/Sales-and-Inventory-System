@@ -10,6 +10,7 @@ import { Card, Col, FormControl, Row, Table } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import ConfirmationModal from 'renderer/components/common/modals/confirmation';
 import GcashTransFilter from 'renderer/components/gcashTransactions/gcashTransFilter';
+import FilterContext from 'renderer/context/filterContext';
 import UserContext from 'renderer/context/userContext';
 import {
   deleteGcashTransaction,
@@ -24,9 +25,6 @@ const isEdited = (item: Gcash) => {
 
 const GcashTransactionsPage = () => {
   const [transactions, setTransactions] = useState<Gcash[]>([]);
-  const [startDate, setStartDate] = useState<Date | undefined>();
-  const [endDate, setEndDate] = useState<Date | undefined>();
-  const [userOption, setUserOption] = useState<string>('');
   const [search, setSearch] = useState('');
   const [totalCashIn, setTotalCashIn] = useState(0);
   const [totalCashOut, setTotalCashOut] = useState(0);
@@ -36,6 +34,9 @@ const GcashTransactionsPage = () => {
   const [selectedTrans, setSelectedTrans] = useState<Gcash | undefined>();
   const [confirmationModal, setConfirmationModal] = useState(false);
   const { user } = useContext(UserContext);
+  const {
+    gcashTransFilter: { userOption, startDate, endDate },
+  } = useContext(FilterContext);
 
   const handleGetGcashTransactions = async (filter?: TransFilter) => {
     const response = await getGcashTransactions(filter);
@@ -72,16 +73,6 @@ const GcashTransactionsPage = () => {
       });
   }, [userOption, startDate, endDate, search]);
 
-  const onFilterChange = (filter: {
-    userOption: string;
-    startDate: Date;
-    endDate: Date;
-  }) => {
-    setStartDate(filter.startDate);
-    setEndDate(filter.endDate);
-    setUserOption(filter.userOption);
-  };
-
   const handleSearch = debounce((e) => {
     setSearch(e.target.value);
   }, 300);
@@ -117,7 +108,7 @@ const GcashTransactionsPage = () => {
       />
 
       <h3>GCash Transactions</h3>
-      <GcashTransFilter onChange={onFilterChange} />
+      <GcashTransFilter />
       <Card>
         <Card.Body>
           <Row className="mb-3">

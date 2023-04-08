@@ -1,5 +1,5 @@
 import { Sales } from 'main/service/salesRealm';
-import { useEffect, useState, useRef, useContext, useCallback } from 'react';
+import { useEffect, useState, useRef, useContext } from 'react';
 import {
   Card,
   Table,
@@ -19,16 +19,10 @@ import { faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import ConfirmationModal from 'renderer/components/common/modals/confirmation';
 import { toast } from 'react-toastify';
 import SalesFilter from 'renderer/components/sales/salesFilters';
+import FilterContext from 'renderer/context/filterContext';
 
 const SalesPage = () => {
   const [sales, setSales] = useState<Sales[]>([]);
-  const [startDate, setStartDate] = useState(
-    new Date(new Date().setHours(0, 0, 0, 0))
-  );
-  const [endDate, setEndDate] = useState(
-    new Date(new Date().setHours(23, 59, 59, 999))
-  );
-  const [userOption, setUserOption] = useState<string>('');
   const [totalAmount, setTotalAmount] = useState(0);
   const [totalQuantity, setTotalQuantity] = useState(0);
   const [totalCash, setTotalCash] = useState(0);
@@ -37,6 +31,9 @@ const SalesPage = () => {
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [selectedSale, setSelectedSale] = useState<Sales | undefined>();
   const { user } = useContext(UserContext);
+  const {
+    salesFilter: { userOption, startDate, endDate },
+  } = useContext(FilterContext);
   const printRef = useRef<HTMLDivElement | null>(null);
 
   const handleGetSales = async (filter?: {
@@ -102,16 +99,6 @@ const SalesPage = () => {
     setShowConfirmationModal(true);
   };
 
-  const onFilterChange = (filter: {
-    userOption: string;
-    startDate: Date;
-    endDate: Date;
-  }) => {
-    setStartDate(filter.startDate);
-    setEndDate(filter.endDate);
-    setUserOption(filter.userOption);
-  };
-
   const handleSearch = debounce((e) => {
     setSearchText(e.target.value);
   }, 300);
@@ -127,7 +114,7 @@ const SalesPage = () => {
 
       <h3>Sales</h3>
 
-      <SalesFilter onChange={useCallback(onFilterChange, [])} />
+      <SalesFilter />
 
       <div ref={printRef}>
         <Card className="d-flex">
