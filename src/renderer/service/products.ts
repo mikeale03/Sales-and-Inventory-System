@@ -68,7 +68,6 @@ export const deleteProduct = async (productId: string) => {
     Channels.delete,
     productId
   );
-  console.log(response);
   return response;
 };
 

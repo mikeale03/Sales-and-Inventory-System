@@ -74,7 +74,6 @@ const PaymentConfirmationModal = ({
     }
 
     const responses = await Promise.all(promises);
-    window.console.log(responses);
 
     for (const res of responses) {
       if (!res.isSuccess) {

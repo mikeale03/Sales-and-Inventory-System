@@ -79,7 +79,6 @@ describe('ProductsRealm', () => {
           quantity: 2,
         }))
       );
-      console.log(purchaseResponse);
     }
     expect(purchaseResponse?.isSuccess).toBe(true);
 

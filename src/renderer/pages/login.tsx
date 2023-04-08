@@ -39,7 +39,6 @@ const LoginPage = () => {
       if (response.isSuccess && !response.result) {
         setCanCreateAdmin(true);
       }
-      console.log(response);
     })();
   }, []);
 
@@ -51,7 +50,7 @@ const LoginPage = () => {
       toast.error(response.message);
     } else {
       response.result && setUser?.(response.result);
-      navigate('Home');
+      navigate('home/cash-register');
     }
   };
 

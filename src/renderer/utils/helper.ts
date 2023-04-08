@@ -1,3 +1,5 @@
+import { KeyboardEvent } from 'react';
+
 export const pesoFormat = (amount: number) => {
   const formatter = new Intl.NumberFormat('en-us', {
     style: 'currency',
@@ -36,4 +38,22 @@ export const getUpdatedProps = <T extends object>(obj: T, updatedObj: T) => {
       newObject[key as newObjKey] = updatedObj[key as Key];
     }
   });
+};
+
+export const barcodeScan = (cb: (barcode: string) => void) => {
+  let barcode = '';
+  let interval: ReturnType<typeof setInterval> | undefined;
+
+  return (event: KeyboardEvent<HTMLDivElement>) => {
+    if (interval) clearInterval(interval);
+    if (event.code === 'Enter') {
+      if (barcode.length > 2) cb(barcode);
+      barcode = '';
+      return;
+    }
+    if (event.key !== 'Shift') barcode += event.key;
+    interval = setInterval(() => {
+      barcode = '';
+    }, 20);
+  };
 };

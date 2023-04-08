@@ -43,7 +43,6 @@ export const getSalesByTransactions = async (filter?: {
   endDate?: Date;
   productName?: string;
 }) => {
-  console.log(filter);
   const response = await ipcRenderer.invoke<Response<Sales[]>>(
     Channels.getByTransactions,
     filter

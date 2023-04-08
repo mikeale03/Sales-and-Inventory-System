@@ -31,7 +31,6 @@ const ProductsPage = () => {
       sortProp: 'name',
       sortAs: 'asc',
     });
-    console.log(response);
     if (response.isSuccess) {
       const data = response.result;
       setProducts(data ?? []);
@@ -39,7 +38,6 @@ const ProductsPage = () => {
   };
 
   const handleUpdateProduct = async (product: Product) => {
-    console.log(product);
     setProducts(
       products.map((prod) => (prod._id === product._id ? product : prod))
     );

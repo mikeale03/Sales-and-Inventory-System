@@ -54,7 +54,6 @@ export default function App() {
           <Routes>
             <Route path="/" element={<LoginPage />} />
             <Route path="/home" element={<HomePage />}>
-              <Route index element={<CashRegisterPage />} />
               <Route path="cash-register" element={<CashRegisterPage />} />
               <Route path="gcash-register" element={<GcashRegisterPage />} />
               <Route path="products" element={<ProductsPage />} />

@@ -3,7 +3,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Product } from 'main/service/productsRealm';
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { Card, Col, Row, Table } from 'react-bootstrap';
+import { useOutletContext } from 'react-router-dom';
 import AsyncSelect from 'react-select/async';
+import { toast } from 'react-toastify';
 import {
   GroupBase,
   OptionsOrGroups,
@@ -14,6 +16,7 @@ import PaymentConfirmationModal from 'renderer/components/cashRegister/paymentCo
 import QuantityInputModal from 'renderer/components/cashRegister/quantityInputModal';
 import { getProducts } from 'renderer/service/products';
 import { debounce, pesoFormat } from 'renderer/utils/helper';
+import { BarcodeContext } from './home';
 
 type Opt = {
   value: string;
@@ -44,12 +47,12 @@ function CashRegisterPage() {
   >();
   const productSelectRef = useRef<SelectInstance<Opt> | null>(null);
   const itemKeys = useMemo(() => Object.keys(items), [items]);
+  const { barcode, setBarcode } = useOutletContext<BarcodeContext>();
 
   const handleGetOptions = async (
     searchText: string
   ): Promise<OptionsOrGroups<Opt, GroupBase<Opt>>> => {
     const response = await handleGetProducts(searchText);
-    window.console.log(response);
     if (response?.isSuccess && response.result) {
       const data = response.result;
       const opts: Opt[] = data.map((item) => ({
@@ -111,15 +114,34 @@ function CashRegisterPage() {
     productSelectRef.current?.focus();
   }, [items]);
 
+  useEffect(() => {
+    (async () => {
+      if (barcode) {
+        const response = await handleGetProducts(barcode);
+        if (response?.isSuccess && response.result) {
+          if (!response.result.length) {
+            toast.error('Barcode not found!');
+            return;
+          }
+          setShowInputQuantityModal(true);
+          setSelectedProduct(response.result[0]);
+          setValue(null);
+          setBarcode('');
+        } else {
+          toast.error(response.message);
+        }
+      }
+    })();
+  }, [barcode, setBarcode]);
+
   return (
-    <div>
+    <>
       <QuantityInputModal
         show={showInputQuantityModal}
         toggle={setShowInputQuantityModal}
         product={selectedProduct}
         onConfirm={handleConfirmQuantity}
       />
-
       <PaymentConfirmationModal
         show={showPaymentConfirmationModal}
         toggle={setShowPaymentConfirmationModal}
@@ -135,79 +157,80 @@ function CashRegisterPage() {
           setTimeout(() => productSelectRef.current?.focus(), 50);
         }, [])}
       />
+      <div>
+        <h3>Cash Register</h3>
 
-      <h3>Cash Register</h3>
-
-      <AsyncSelect
-        ref={productSelectRef}
-        className="flex-grow-1"
-        value={value}
-        placeholder="Enter product name or barcode"
-        onChange={handleSelect}
-        loadOptions={handleGetOptions}
-        defaultOptions={defaultOptions ?? true}
-        isSearchable
-        autoFocus
-      />
-      <Row className="my-3">
-        <Col lg="8" style={{ position: 'relative' }}>
-          <Card style={{ minHeight: '100%' }}>
-            <Card.Body>
-              <Table size="sm">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th className="text-center">Quantity</th>
-                    <th className="text-center">Price</th>
-                    <th className="text-center">Total Price</th>
-                    <th> </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {itemKeys.map((key) => (
-                    <tr key={items[key]._id}>
-                      <td className="align-middle">{items[key].name}</td>
-                      <td className="align-middle text-center">
-                        {items[key].quantity}
-                      </td>
-                      <td className="align-middle text-center">
-                        {pesoFormat(items[key].price)}
-                      </td>
-                      <td className="align-middle text-center">
-                        {pesoFormat(items[key].totalPrice)}
-                      </td>
-                      <td className="align-middle text-center">
-                        <FontAwesomeIcon
-                          title="remove"
-                          icon={faXmark}
-                          className="btn"
-                          onClick={() => handleDeleteItem(key)}
-                        />
-                      </td>
+        <AsyncSelect
+          ref={productSelectRef}
+          className="flex-grow-1"
+          value={value}
+          placeholder="Enter product name or barcode"
+          onChange={handleSelect}
+          loadOptions={handleGetOptions}
+          defaultOptions={defaultOptions ?? true}
+          isSearchable
+          autoFocus
+        />
+        <Row className="my-3">
+          <Col lg="8" style={{ position: 'relative' }}>
+            <Card style={{ minHeight: '100%' }}>
+              <Card.Body>
+                <Table size="sm">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th className="text-center">Quantity</th>
+                      <th className="text-center">Price</th>
+                      <th className="text-center">Total Price</th>
+                      <th> </th>
                     </tr>
-                  ))}
-                </tbody>
-              </Table>
-              {itemKeys.length === 0 && (
-                <span className="ms-2 fw-light fst-italic text-secondary">
-                  no items
-                </span>
-              )}
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col lg="4">
-          <PaymentCard
-            items={items}
-            paymentAmount={paymentAmount}
-            setPaymentAmount={setPaymentAmount}
-            onPayment={useCallback(() => {
-              setShowPaymentConfirmationModal(true);
-            }, [])}
-          />
-        </Col>
-      </Row>
-    </div>
+                  </thead>
+                  <tbody>
+                    {itemKeys.map((key) => (
+                      <tr key={items[key]._id}>
+                        <td className="align-middle">{items[key].name}</td>
+                        <td className="align-middle text-center">
+                          {items[key].quantity}
+                        </td>
+                        <td className="align-middle text-center">
+                          {pesoFormat(items[key].price)}
+                        </td>
+                        <td className="align-middle text-center">
+                          {pesoFormat(items[key].totalPrice)}
+                        </td>
+                        <td className="align-middle text-center">
+                          <FontAwesomeIcon
+                            title="remove"
+                            icon={faXmark}
+                            className="btn"
+                            onClick={() => handleDeleteItem(key)}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+                {itemKeys.length === 0 && (
+                  <span className="ms-2 fw-light fst-italic text-secondary">
+                    no items
+                  </span>
+                )}
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col lg="4">
+            <PaymentCard
+              items={items}
+              paymentAmount={paymentAmount}
+              setPaymentAmount={setPaymentAmount}
+              onPayment={useCallback(() => {
+                setShowPaymentConfirmationModal(true);
+              }, [])}
+            />
+          </Col>
+        </Row>
+      </div>
+    </>
   );
 }
 
