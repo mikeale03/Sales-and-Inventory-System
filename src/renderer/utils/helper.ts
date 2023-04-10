@@ -40,14 +40,16 @@ export const getUpdatedProps = <T extends object>(obj: T, updatedObj: T) => {
   });
 };
 
-export const barcodeScan = (cb: (barcode: string) => void) => {
+export const barcodeScan = (
+  cb: (barcode: string, event?: KeyboardEvent<HTMLDivElement>) => void
+) => {
   let barcode = '';
   let interval: ReturnType<typeof setInterval> | undefined;
 
   return (event: KeyboardEvent<HTMLDivElement>) => {
     if (interval) clearInterval(interval);
     if (event.code === 'Enter') {
-      if (barcode.length > 2) cb(barcode);
+      if (barcode.length > 2) cb(barcode, event);
       barcode = '';
       return;
     }
@@ -56,4 +58,26 @@ export const barcodeScan = (cb: (barcode: string) => void) => {
       barcode = '';
     }, 20);
   };
+};
+
+export const debounceText = (
+  func: (text: string) => string | void,
+  milliseconds = 20
+) => {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  let t = '';
+  return (text: string) =>
+    new Promise<string | void>((resolve) => {
+      const onComplete = () => {
+        timer = null;
+        resolve(func(t));
+      };
+      t = text;
+      if (timer) {
+        clearTimeout(timer);
+        t = '';
+      }
+
+      timer = setTimeout(onComplete, milliseconds);
+    });
 };

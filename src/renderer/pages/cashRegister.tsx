@@ -16,6 +16,7 @@ import PaymentConfirmationModal from 'renderer/components/cashRegister/paymentCo
 import QuantityInputModal from 'renderer/components/cashRegister/quantityInputModal';
 import { getProducts } from 'renderer/service/products';
 import { debounce, pesoFormat } from 'renderer/utils/helper';
+import ProductsSelect from 'renderer/components/cashRegister/productsSelect';
 import { BarcodeContext } from './home';
 
 type Opt = {
@@ -39,6 +40,7 @@ function CashRegisterPage() {
   const [selectedProduct, setSelectedProduct] = useState<Product>();
   const [paymentAmount, setPaymentAmount] = useState('');
   const [value, setValue] = useState<Opt | null>(null);
+  const [selectInputValue, setSelectInputValue] = useState('');
   const [items, setItems] = useState<
     Record<string, Product & { totalPrice: number }>
   >({});
@@ -67,41 +69,58 @@ function CashRegisterPage() {
     return [];
   };
 
-  const handleSelect = (option: Opt | null) => {
-    const product = option?.product && { ...option.product };
+  // const handleSelect = (option: Opt | null) => {
+  //   const product = option?.product && { ...option.product };
 
+  //   if (product) {
+  //     const itemQuantity = items[product._id]?.quantity ?? 0;
+  //     product.quantity -= itemQuantity;
+  //   }
+  //   setShowInputQuantityModal(true);
+  //   setSelectedProduct(product);
+  //   setValue(null);
+  // };
+
+  const handleSelect = (product: Product) => {
+    // const product = option?.product && { ...option.product };
+    if (barcode) return;
     if (product) {
       const itemQuantity = items[product._id]?.quantity ?? 0;
       product.quantity -= itemQuantity;
     }
     setShowInputQuantityModal(true);
     setSelectedProduct(product);
-    setValue(null);
+    // setValue(null);
   };
 
-  const handleConfirmQuantity = useCallback(
-    async (quantity: string | number): Promise<undefined | void> => {
-      if (!selectedProduct) return;
-
-      if (items[selectedProduct._id]) {
-        const itemQuantity = items[selectedProduct._id].quantity;
-        const { price } = items[selectedProduct._id];
+  const handleSetItems = useMemo(
+    () => (item: Product, quantity: number) => {
+      if (items[item._id]) {
+        const itemQuantity = items[item._id].quantity;
+        const { price } = items[item._id];
         setItems({
           ...items,
-          [selectedProduct._id]: {
-            ...selectedProduct,
-            quantity: itemQuantity + Number(quantity),
-            totalPrice: price * (itemQuantity + Number(quantity)),
+          [item._id]: {
+            ...item,
+            quantity: itemQuantity + quantity,
+            totalPrice: price * (itemQuantity + quantity),
           },
         });
         return;
       }
-      const product = { ...selectedProduct, totalPrice: selectedProduct.price };
-      product.quantity = +quantity;
-      product.totalPrice = product.price * +quantity;
-      setItems({ ...items, [selectedProduct._id]: product });
+      const product = { ...item, totalPrice: item.price * quantity };
+      product.quantity = quantity;
+      setItems({ ...items, [item._id]: product });
     },
-    [items, selectedProduct]
+    [items]
+  );
+
+  const handleConfirmQuantity = useCallback(
+    async (quantity: string | number): Promise<undefined | void> => {
+      if (!selectedProduct) return;
+      handleSetItems(selectedProduct, +quantity);
+    },
+    [selectedProduct, handleSetItems]
   );
 
   const handleDeleteItem = (key: keyof typeof items) => {
@@ -118,21 +137,22 @@ function CashRegisterPage() {
     (async () => {
       if (barcode) {
         const response = await handleGetProducts(barcode);
+        setBarcode('');
         if (response?.isSuccess && response.result) {
           if (!response.result.length) {
             toast.error('Barcode not found!');
             return;
           }
-          setShowInputQuantityModal(true);
-          setSelectedProduct(response.result[0]);
-          setValue(null);
-          setBarcode('');
+          handleSetItems(response.result[0], 1);
         } else {
           toast.error(response.message);
         }
+        // const opts = await handleGetOptions('');
+        // setDefaultOptions(opts);
+        // setShowInputQuantityModal(false);
       }
     })();
-  }, [barcode, setBarcode]);
+  }, [barcode, setBarcode, handleSetItems]);
 
   return (
     <>
@@ -160,16 +180,26 @@ function CashRegisterPage() {
       <div>
         <h3>Cash Register</h3>
 
-        <AsyncSelect
-          ref={productSelectRef}
+        {/* <AsyncSelect
+          // ref={productSelectRef}
           className="flex-grow-1"
           value={value}
+          inputValue={selectInputValue}
+          onInputChange={setSelectInputValue}
           placeholder="Enter product name or barcode"
-          onChange={handleSelect}
+          // onChange={handleSelect}
           loadOptions={handleGetOptions}
           defaultOptions={defaultOptions ?? true}
+          isLoading={false}
           isSearchable
-          autoFocus
+          // autoFocus
+        /> */}
+
+        <ProductsSelect
+          ref={productSelectRef}
+          inputValue={selectInputValue}
+          onInputChange={setSelectInputValue}
+          onSelect={handleSelect}
         />
         <Row className="my-3">
           <Col lg="8" style={{ position: 'relative' }}>
