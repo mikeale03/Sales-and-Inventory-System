@@ -9,4 +9,5 @@ export type Sales = {
   date_created: Date;
   transact_by: string;
   transact_by_user_id: string;
+  transaction_id: string;
 };

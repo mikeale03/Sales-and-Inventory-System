@@ -9,6 +9,9 @@ export type Gcash = {
   transact_by_user_id: string;
   updated_by?: string;
   updated_by_user_id?: string;
+  transaction_id: string;
+  is_product_gcash_pay?: boolean;
+  related_gcash_id?: string;
 };
 
 export type GcashCreate = Omit<Gcash, '_id' | 'date_created'> & {

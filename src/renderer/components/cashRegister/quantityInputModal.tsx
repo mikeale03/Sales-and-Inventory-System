@@ -6,8 +6,9 @@ export type Props = {
   show: boolean;
   toggle: (show: boolean) => void;
   product?: Product;
-  onConfirm?: (quantity: number | string) => void;
+  onConfirm?: (quantity: number | string, isEdit?: boolean) => void;
   onCancel?: () => void;
+  selectedItem?: Product;
 };
 
 const QuantityInputModal = ({
@@ -16,6 +17,7 @@ const QuantityInputModal = ({
   product,
   onConfirm,
   onCancel,
+  selectedItem,
 }: Props) => {
   const [quantity, setQuantity] = useState<number | string>(1);
 
@@ -28,11 +30,11 @@ const QuantityInputModal = ({
     e.preventDefault();
     e.stopPropagation();
     toggle(false);
-    onConfirm?.(quantity);
+    onConfirm?.(quantity, !!selectedItem);
   };
 
   const onShow = () => {
-    setQuantity(1);
+    setQuantity(selectedItem?.quantity ?? 1);
   };
 
   return (
@@ -83,7 +85,7 @@ const QuantityInputModal = ({
           )}
           <Form.Group className="m-3">
             <Form.Label className="d-block fw-bold text-center">
-              Quantity of Items
+              {selectedItem ? 'Edit' : 'Add'} Quantity of Items
             </Form.Label>
             <Form.Control
               className="text-center"

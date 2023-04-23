@@ -1,26 +1,17 @@
 import { Channels } from 'globalTypes/channels/salesChannels';
-import { Response } from '../../globalTypes/realm/response.types';
-import { Sales } from '../../main/service/salesRealm';
+import { Gcash } from 'globalTypes/realm/gcash.types';
+import { SalesPurchaseArg } from 'main/eventHandlers/sales';
+import { Response } from 'globalTypes/realm/response.types';
+import { Sales } from 'main/service/salesRealm';
 
 const {
   electron: { ipcRenderer },
 } = window;
 
-export const salesPurchase = async (
-  items: {
-    _id: string;
-    quantity: string | number;
-  }[],
-  transactBy: string,
-  transactByUserId: string,
-  payment: 'cash' | 'gcash'
-) => {
+export const salesPurchase = async (...args: SalesPurchaseArg) => {
   const response = await ipcRenderer.invoke<Response<undefined>>(
     Channels.purchase,
-    items,
-    transactBy,
-    transactByUserId,
-    payment
+    ...args
   );
   return response;
 };
@@ -54,6 +45,14 @@ export const deleteSale = async (saleId: string) => {
   const response = await ipcRenderer.invoke<Response<undefined>>(
     Channels.delete,
     saleId
+  );
+  return response;
+};
+
+export const updateByGcashDelete = async (gcash: Gcash) => {
+  const response = await ipcRenderer.invoke<Response<undefined>>(
+    Channels.updateByGcashDelete,
+    gcash
   );
   return response;
 };
