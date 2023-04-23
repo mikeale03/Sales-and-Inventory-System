@@ -44,6 +44,7 @@ const SalesPage = () => {
   }) => {
     const response = await getSalesByTransactions(filter);
     if (response.isSuccess && response.result) {
+      window.console.log(response.result);
       setSales(response.result);
     } else {
       toast.error(response.message);
@@ -181,6 +182,8 @@ const SalesPage = () => {
                           title="Delete"
                           size="xl"
                           className="me-2 cursor-pointer"
+                          role="button"
+                          tabIndex={0}
                         />
                       </td>
                     )}

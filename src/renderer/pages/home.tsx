@@ -25,8 +25,8 @@ function HomePage() {
     <div
       className="container-fluid p-0 vh-100"
       onKeyDown={barcodeScanCb}
-      role="button"
-      tabIndex={0}
+      role="menu"
+      tabIndex={-1}
     >
       <div className="pe-0 h-100" style={{ paddingLeft: '120px' }}>
         <Sidebar />

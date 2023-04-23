@@ -26,6 +26,9 @@ export class GcashSchema extends Realm.Object {
       updated_by: 'string?',
       updated_by_user_id: 'string?',
       date_updated: 'date?',
+      transaction_id: 'string',
+      is_product_gcash_pay: 'bool?',
+      related_gcash_id: 'string?',
     },
     primaryKey: '_id',
   };
@@ -36,6 +39,7 @@ export const openGcashRealm = async () => {
     const realm = await Realm.open({
       path: '../realm/gcash',
       schema: [GcashSchema],
+      schemaVersion: 3,
     });
     return realm;
   } catch (error) {
@@ -57,19 +61,26 @@ export const createGcashTransactions = async (
   const sales: Omit<Sales, '_id'>[] = [];
   try {
     gcashTrans.forEach((gcashTran) => {
-      const task = create(realm, GCASH, {
-        ...gcashTran,
-        date_created: new Date(),
-      });
+      const task = create<GcashCreate & { _id?: string; date_created: Date }>(
+        realm,
+        GCASH,
+        {
+          ...gcashTran,
+          date_created: new Date(),
+          transaction_id: gcashTran.transaction_id,
+        }
+      );
 
       if (gcashTran.charge_payment === 'gcash') {
-        const task2 = create(realm, GCASH, {
+        const task2 = create<Omit<Gcash, '_id'>>(realm, GCASH, {
           type: 'gcash pay',
           amount: gcashTran.charge,
           charge: 0,
           transact_by: gcashTran.transact_by,
           transact_by_user_id: gcashTran.transact_by_user_id,
           date_created: new Date(),
+          transaction_id: gcashTran.transaction_id,
+          related_gcash_id: task?._id?.toString(),
         });
         trans.push(task2?.toJSON() as Gcash);
       }
@@ -78,7 +89,7 @@ export const createGcashTransactions = async (
       task &&
         task.type !== 'gcash pay' &&
         sales.push({
-          product_id: 'gcash',
+          product_id: task._id?.toString() ?? 'gcash',
           product_name: `GCash-${task.type === 'cash in' ? 'In' : 'Out'} - ${
             gcashTran.amount
           }`,
@@ -89,6 +100,7 @@ export const createGcashTransactions = async (
           date_created: new Date(),
           transact_by: gcashTran.transact_by,
           transact_by_user_id: gcashTran.transact_by_user_id,
+          transaction_id: gcashTran.transaction_id,
         });
     });
     // const newGcash = task?.toJSON() as Gcash;

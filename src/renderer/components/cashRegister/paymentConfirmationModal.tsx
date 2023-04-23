@@ -2,6 +2,7 @@
 import { useContext, useEffect, useState, memo, useRef } from 'react';
 import { Button, Col, Modal, Row } from 'react-bootstrap';
 import { toast } from 'react-toastify';
+import { v4 as uuid } from 'uuid';
 import UserContext from 'renderer/context/userContext';
 import { createGcashTransactions } from 'renderer/service/gcash';
 import { salesPurchase } from 'renderer/service/sales';
@@ -51,11 +52,14 @@ const PaymentConfirmationModal = ({
     if (!user?.username) return;
 
     const promises = [];
+    const transaction_id = uuid();
+
     const salesPromise = salesPurchase(
       Object.keys(items).map((key) => items[key]),
       user.username,
       user._id,
-      isGcash ? 'gcash' : 'cash'
+      isGcash ? 'gcash' : 'cash',
+      transaction_id
     );
     promises.push(salesPromise);
 
@@ -68,6 +72,8 @@ const PaymentConfirmationModal = ({
           charge_payment: 'cash',
           transact_by: user.username,
           transact_by_user_id: user._id,
+          transaction_id,
+          is_product_gcash_pay: true,
         },
       ]);
       promises.push(gcashPromise);
@@ -77,6 +83,7 @@ const PaymentConfirmationModal = ({
 
     for (const res of responses) {
       if (!res.isSuccess) {
+        console.log(res.error);
         toast.error(res.message);
         onError?.();
         toggle(false);

@@ -169,6 +169,8 @@ const ProductsPage = () => {
                       title="Edit"
                       size="xl"
                       className="me-2 cursor-pointer"
+                      role="button"
+                      tabIndex={0}
                     />
                     {user?.role === 'admin' && (
                       <FontAwesomeIcon
@@ -177,6 +179,8 @@ const ProductsPage = () => {
                         title="Delete"
                         size="xl"
                         className="me-2 cursor-pointer"
+                        role="button"
+                        tabIndex={0}
                       />
                     )}
                   </td>

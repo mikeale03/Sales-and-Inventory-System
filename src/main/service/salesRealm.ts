@@ -1,6 +1,8 @@
+/* eslint-disable no-restricted-syntax */
 import Realm from 'realm';
 import { Response } from '../../globalTypes/realm/response.types';
 import { openProductsRealm, Product } from './productsRealm';
+import { Gcash } from '../../globalTypes/realm/gcash.types';
 
 const PRODUCTS = 'Products';
 const SALES = 'Sales';
@@ -16,6 +18,7 @@ export type Sales = {
   date_created: Date;
   transact_by: string;
   transact_by_user_id: string;
+  transaction_id: string;
 };
 
 export class SalesSchema extends Realm.Object {
@@ -23,15 +26,16 @@ export class SalesSchema extends Realm.Object {
     name: SALES,
     properties: {
       _id: { type: 'objectId', default: () => new Realm.BSON.ObjectId() },
-      product_id: 'string',
-      product_name: 'string',
+      product_id: { type: 'string', indexed: true },
+      product_name: { type: 'string', indexed: true },
       quantity: 'int',
       price: 'float',
       total_price: 'float',
       payment: 'string',
-      date_created: 'date',
+      date_created: { type: 'date', indexed: true },
       transact_by: 'string',
-      transact_by_user_id: 'string',
+      transact_by_user_id: { type: 'string', indexed: true },
+      transaction_id: { type: 'string', indexed: true },
     },
     primaryKey: '_id',
   };
@@ -41,7 +45,7 @@ export const openSalesRealm = async () => {
   const sales = await Realm.open({
     path: '../realm/sales',
     schema: [SalesSchema],
-    schemaVersion: 2,
+    schemaVersion: 4,
   });
   return sales;
 };
@@ -63,7 +67,8 @@ export const salesPurchase = async (
   items: { _id: string; quantity: number }[],
   transactBy: string,
   transactByUserId: string,
-  payment: 'cash' | 'gcash'
+  payment: 'cash' | 'gcash',
+  transactionId: string
 ) => {
   let productsRealm: Realm | undefined;
   let salesRealm: Realm | undefined;
@@ -88,6 +93,7 @@ export const salesPurchase = async (
             date_created: new Date(),
             transact_by: transactBy,
             transact_by_user_id: transactByUserId,
+            transaction_id: transactionId,
           });
         });
         productsRealm?.write(() => {
@@ -292,6 +298,54 @@ export const deleteSale = async (salesId: string) => {
     return {
       isSuccess: false,
       message: 'Failed to delete sale',
+      error,
+    };
+  }
+};
+
+export const updateSalesByGcashTransDelete = async (gcashTrans: Gcash) => {
+  const { _id, transaction_id, type, is_product_gcash_pay, related_gcash_id } =
+    gcashTrans;
+  let realm: Realm | undefined;
+  let query = `product_id == '${
+    type === 'gcash pay' ? related_gcash_id : _id
+  }'`;
+  try {
+    if (!transaction_id) throw new Error('No transaction id');
+
+    if (is_product_gcash_pay) {
+      query = `transaction_id == '${transaction_id}'`;
+    }
+
+    realm = await openSalesRealm();
+    const sales = realm?.objects<Sales>(SALES).filtered(query);
+    if (sales.length === 0) throw new Error('No sales found');
+    let product_name = '';
+    realm.write(() => {
+      if (type === 'gcash pay')
+        for (const sale of sales) {
+          sale.payment = 'cash';
+        }
+      else {
+        product_name = sales[0].product_name;
+        realm?.delete(sales);
+      }
+    });
+    const message =
+      type === 'gcash pay'
+        ? 'Sales payment type is updated'
+        : `Sales with product name ${product_name} is deleted`;
+    realm?.close();
+
+    return {
+      isSuccess: true,
+      message,
+    };
+  } catch (error) {
+    realm?.close();
+    return {
+      isSuccess: false,
+      message: 'Failed to update sales',
       error,
     };
   }

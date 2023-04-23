@@ -5,24 +5,17 @@ import {
   getSalesByProducts,
   getSalesByTransactions,
   salesPurchase,
+  updateSalesByGcashTransDelete,
 } from '../service/salesRealm';
+import { Gcash } from '../../globalTypes/realm/gcash.types';
+
+export type SalesPurchaseArg = Parameters<typeof salesPurchase>;
 
 const setSalesEventHandler = (ipcMain: IpcMain) => {
   ipcMain.handle(
     Channels.purchase,
-    async (
-      event: IpcMainInvokeEvent,
-      items: { _id: string; quantity: number }[],
-      transactBy: string,
-      transactByUserId: string,
-      payment: 'cash' | 'gcash'
-    ) => {
-      const result = await salesPurchase(
-        items,
-        transactBy,
-        transactByUserId,
-        payment
-      );
+    async (event: IpcMainInvokeEvent, ...args: SalesPurchaseArg) => {
+      const result = await salesPurchase(...args);
       return result;
     }
   );
@@ -59,6 +52,13 @@ const setSalesEventHandler = (ipcMain: IpcMain) => {
     Channels.delete,
     async (event: IpcMainInvokeEvent, saleId: string) => {
       const result = await deleteSale(saleId);
+      return result;
+    }
+  );
+  ipcMain.handle(
+    Channels.updateByGcashDelete,
+    async (event: IpcMainInvokeEvent, gcash: Gcash) => {
+      const result = await updateSalesByGcashTransDelete(gcash);
       return result;
     }
   );

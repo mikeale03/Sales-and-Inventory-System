@@ -1,16 +1,11 @@
-import { faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faPenToSquare, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Product } from 'main/service/productsRealm';
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { Card, Col, Row, Table } from 'react-bootstrap';
 import { useOutletContext } from 'react-router-dom';
-import AsyncSelect from 'react-select/async';
 import { toast } from 'react-toastify';
-import {
-  GroupBase,
-  OptionsOrGroups,
-  SelectInstance,
-} from 'react-select/dist/declarations/src';
+import { SelectInstance } from 'react-select/dist/declarations/src';
 import PaymentCard from 'renderer/components/cashRegister/paymentCard';
 import PaymentConfirmationModal from 'renderer/components/cashRegister/paymentConfirmationModal';
 import QuantityInputModal from 'renderer/components/cashRegister/quantityInputModal';
@@ -38,63 +33,32 @@ function CashRegisterPage() {
   const [showPaymentConfirmationModal, setShowPaymentConfirmationModal] =
     useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product>();
+  const [selectedItem, setSelectedItem] = useState<Product | undefined>();
   const [paymentAmount, setPaymentAmount] = useState('');
-  const [value, setValue] = useState<Opt | null>(null);
   const [selectInputValue, setSelectInputValue] = useState('');
   const [items, setItems] = useState<
     Record<string, Product & { totalPrice: number }>
   >({});
-  const [defaultOptions, setDefaultOptions] = useState<
-    OptionsOrGroups<Opt, GroupBase<Opt>> | undefined
-  >();
+  const [productsSrc, setProductsSrc] = useState<Record<string, Product>>({});
   const productSelectRef = useRef<SelectInstance<Opt> | null>(null);
   const itemKeys = useMemo(() => Object.keys(items), [items]);
   const { barcode, setBarcode } = useOutletContext<BarcodeContext>();
-
-  const handleGetOptions = async (
-    searchText: string
-  ): Promise<OptionsOrGroups<Opt, GroupBase<Opt>>> => {
-    const response = await handleGetProducts(searchText);
-    if (response?.isSuccess && response.result) {
-      const data = response.result;
-      const opts: Opt[] = data.map((item) => ({
-        value: item._id,
-        label: `${item.name} - ${pesoFormat(item.price)} ${
-          item.barcode ? `-    #${item.barcode}` : ''
-        }`,
-        product: item,
-      }));
-      return opts;
-    }
-    return [];
-  };
-
-  // const handleSelect = (option: Opt | null) => {
-  //   const product = option?.product && { ...option.product };
-
-  //   if (product) {
-  //     const itemQuantity = items[product._id]?.quantity ?? 0;
-  //     product.quantity -= itemQuantity;
-  //   }
-  //   setShowInputQuantityModal(true);
-  //   setSelectedProduct(product);
-  //   setValue(null);
-  // };
+  const [lastUpdatedId, setLastUpdatedId] = useState('');
 
   const handleSelect = (product: Product) => {
-    // const product = option?.product && { ...option.product };
-    if (barcode) return;
-    if (product) {
+    const prod = { ...product };
+    setSelectedItem(undefined);
+    if (prod) {
       const itemQuantity = items[product._id]?.quantity ?? 0;
-      product.quantity -= itemQuantity;
+      prod.quantity -= itemQuantity;
     }
     setShowInputQuantityModal(true);
-    setSelectedProduct(product);
-    // setValue(null);
+    setSelectedProduct(prod);
   };
 
   const handleSetItems = useMemo(
-    () => (item: Product, quantity: number) => {
+    () => (item: Product, quantity: number, isEdit?: boolean) => {
+      setLastUpdatedId(item._id);
       if (items[item._id]) {
         const itemQuantity = items[item._id].quantity;
         const { price } = items[item._id];
@@ -102,7 +66,7 @@ function CashRegisterPage() {
           ...items,
           [item._id]: {
             ...item,
-            quantity: itemQuantity + quantity,
+            quantity: isEdit ? quantity : itemQuantity + quantity,
             totalPrice: price * (itemQuantity + quantity),
           },
         });
@@ -111,14 +75,18 @@ function CashRegisterPage() {
       const product = { ...item, totalPrice: item.price * quantity };
       product.quantity = quantity;
       setItems({ ...items, [item._id]: product });
+      setProductsSrc({ ...productsSrc, [item._id]: item });
     },
-    [items]
+    [items, productsSrc]
   );
 
   const handleConfirmQuantity = useCallback(
-    async (quantity: string | number): Promise<undefined | void> => {
+    async (
+      quantity: string | number,
+      isEdit?: boolean
+    ): Promise<undefined | void> => {
       if (!selectedProduct) return;
-      handleSetItems(selectedProduct, +quantity);
+      handleSetItems(selectedProduct, +quantity, isEdit);
     },
     [selectedProduct, handleSetItems]
   );
@@ -147,9 +115,6 @@ function CashRegisterPage() {
         } else {
           toast.error(response.message);
         }
-        // const opts = await handleGetOptions('');
-        // setDefaultOptions(opts);
-        // setShowInputQuantityModal(false);
       }
     })();
   }, [barcode, setBarcode, handleSetItems]);
@@ -161,6 +126,7 @@ function CashRegisterPage() {
         toggle={setShowInputQuantityModal}
         product={selectedProduct}
         onConfirm={handleConfirmQuantity}
+        selectedItem={selectedItem}
       />
       <PaymentConfirmationModal
         show={showPaymentConfirmationModal}
@@ -170,8 +136,6 @@ function CashRegisterPage() {
         onSuccess={useCallback(async () => {
           setPaymentAmount('');
           setItems({});
-          const opts = await handleGetOptions('');
-          setDefaultOptions(opts);
         }, [])}
         onExited={useCallback(() => {
           setTimeout(() => productSelectRef.current?.focus(), 50);
@@ -179,21 +143,6 @@ function CashRegisterPage() {
       />
       <div>
         <h3>Cash Register</h3>
-
-        {/* <AsyncSelect
-          // ref={productSelectRef}
-          className="flex-grow-1"
-          value={value}
-          inputValue={selectInputValue}
-          onInputChange={setSelectInputValue}
-          placeholder="Enter product name or barcode"
-          // onChange={handleSelect}
-          loadOptions={handleGetOptions}
-          defaultOptions={defaultOptions ?? true}
-          isLoading={false}
-          isSearchable
-          // autoFocus
-        /> */}
 
         <ProductsSelect
           ref={productSelectRef}
@@ -217,7 +166,12 @@ function CashRegisterPage() {
                   </thead>
                   <tbody>
                     {itemKeys.map((key) => (
-                      <tr key={items[key]._id}>
+                      <tr
+                        key={items[key]._id}
+                        className={
+                          lastUpdatedId === items[key]._id ? 'fw-bold' : ''
+                        }
+                      >
                         <td className="align-middle">{items[key].name}</td>
                         <td className="align-middle text-center">
                           {items[key].quantity}
@@ -229,6 +183,16 @@ function CashRegisterPage() {
                           {pesoFormat(items[key].totalPrice)}
                         </td>
                         <td className="align-middle text-center">
+                          <FontAwesomeIcon
+                            onClick={() => {
+                              setShowInputQuantityModal(true);
+                              handleSelect(productsSrc[key]);
+                              setSelectedItem(items[key]);
+                            }}
+                            icon={faPenToSquare}
+                            title="Edit"
+                            className="me-2 cursor-pointer"
+                          />
                           <FontAwesomeIcon
                             title="remove"
                             icon={faXmark}

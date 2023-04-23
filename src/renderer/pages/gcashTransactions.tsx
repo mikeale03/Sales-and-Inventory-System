@@ -16,6 +16,7 @@ import {
   deleteGcashTransaction,
   getGcashTransactions,
 } from 'renderer/service/gcash';
+import { updateByGcashDelete } from 'renderer/service/sales';
 import { debounce, pesoFormat } from 'renderer/utils/helper';
 
 const isEdited = (item: Gcash) => {
@@ -41,6 +42,7 @@ const GcashTransactionsPage = () => {
   const handleGetGcashTransactions = async (filter?: TransFilter) => {
     const response = await getGcashTransactions(filter);
     if (response.isSuccess && response.result) {
+      window.console.log(response.result);
       setTransactions(response.result);
     } else toast.error(response.message);
   };
@@ -84,11 +86,15 @@ const GcashTransactionsPage = () => {
 
   const handleDeleteTrans = async () => {
     if (!selectedTrans) return;
-    const response = await deleteGcashTransaction(selectedTrans._id);
-    if (!response?.isSuccess) {
-      toast.error(response.message);
+    const [response1, response2] = await Promise.all([
+      deleteGcashTransaction(selectedTrans._id),
+      updateByGcashDelete(selectedTrans),
+    ]);
+    if (!response1?.isSuccess) {
+      toast.error(response1.message);
       return;
     }
+    window.console.log(response2);
     setTransactions(
       transactions.filter((item) => item._id !== selectedTrans._id)
     );
@@ -162,6 +168,8 @@ const GcashTransactionsPage = () => {
                         title="Delete"
                         size="xl"
                         className="me-2 cursor-pointer"
+                        role="button"
+                        tabIndex={0}
                       />
                     </td>
                   )}

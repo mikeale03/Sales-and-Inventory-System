@@ -1,5 +1,6 @@
 import { faPenToSquare, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { v4 as uuid } from 'uuid';
 import { GcashCreate } from 'globalTypes/realm/gcash.types';
 import { useContext, useEffect, useState } from 'react';
 import { Button, Card, Col, Row, Table } from 'react-bootstrap';
@@ -85,10 +86,12 @@ const GcashRegisterPage = () => {
   const handleSubmit = async () => {
     if (!user) return;
 
+    const transaction_id = uuid();
     const gcashTrans: GcashCreate[] = items.map((item) => ({
       ...item,
       transact_by: user.username,
       transact_by_user_id: user._id,
+      transaction_id,
     }));
 
     const response = await createGcashTransactions(gcashTrans);
@@ -97,6 +100,7 @@ const GcashRegisterPage = () => {
       setItems([]);
     } else {
       toast.error(response.message);
+      window.console.log(response.error);
     }
   };
 
