@@ -162,6 +162,8 @@ const ProductsPage = () => {
                       title="Add quantity"
                       size="xl"
                       className="me-2 cursor-pointer"
+                      role="button"
+                      tabIndex={0}
                     />
                     <FontAwesomeIcon
                       onClick={() => handleShowSetProductModal(d)}
