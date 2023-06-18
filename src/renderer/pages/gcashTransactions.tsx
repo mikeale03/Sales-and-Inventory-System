@@ -5,6 +5,7 @@ import {
   Gcash,
   GcashTransFilter as TransFilter,
 } from 'globalTypes/realm/gcash.types';
+import { type } from 'os';
 import { useContext, useEffect, useState } from 'react';
 import { Card, Col, FormCheck, FormControl, Row, Table } from 'react-bootstrap';
 import { toast } from 'react-toastify';
@@ -158,7 +159,14 @@ const GcashTransactionsPage = () => {
             <tbody>
               {transactions.map((item) => (
                 <tr key={`${item._id}`}>
-                  <td className="text-capitalize">{item.type}</td>
+                  <td
+                    className={`text-capitalize ${
+                      item.type === 'cash in' && 'text-primary'
+                    } ${item.type === 'cash out' && 'text-danger'}
+                    `}
+                  >
+                    {item.type}
+                  </td>
                   <td>{pesoFormat(item.amount)}</td>
                   <td className={isEdited(item) ? 'text-danger' : ''}>
                     {pesoFormat(item.charge)}
