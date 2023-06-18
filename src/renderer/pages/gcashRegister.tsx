@@ -1,4 +1,9 @@
-import { faPenToSquare, faXmark } from '@fortawesome/free-solid-svg-icons';
+import {
+  faBuildingColumns,
+  faPaperPlane,
+  faPenToSquare,
+  faXmark,
+} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { v4 as uuid } from 'uuid';
 import { GcashCreate } from 'globalTypes/realm/gcash.types';
@@ -189,16 +194,17 @@ const GcashRegisterPage = () => {
       <div className="my-3">
         <Button
           className="me-2"
-          style={{ width: 100 }}
+          style={{ width: 120 }}
           onClick={() => handleSetCashInCashOutModal('cash in')}
         >
-          Cash In
+          Cash In <FontAwesomeIcon icon={faBuildingColumns} />
         </Button>
         <Button
-          style={{ width: 100 }}
+          variant="outline-primary"
+          style={{ width: 120 }}
           onClick={() => handleSetCashInCashOutModal('cash out')}
         >
-          Cash Out
+          Cash Out <FontAwesomeIcon icon={faPaperPlane} color="red" />
         </Button>
       </div>
 

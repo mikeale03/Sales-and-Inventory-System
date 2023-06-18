@@ -28,6 +28,7 @@ export class GcashSchema extends Realm.Object {
       date_updated: 'date?',
       transaction_id: 'string',
       is_product_gcash_pay: 'bool?',
+      charge_payment: 'string',
       related_gcash_id: 'string?',
     },
     primaryKey: '_id',
@@ -39,7 +40,7 @@ export const openGcashRealm = async () => {
     const realm = await Realm.open({
       path: '../realm/gcash',
       schema: [GcashSchema],
-      schemaVersion: 3,
+      schemaVersion: 4,
     });
     return realm;
   } catch (error) {
@@ -71,19 +72,19 @@ export const createGcashTransactions = async (
         }
       );
 
-      if (gcashTran.charge_payment === 'gcash') {
-        const task2 = create<Omit<Gcash, '_id'>>(realm, GCASH, {
-          type: 'gcash pay',
-          amount: gcashTran.charge,
-          charge: 0,
-          transact_by: gcashTran.transact_by,
-          transact_by_user_id: gcashTran.transact_by_user_id,
-          date_created: new Date(),
-          transaction_id: gcashTran.transaction_id,
-          related_gcash_id: task?._id?.toString(),
-        });
-        trans.push(task2?.toJSON() as Gcash);
-      }
+      // if (gcashTran.charge_payment === 'gcash') {
+      //   const task2 = create<Omit<Gcash, '_id'>>(realm, GCASH, {
+      //     type: 'gcash pay',
+      //     amount: gcashTran.charge,
+      //     charge: 0,
+      //     transact_by: gcashTran.transact_by,
+      //     transact_by_user_id: gcashTran.transact_by_user_id,
+      //     date_created: new Date(),
+      //     transaction_id: gcashTran.transaction_id,
+      //     related_gcash_id: task?._id?.toString(),
+      //   });
+      //   trans.push(task2?.toJSON() as Gcash);
+      // }
 
       trans.push(task?.toJSON() as Gcash);
       task &&

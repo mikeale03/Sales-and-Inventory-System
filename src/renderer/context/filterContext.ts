@@ -8,11 +8,20 @@ export type Filter = {
   endDate: Date;
 };
 
+export type GcashFilter = {
+  userOption: string;
+  selectedPeriod: string;
+  selectedType?: 'cash in' | 'cash out';
+  selectedDate: Date;
+  startDate: Date;
+  endDate: Date;
+};
+
 const FilterContext = createContext<{
   salesFilter: Filter;
   setSalesFilter: (salesFilter: Filter) => void;
-  gcashTransFilter: Filter;
-  setGcashTransFilter: (salesFilter: Filter) => void;
+  gcashTransFilter: GcashFilter;
+  setGcashTransFilter: (gcashFilter: GcashFilter) => void;
 }>({
   salesFilter: {
     selectedDate: new Date(),
@@ -26,6 +35,7 @@ const FilterContext = createContext<{
     selectedDate: new Date(),
     userOption: '',
     selectedPeriod: 'Daily',
+    selectedType: undefined,
     startDate: new Date(new Date().setHours(0, 0, 0, 0)),
     endDate: new Date(new Date().setHours(23, 59, 59, 999)),
   },

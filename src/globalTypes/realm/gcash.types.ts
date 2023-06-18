@@ -12,16 +12,19 @@ export type Gcash = {
   transaction_id: string;
   is_product_gcash_pay?: boolean;
   related_gcash_id?: string;
+  charge_payment: 'cash' | 'gcash';
 };
 
 export type GcashCreate = Omit<Gcash, '_id' | 'date_created'> & {
   charge_payment: 'cash' | 'gcash';
 };
 
+export type GcashTransFilterType = 'cash in' | 'cash out' | undefined;
+
 export type GcashTransFilter = {
   transactBy?: string;
   startDate?: Date;
   endDate?: Date;
   number?: string;
-  type?: 'cash in' | 'cash out' | 'gcash pay';
+  type?: GcashTransFilterType;
 };
