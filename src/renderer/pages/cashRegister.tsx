@@ -60,14 +60,16 @@ function CashRegisterPage() {
     () => (item: Product, quantity: number, isEdit?: boolean) => {
       setLastUpdatedId(item._id);
       if (items[item._id]) {
-        const itemQuantity = items[item._id].quantity;
+        const itemQuantity = isEdit
+          ? quantity
+          : items[item._id].quantity + quantity;
         const { price } = items[item._id];
         setItems({
           ...items,
           [item._id]: {
             ...item,
-            quantity: isEdit ? quantity : itemQuantity + quantity,
-            totalPrice: price * (itemQuantity + quantity),
+            quantity: itemQuantity,
+            totalPrice: price * itemQuantity,
           },
         });
         return;
@@ -126,7 +128,7 @@ function CashRegisterPage() {
         toggle={setShowInputQuantityModal}
         product={selectedProduct}
         onConfirm={handleConfirmQuantity}
-        selectedItem={selectedItem}
+        selectedItem={selectedItem} // item to edit
       />
       <PaymentConfirmationModal
         show={showPaymentConfirmationModal}

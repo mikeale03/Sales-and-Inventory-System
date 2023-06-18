@@ -6,7 +6,7 @@ import {
   GcashTransFilter as TransFilter,
 } from 'globalTypes/realm/gcash.types';
 import { useContext, useEffect, useState } from 'react';
-import { Card, Col, FormControl, Row, Table } from 'react-bootstrap';
+import { Card, Col, FormCheck, FormControl, Row, Table } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import ConfirmationModal from 'renderer/components/common/modals/confirmation';
 import GcashTransFilter from 'renderer/components/gcashTransactions/gcashTransFilter';
@@ -29,20 +29,19 @@ const GcashTransactionsPage = () => {
   const [search, setSearch] = useState('');
   const [totalCashIn, setTotalCashIn] = useState(0);
   const [totalCashOut, setTotalCashOut] = useState(0);
-  const [totalGcashPay, setTotalGcashPay] = useState(0);
+  // const [totalGcashPay, setTotalGcashPay] = useState(0);
   const [totalCharge, setTotalCharge] = useState(0);
   const [endingBalance, setEndingBalance] = useState(0);
   const [selectedTrans, setSelectedTrans] = useState<Gcash | undefined>();
   const [confirmationModal, setConfirmationModal] = useState(false);
   const { user } = useContext(UserContext);
   const {
-    gcashTransFilter: { userOption, startDate, endDate },
+    gcashTransFilter: { userOption, selectedType, startDate, endDate },
   } = useContext(FilterContext);
 
   const handleGetGcashTransactions = async (filter?: TransFilter) => {
     const response = await getGcashTransactions(filter);
     if (response.isSuccess && response.result) {
-      window.console.log(response.result);
       setTransactions(response.result);
     } else toast.error(response.message);
   };
@@ -50,17 +49,17 @@ const GcashTransactionsPage = () => {
   useEffect(() => {
     let cashIn = 0;
     let cashOut = 0;
-    let gcashPay = 0;
+    // let gcashPay = 0;
     let charge = 0;
     transactions.forEach((item) => {
       cashIn += item.type === 'cash in' ? item.amount : 0;
       cashOut += item.type === 'cash out' ? item.amount : 0;
-      gcashPay += item.type === 'gcash pay' ? item.amount : 0;
+      // gcashPay += item.type === 'gcash pay' ? item.amount : 0;
       charge += item.charge;
     });
     setTotalCashIn(cashIn);
     setTotalCashOut(cashOut);
-    setTotalGcashPay(gcashPay);
+    // setTotalGcashPay(gcashPay);
     setTotalCharge(charge);
     setEndingBalance(cashIn - cashOut);
   }, [transactions]);
@@ -69,11 +68,12 @@ const GcashTransactionsPage = () => {
     userOption &&
       handleGetGcashTransactions({
         transactBy: userOption === 'all' ? undefined : userOption,
+        type: selectedType,
         number: search,
         startDate,
         endDate,
       });
-  }, [userOption, startDate, endDate, search]);
+  }, [userOption, selectedType, startDate, endDate, search]);
 
   const handleSearch = debounce((e) => {
     setSearch(e.target.value);
@@ -127,11 +127,17 @@ const GcashTransactionsPage = () => {
             </Col>
           </Row>
           <div className="d-xl-flex justify-content-between">
-            <p className="m-0">Total Cash In: {pesoFormat(totalCashIn)}</p>
-            <p className="m-0">Total Cash Out: {pesoFormat(totalCashOut)}</p>
-            <p className="m-0">Total GCash Pay: {pesoFormat(totalGcashPay)}</p>
+            {selectedType !== 'cash out' && (
+              <p className="m-0">Total Cash In: {pesoFormat(totalCashIn)}</p>
+            )}
+            {selectedType !== 'cash in' && (
+              <p className="m-0">Total Cash Out: {pesoFormat(totalCashOut)}</p>
+            )}
+            {/* <p className="m-0">Total GCash Pay: {pesoFormat(totalGcashPay)}</p> */}
             <p className="m-0">Total Charge: {pesoFormat(totalCharge)}</p>
-            <p className="m-0">Ending Balance: {pesoFormat(endingBalance)}</p>
+            {!selectedType && (
+              <p className="m-0">Ending Balance: {pesoFormat(endingBalance)}</p>
+            )}
             <p className="m-0">
               Quantity: {transactions.length.toLocaleString()}
             </p>
@@ -156,12 +162,16 @@ const GcashTransactionsPage = () => {
                   <td>{pesoFormat(item.amount)}</td>
                   <td className={isEdited(item) ? 'text-danger' : ''}>
                     {pesoFormat(item.charge)}
+                    {item.charge_payment === 'gcash' && (
+                      <span className="text-primary">(GCash)</span>
+                    )}
                   </td>
                   <td>{item.number}</td>
                   <td>{format(item.date_created, 'MM/dd/yyyy hh:mm aaa')}</td>
                   <td>{item.transact_by}</td>
-                  {user?.role === 'admin' && (
-                    <td>
+                  <td className="d-flex justify-content-around">
+                    <FormCheck type="checkbox" />
+                    {user?.role === 'admin' && (
                       <FontAwesomeIcon
                         onClick={() => handleShowConfirmationModal(item)}
                         icon={faTrashCan}
@@ -171,8 +181,8 @@ const GcashTransactionsPage = () => {
                         role="button"
                         tabIndex={0}
                       />
-                    </td>
-                  )}
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

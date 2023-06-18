@@ -63,27 +63,26 @@ const PaymentConfirmationModal = ({
     );
     promises.push(salesPromise);
 
-    if (isGcash) {
-      const gcashPromise = createGcashTransactions([
-        {
-          type: 'gcash pay',
-          amount: total,
-          charge: 0,
-          charge_payment: 'cash',
-          transact_by: user.username,
-          transact_by_user_id: user._id,
-          transaction_id,
-          is_product_gcash_pay: true,
-        },
-      ]);
-      promises.push(gcashPromise);
-    }
+    // if (isGcash) {
+    //   const gcashPromise = createGcashTransactions([
+    //     {
+    //       type: 'gcash pay',
+    //       amount: total,
+    //       charge: 0,
+    //       charge_payment: 'cash',
+    //       transact_by: user.username,
+    //       transact_by_user_id: user._id,
+    //       transaction_id,
+    //       is_product_gcash_pay: true,
+    //     },
+    //   ]);
+    //   promises.push(gcashPromise);
+    // }
 
     const responses = await Promise.all(promises);
 
     for (const res of responses) {
       if (!res.isSuccess) {
-        console.log(res.error);
         toast.error(res.message);
         onError?.();
         toggle(false);

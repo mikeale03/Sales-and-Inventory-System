@@ -1,4 +1,6 @@
+import { faPaperPlane } from '@fortawesome/free-regular-svg-icons';
 import {
+  faBuildingColumns,
   faPenToSquare,
   faRotateRight,
 } from '@fortawesome/free-solid-svg-icons';
@@ -101,9 +103,18 @@ const SetCashInOutModal = ({
     >
       <Form onSubmit={handleConfirm}>
         <Modal.Header>
-          <Modal.Title className="fw-bold text-center d-block w-100 text-capitalize">
+          <Modal.Title
+            className={`fw-bold text-center d-block w-100 text-capitalize ${
+              type === 'cash in' ? 'text-primary' : 'text-danger'
+            }`}
+          >
             {selectedItem ? 'Edit ' : ''}
-            {type}
+            {`${type} `}
+            {type === 'cash in' ? (
+              <FontAwesomeIcon icon={faBuildingColumns} />
+            ) : (
+              <FontAwesomeIcon icon={faPaperPlane} />
+            )}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -113,9 +124,6 @@ const SetCashInOutModal = ({
             </Form.Label>
             <Form.Control
               value={item.number}
-              type="number"
-              step={1}
-              min={0}
               onChange={(e) => handleChange({ number: e.target.value })}
               required
               autoFocus

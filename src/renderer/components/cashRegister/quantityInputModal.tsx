@@ -17,9 +17,16 @@ const QuantityInputModal = ({
   product,
   onConfirm,
   onCancel,
-  selectedItem,
+  selectedItem, // item to edit
 }: Props) => {
   const [quantity, setQuantity] = useState<number | string>(1);
+  const [initQty, setInitQty] = useState(0);
+  const productQty = product?.quantity ?? 0;
+  const remaining = selectedItem
+    ? productQty + initQty - +quantity // if edit qty
+    : productQty; // if add qty
+
+  const max = selectedItem ? productQty + initQty : productQty;
 
   const handleCancel = () => {
     toggle(false);
@@ -35,6 +42,7 @@ const QuantityInputModal = ({
 
   const onShow = () => {
     setQuantity(selectedItem?.quantity ?? 1);
+    selectedItem && setInitQty(selectedItem?.quantity);
   };
 
   return (
@@ -68,9 +76,7 @@ const QuantityInputModal = ({
               <p className="m-0">Remaining:</p>
             </Col>
             <Col xs="6">
-              <p className="m-0 text-end">
-                {product?.quantity.toLocaleString()}
-              </p>
+              <p className="m-0 text-end">{remaining.toLocaleString()}</p>
             </Col>
           </Row>
           {product?.description && (
@@ -92,7 +98,7 @@ const QuantityInputModal = ({
               type="number"
               min="1"
               placeholder="Enter quantity"
-              max={product?.quantity}
+              max={max}
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
               autoFocus

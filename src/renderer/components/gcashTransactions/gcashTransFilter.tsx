@@ -1,3 +1,4 @@
+import { GcashTransFilterType } from 'globalTypes/realm/gcash.types';
 import { User } from 'globalTypes/realm/user.types';
 import { useContext, useEffect, useState, ChangeEvent } from 'react';
 import { Col, FormLabel, FormSelect, Row } from 'react-bootstrap';
@@ -80,6 +81,16 @@ const GcashTransFilter = () => {
     setDateRange(gcashTransFilter.selectedPeriod, date);
   };
 
+  const handleTypeSelect = (e: ChangeEvent<HTMLSelectElement>) => {
+    if (!gcashTransFilter) return;
+    const { value } = e.target;
+    setGcashTransFilter({
+      ...gcashTransFilter,
+      selectedType:
+        value === 'all' ? undefined : (value as GcashTransFilterType),
+    });
+  };
+
   return (
     <Row>
       <Col md="2" className="mb-3">
@@ -112,6 +123,17 @@ const GcashTransFilter = () => {
         </FormSelect>
       </Col>
       <Col md="2" className="mb-3">
+        <FormLabel>Type</FormLabel>
+        <FormSelect
+          value={gcashTransFilter.selectedType ?? 'all'}
+          onChange={handleTypeSelect}
+        >
+          <option value="all">All Type</option>
+          <option value="cash in">Cash In</option>
+          <option value="cash out">Cash Out</option>
+        </FormSelect>
+      </Col>
+      <Col md="2" className="mb-3">
         <FormLabel>Select {isDaily ? 'Date' : 'Month'}</FormLabel>
         <DatePicker
           className="form-control"
@@ -126,7 +148,7 @@ const GcashTransFilter = () => {
           todayButton="Today"
         />
       </Col>
-      <Col md="3" className="mb-3">
+      <Col md="2" className="mb-3">
         <FormLabel>Start {isDaily ? 'Time' : 'Date'}</FormLabel>
         <DatePicker
           className="form-control"
@@ -145,7 +167,7 @@ const GcashTransFilter = () => {
           dateFormat={isDaily ? 'h:mm aa' : 'MM/dd/yyyy h:mm aa'}
         />
       </Col>
-      <Col md="3" className="mb-3">
+      <Col md="2" className="mb-3">
         <FormLabel>End {isDaily ? 'Time' : 'Date'}</FormLabel>
         <DatePicker
           className="form-control"
