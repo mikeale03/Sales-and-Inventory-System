@@ -133,11 +133,11 @@ const GcashRegisterPage = () => {
             <Col>
               {totalCashIn > 0 && (
                 <Row>
-                  <Col xs="6" className="fs-5">
+                  <Col xs="6" className="fs-5 text-primary">
                     Total Cash In:
                   </Col>
                   <Col xs="6">
-                    <p className="m-0 mb-1 fs-5 text-end">
+                    <p className="m-0 mb-1 fs-5 text-end text-primary">
                       <strong>{pesoFormat(totalCashIn)}</strong>
                     </p>
                   </Col>
@@ -145,11 +145,11 @@ const GcashRegisterPage = () => {
               )}
               {totalCashOut > 0 && (
                 <Row>
-                  <Col xs="6" className="fs-5">
+                  <Col xs="6" className="fs-5 text-danger">
                     Total Cash Out:
                   </Col>
                   <Col xs="6">
-                    <p className="m-0 mb-1 fs-5 text-end">
+                    <p className="m-0 mb-1 fs-5 text-end text-danger">
                       <strong>{pesoFormat(totalCashOut)}</strong>
                     </p>
                   </Col>
@@ -234,7 +234,13 @@ const GcashRegisterPage = () => {
                       ' (Cash)'
                     )}
                   </td>
-                  <td className="text-capitalize">{item.type}</td>
+                  <td
+                    className={`text-capitalize ${
+                      item.type === 'cash in' ? 'text-primary' : 'text-danger'
+                    }`}
+                  >
+                    {item.type}
+                  </td>
                   <td>{pesoFormat(item.amount + item.charge)}</td>
 
                   <td className="align-middle text-center">
