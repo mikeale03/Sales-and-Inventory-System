@@ -5,7 +5,6 @@ import {
   Gcash,
   GcashTransFilter as TransFilter,
 } from 'globalTypes/realm/gcash.types';
-import { type } from 'os';
 import { useContext, useEffect, useState } from 'react';
 import { Card, Col, FormCheck, FormControl, Row, Table } from 'react-bootstrap';
 import { toast } from 'react-toastify';
@@ -122,7 +121,7 @@ const GcashTransactionsPage = () => {
             <Col lg="6">
               <FormControl
                 type="search"
-                placeholder="Search number"
+                placeholder="Search number or amount"
                 onChange={handleSearch}
               />
             </Col>

@@ -137,8 +137,13 @@ export const createGcashTransQuery = (filter: GcashTransFilter) => {
   const params = [];
 
   if (number) {
-    query.push(`number CONTAINS[c] $${params.length}`);
+    query.push(
+      `(number CONTAINS[c] $${params.length} || amount == $${
+        params.length + 1
+      })`
+    );
     params.push(number);
+    params.push(+number);
   }
   if (transactBy) {
     query.push(`transact_by_user_id == $${params.length}`);
@@ -189,6 +194,7 @@ export const getGcashTransactions = async (
       })),
     };
   } catch (error) {
+    console.log(error);
     realm.close();
     return {
       isSuccess: false,
