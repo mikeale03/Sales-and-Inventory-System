@@ -350,3 +350,124 @@ export const updateSalesByGcashTransDelete = async (gcashTrans: Gcash) => {
     };
   }
 };
+
+export const getSalesByDateRange = async (
+  startDate: Date,
+  endDate: Date
+  // limit?: number
+) => {
+  let realm: Realm | undefined;
+  try {
+    realm = await openSalesRealm();
+    const sales = realm
+      ?.objects<Sales>(SALES)
+      .filtered('date_created >= $0 && date_created <= $1', startDate, endDate);
+
+    const salesMap = new Map<
+      string,
+      {
+        product_name: string;
+        quantity: number;
+        total_price: number;
+        date_created: Date;
+      }
+    >();
+
+    sales.forEach((s) => {
+      const { product_name, quantity, date_created, total_price } = s;
+      const type = product_name.split('-');
+      const name = type[0] === 'GCash' ? `${type[0]}-${type[1]}` : product_name;
+
+      if (salesMap.has(name)) {
+        const item = salesMap.get(name)!;
+        item.quantity += quantity;
+      } else {
+        salesMap.set(name, {
+          product_name: name,
+          quantity,
+          total_price,
+          date_created,
+        });
+      }
+    });
+
+    const sortedByQty = [...salesMap.values()]
+      .sort((a, b) => b.quantity - a.quantity)
+      .slice(0, 10);
+    // console.debug(sortedByQty);
+    realm.close();
+    return {
+      isSuccess: true,
+      result: sortedByQty,
+      message: 'Successfully get sales',
+    };
+  } catch (error) {
+    realm?.close();
+    // console.log(error);
+    return {
+      isSuccess: false,
+      message: 'Failed to get sales',
+      error,
+    };
+  }
+};
+
+export const getSalesGroupByDate = async (
+  startDate: Date,
+  endDate: Date
+  // limit?: number
+) => {
+  let realm: Realm | undefined;
+  try {
+    realm = await openSalesRealm();
+    const sales = realm
+      ?.objects<Sales>(SALES)
+      .filtered(
+        'date_created >= $0 && date_created <= $1 SORT(date_created ASC)',
+        startDate,
+        endDate
+      );
+
+    const salesMap = new Map<
+      string,
+      {
+        product_name: string;
+        quantity: number;
+        total_price: number;
+        date: string;
+      }
+    >();
+
+    sales.forEach((s) => {
+      const { product_name, quantity, date_created, total_price } = s;
+
+      const date = date_created.toLocaleDateString();
+
+      if (salesMap.has(date)) {
+        const item = salesMap.get(date)!;
+        item.total_price += total_price;
+      } else {
+        salesMap.set(date, {
+          product_name,
+          quantity,
+          total_price,
+          date,
+        });
+      }
+    });
+    realm.close();
+    return {
+      isSuccess: true,
+      result: salesMap,
+      message: 'Successfully get sales',
+    };
+  } catch (error) {
+    realm?.close();
+    // console.log(error);
+    return {
+      isSuccess: false,
+      message: 'Failed to get sales',
+      error,
+    };
+  }
+};

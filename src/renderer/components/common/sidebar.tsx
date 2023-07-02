@@ -66,7 +66,7 @@ const Sidebar = () => {
             </li>
           )}
         </NavLink>
-        <NavLink to="gcash-transactions">
+        <NavLink to="gcash-transactions" className="mb-3">
           {({ isActive }) => (
             <li
               className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 shadow-sm transition-all
@@ -75,6 +75,18 @@ const Sidebar = () => {
             >
               <FontAwesomeIcon icon={faMoneyBillTransfer} size="xl" />
               <p className="m-0 text-center">GCash Trans.</p>
+            </li>
+          )}
+        </NavLink>
+        <NavLink to="reports">
+          {({ isActive }) => (
+            <li
+              className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 shadow-sm transition-all
+            ${isActive && 'active'}`}
+              style={{ fontSize: '0.8em' }}
+            >
+              <FontAwesomeIcon icon={faMoneyBillTransfer} size="xl" />
+              <p className="m-0 text-center">Reports</p>
             </li>
           )}
         </NavLink>

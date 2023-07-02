@@ -1,3 +1,4 @@
+import { addDays } from 'date-fns';
 import { KeyboardEvent } from 'react';
 
 export const pesoFormat = (amount: number) => {
@@ -80,4 +81,15 @@ export const debounceText = (
 
       timer = setTimeout(onComplete, milliseconds);
     });
+};
+
+export const createDateLabels = (startDate: Date, endDate: Date) => {
+  const dateLabels: string[] = [];
+  let date = new Date(startDate);
+
+  while (date <= endDate) {
+    dateLabels.push(date.toLocaleDateString());
+    date = addDays(date, 1);
+  }
+  return dateLabels;
 };

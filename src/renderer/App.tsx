@@ -11,7 +11,7 @@ import HomePage from './pages/home';
 import CashRegisterPage from './pages/cashRegister';
 import ProductsPage from './pages/products';
 import SalesPage from './pages/sales';
-import ReportingPage from './pages/reporting';
+import ReportsPage from './pages/reports';
 import UserContext from './context/userContext';
 import AdminPage from './pages/admin';
 import UsersPage from './pages/admin/users';
@@ -62,7 +62,7 @@ export default function App() {
                 path="gcash-transactions"
                 element={<GcashTransactionsPage />}
               />
-              <Route path="reporting" element={<ReportingPage />} />
+              <Route path="reports" element={<ReportsPage />} />
               <Route path="admin" element={<AdminPage />} />
               <Route path="admin/users" element={<UsersPage />} />
             </Route>
