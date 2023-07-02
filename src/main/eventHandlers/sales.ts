@@ -4,8 +4,10 @@ import {
   deleteSale,
   getSalesByProducts,
   getSalesByTransactions,
+  getSalesByDateRange,
   salesPurchase,
   updateSalesByGcashTransDelete,
+  getSalesGroupByDate,
 } from '../service/salesRealm';
 import { Gcash } from '../../globalTypes/realm/gcash.types';
 
@@ -59,6 +61,20 @@ const setSalesEventHandler = (ipcMain: IpcMain) => {
     Channels.updateByGcashDelete,
     async (event: IpcMainInvokeEvent, gcash: Gcash) => {
       const result = await updateSalesByGcashTransDelete(gcash);
+      return result;
+    }
+  );
+  ipcMain.handle(
+    Channels.getSalesByDateRange,
+    async (event: IpcMainInvokeEvent, startDate: Date, endDate: Date) => {
+      const result = await getSalesByDateRange(startDate, endDate);
+      return result;
+    }
+  );
+  ipcMain.handle(
+    Channels.getSalesGroupByDate,
+    async (event: IpcMainInvokeEvent, startDate: Date, endDate: Date) => {
+      const result = await getSalesGroupByDate(startDate, endDate);
       return result;
     }
   );
