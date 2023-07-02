@@ -17,7 +17,7 @@ import {
   LineElement,
 } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
-import { Card, FormSelect } from 'react-bootstrap';
+import { Card, Col, FormSelect, Row } from 'react-bootstrap';
 import {
   endOfMonth,
   endOfWeek,
@@ -158,28 +158,37 @@ const ReportingPage = () => {
   return (
     <div className="pb-1">
       <h3>Reports</h3>
-      <Card className="mb-3">
-        <Card.Body>
-          <FormSelect
-            style={{ width: '200px' }}
-            onChange={handleChangeBarChart}
-          >
-            <option>This Week</option>
-            <option>This Month</option>
-            <option>This Year</option>
-          </FormSelect>
-          <div style={{ position: 'relative', height: '350px' }}>
-            <Bar options={barOptions} data={barChartData} width={100} />
-          </div>
-        </Card.Body>
-      </Card>
-      <Card className="mb-3">
-        <Card.Body>
-          <div style={{ position: 'relative', height: '350px' }}>
-            <Line options={lineOptions} data={lineChartData} width={100} />
-          </div>
-        </Card.Body>
-      </Card>
+      <Row>
+        <Col xl="6" className="mb-3">
+          <Card>
+            <Card.Body>
+              <FormSelect
+                style={{ width: '200px' }}
+                onChange={handleChangeBarChart}
+              >
+                <option>This Week</option>
+                <option>This Month</option>
+                <option>This Year</option>
+              </FormSelect>
+              <div style={{ position: 'relative', height: '350px' }}>
+                <Bar options={barOptions} data={barChartData} width={100} />
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col xl="6" className="mb-3">
+          <Card className="h-100">
+            <Card.Body>
+              <div
+                className="mt-3"
+                style={{ position: 'relative', height: '350px' }}
+              >
+                <Line options={lineOptions} data={lineChartData} width={100} />
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
     </div>
   );
 };
