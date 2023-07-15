@@ -28,6 +28,7 @@ const ProductsSelect = forwardRef<SelectInstance<Opt> | null, Props>(
   ({ onSelect, inputValue, onInputChange }, ref) => {
     const [productOptions, setProductOptions] = useState<Opt[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [menuIsOpen, setMenuIsOpen] = useState(false);
 
     const handleGetOptions = async (searchText: string): Promise<Opt[]> => {
       const response = await handleGetProducts(searchText);
@@ -53,6 +54,7 @@ const ProductsSelect = forwardRef<SelectInstance<Opt> | null, Props>(
     const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
       if (e.code === 'Enter') {
         onInputChange('');
+        setMenuIsOpen(false);
       }
     };
 
@@ -78,6 +80,9 @@ const ProductsSelect = forwardRef<SelectInstance<Opt> | null, Props>(
         autoFocus
         onKeyDown={onKeyDown}
         isLoading={isLoading}
+        menuIsOpen={menuIsOpen}
+        onMenuOpen={() => setMenuIsOpen(true)}
+        onMenuClose={() => setMenuIsOpen(false)}
       />
     );
   }
