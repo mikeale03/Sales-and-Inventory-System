@@ -10,7 +10,7 @@ const AdminPage = () => {
           <Row>
             <Col lg="4">
               <p className="mb-0">
-                <strong>Manage Users</strong>
+                <strong>Manage Users test</strong>
               </p>
               <Link to="users" className="d-block">
                 Users
