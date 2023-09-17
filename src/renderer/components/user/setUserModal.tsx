@@ -1,4 +1,4 @@
-import { User } from 'globalTypes/realm/user.types';
+import { Role, User } from 'globalTypes/realm/user.types';
 import { ChangeEvent, FormEvent, useState } from 'react';
 import { Button, Modal, Form, FormSelect } from 'react-bootstrap';
 import { toast } from 'react-toastify';
@@ -24,7 +24,7 @@ const SetUserModal = ({
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [role, setRole] = useState('staff');
+  const [role, setRole] = useState<Role>('staff');
   const [isSetPassword, setIsSetPassword] = useState(false);
 
   const handleCancel = () => {
@@ -35,8 +35,6 @@ const SetUserModal = ({
   const handleConfirm = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    if (role !== 'staff' && role !== 'admin') return;
-
     if (isSetPassword && password !== confirmPassword) {
       toast.error('Password and Confirm Password does not match');
       return;
@@ -103,10 +101,11 @@ const SetUserModal = ({
             <Form.Label>Role</Form.Label>
             <FormSelect
               value={role}
-              onChange={(e) => setRole(e.target.value)}
+              onChange={(e) => setRole(e.target.value as Role)}
               required
             >
               <option value="staff">Staff</option>
+              <option value="manager">Manager</option>
               <option value="admin">Admin</option>
             </FormSelect>
           </Form.Group>

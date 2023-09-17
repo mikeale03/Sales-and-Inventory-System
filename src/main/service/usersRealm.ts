@@ -1,18 +1,9 @@
 import { Response } from 'globalTypes/realm/response.types';
-import { UserCreate, UserUpdate } from 'globalTypes/realm/user.types';
+import { User, UserCreate, UserUpdate } from 'globalTypes/realm/user.types';
 import Realm, { ObjectSchema } from 'realm';
 import { isValidPassword, saltAndHash } from '../util';
 
 const USERS = 'Users';
-
-export type User = {
-  _id: string;
-  username: string;
-  password?: string;
-  salt?: string;
-  role: 'admin' | 'staff';
-  date_created: Date;
-};
 
 export class UsersSchema extends Realm.Object {
   static schema: ObjectSchema = {

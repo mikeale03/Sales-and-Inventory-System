@@ -17,6 +17,7 @@ export type Product = {
   updated_by?: string;
   updated_by_user_id?: string;
   last_transaction_date?: Date;
+  inventory_verified?: boolean;
   image?: string;
 };
 
@@ -37,6 +38,7 @@ export class ProductsSchema extends Realm.Object {
       updated_by: 'string?',
       updated_by_user_id: 'string?',
       last_transaction_date: 'date?',
+      inventory_verified: 'bool?',
       image: 'string?',
     },
     primaryKey: '_id',
@@ -47,6 +49,7 @@ export const openProductsRealm = async () => {
   const products = await Realm.open({
     path: '../realm/products',
     schema: [ProductsSchema],
+    schemaVersion: 2,
   });
   return products;
 };
@@ -176,6 +179,7 @@ export const getAllProducts = async (filter?: {
       result,
     };
   } catch (error) {
+    console.error(error);
     realm?.close();
     return {
       isSuccess: false,
