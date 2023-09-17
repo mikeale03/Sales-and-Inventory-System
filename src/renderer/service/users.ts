@@ -1,6 +1,6 @@
 import { Response } from 'globalTypes/realm/response.types';
 import { Channels } from 'globalTypes/channels/usersChannels';
-import { UserUpdate, User } from 'globalTypes/realm/user.types';
+import { UserUpdate, User, Role } from 'globalTypes/realm/user.types';
 
 const {
   electron: { ipcRenderer },
@@ -9,7 +9,7 @@ const {
 export const createUser = async (user: {
   username: string;
   password: string;
-  role: 'admin' | 'staff';
+  role: Role;
 }) => {
   const response = await ipcRenderer.invoke<Response<User>>(
     Channels.create,

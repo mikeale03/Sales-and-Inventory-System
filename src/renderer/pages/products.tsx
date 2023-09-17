@@ -1,5 +1,5 @@
 /* eslint-disable radix */
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState, useContext, useMemo, useCallback } from 'react';
 import { Button, Table, Card, Row, Col, FormControl } from 'react-bootstrap';
 import { debounce, pesoFormat } from 'renderer/utils/helper';
 import { deleteProduct, getProducts } from 'renderer/service/products';
@@ -7,14 +7,12 @@ import AddQuantityModal from 'renderer/components/products/addQuantityModal';
 import SetProductModal from 'renderer/components/products/setProductModal';
 import ConfirmationModal from 'renderer/components/common/modals/confirmation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCirclePlus } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faCirclePlus } from '@fortawesome/free-solid-svg-icons';
 import { faPenToSquare, faTrashCan } from '@fortawesome/free-regular-svg-icons';
 import { Product } from 'main/service/productsRealm';
 import { toast } from 'react-toastify';
 import UserContext from 'renderer/context/userContext';
 import format from 'date-fns/format';
-
-const { console } = window;
 
 const ProductsPage = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | undefined>();
@@ -23,19 +21,28 @@ const ProductsPage = () => {
     useState<boolean>(false);
   const [showAddQuantityModal, setShowAddQuantityModal] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [pageSize] = useState(50);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
   const { user } = useContext(UserContext);
 
-  const handleGetProducts = async (searchText?: string) => {
-    const response = await getProducts({
-      searchText,
-      sortProp: 'name',
-      sortAs: 'asc',
-    });
-    if (response.isSuccess) {
-      const data = response.result;
-      setProducts(data ?? []);
-    }
-  };
+  const handleGetProducts = useCallback(
+    async (searchText?: string) => {
+      const response = await getProducts({
+        searchText,
+        sortProp: 'name',
+        sortAs: 'asc',
+      });
+      if (response.isSuccess) {
+        const data = response.result;
+        const prods = data ?? [];
+        window.console.log(prods);
+        setTotalPages(Math.ceil(prods.length / pageSize));
+        setProducts(prods);
+      }
+    },
+    [pageSize]
+  );
 
   const handleUpdateProduct = async (product: Product) => {
     setProducts(
@@ -77,9 +84,15 @@ const ProductsPage = () => {
     handleGetProducts(search);
   }, 500);
 
+  const displayProducts = useMemo(() => {
+    const startIndex = (pageNumber - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    return products.slice(startIndex, endIndex);
+  }, [pageNumber, pageSize, products]);
+
   useEffect(() => {
     handleGetProducts();
-  }, []);
+  }, [handleGetProducts]);
 
   return (
     <div>
@@ -140,11 +153,12 @@ const ProductsPage = () => {
                 <th>Quantity</th>
                 <th>Last Updated By</th>
                 <th>Last Updated Date</th>
+                <th>Verified</th>
                 <th> </th>
               </tr>
             </thead>
             <tbody>
-              {products.map((d) => (
+              {displayProducts.map((d) => (
                 <tr key={d._id}>
                   <td>{d.name}</td>
                   <td>{d.barcode}</td>
@@ -154,6 +168,9 @@ const ProductsPage = () => {
                   <td>
                     {d.date_updated &&
                       format(d.date_updated, 'MM/dd/yyy hh:mm aaa')}
+                  </td>
+                  <td className="text-center">
+                    {d.inventory_verified && <FontAwesomeIcon icon={faCheck} />}
                   </td>
                   <td>
                     <FontAwesomeIcon
@@ -165,15 +182,18 @@ const ProductsPage = () => {
                       role="button"
                       tabIndex={0}
                     />
-                    <FontAwesomeIcon
-                      onClick={() => handleShowSetProductModal(d)}
-                      icon={faPenToSquare}
-                      title="Edit"
-                      size="xl"
-                      className="me-2 cursor-pointer"
-                      role="button"
-                      tabIndex={0}
-                    />
+                    {(user?.role === 'admin' ||
+                      (user?.role === 'manager' && !d.inventory_verified)) && (
+                      <FontAwesomeIcon
+                        onClick={() => handleShowSetProductModal(d)}
+                        icon={faPenToSquare}
+                        title="Edit"
+                        size="xl"
+                        className="me-2 cursor-pointer"
+                        role="button"
+                        tabIndex={0}
+                      />
+                    )}
                     {user?.role === 'admin' && (
                       <FontAwesomeIcon
                         onClick={() => handleShowConfirmationModal(d)}
@@ -190,13 +210,30 @@ const ProductsPage = () => {
               ))}
             </tbody>
           </Table>
-          {products.length === 0 && (
+          {displayProducts.length === 0 && (
             <span className="ms-2 fw-light fst-italic text-secondary">
               no products
             </span>
           )}
         </Card.Body>
       </Card>
+      <div className="d-flex justify-content-between align-items-center">
+        <Button
+          variant="secondary"
+          onClick={() => pageNumber > 1 && setPageNumber(pageNumber - 1)}
+        >
+          Previous
+        </Button>
+        <p className="pt-3 fw-bold">{pageNumber}</p>
+        <Button
+          variant="secondary"
+          onClick={() =>
+            pageNumber < totalPages && setPageNumber(pageNumber + 1)
+          }
+        >
+          Next
+        </Button>
+      </div>
     </div>
   );
 };

@@ -16,6 +16,7 @@ type ProductCreateParam = {
   description?: string;
   quantity: string | number;
   price: string | number;
+  inventory_verified?: boolean;
   created_by: string;
   created_by_user_id: string;
 };

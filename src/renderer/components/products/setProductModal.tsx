@@ -13,6 +13,16 @@ type ProductForm = {
   description?: string;
   quantity: string | number;
   price: string | number;
+  inventory_verified?: boolean;
+};
+
+const initProduct = {
+  name: '',
+  barcode: '',
+  description: '',
+  quantity: '',
+  price: '',
+  inventory_verified: false,
 };
 
 export type Props = {
@@ -30,13 +40,7 @@ const SetProductModal = ({
   onUpdate,
   onCreate,
 }: Props) => {
-  const [product, setProduct] = useState<ProductForm>({
-    name: '',
-    barcode: '',
-    description: '',
-    quantity: '',
-    price: '',
-  });
+  const [product, setProduct] = useState<ProductForm>(initProduct);
   const productNameInputRef = useRef<HTMLInputElement | null>(null);
   const { user } = useContext(UserContext);
 
@@ -64,13 +68,7 @@ const SetProductModal = ({
         created_by_user_id: user._id,
       });
       if (response.isSuccess && response.result) {
-        setProduct({
-          name: '',
-          barcode: '',
-          description: '',
-          quantity: '',
-          price: '',
-        });
+        setProduct(initProduct);
         productNameInputRef.current?.focus();
         toast.success(response.message);
         onCreate?.(response.result);
@@ -86,14 +84,7 @@ const SetProductModal = ({
 
   const onShow = () => {
     if (selectedProduct) setProduct(selectedProduct);
-    else
-      setProduct({
-        name: '',
-        barcode: '',
-        description: '',
-        quantity: '',
-        price: '',
-      });
+    else setProduct(initProduct);
   };
 
   return (
@@ -158,6 +149,18 @@ const SetProductModal = ({
               onChange={(e) => handleChange({ description: e.target.value })}
             />
           </Form.Group>
+          {(user?.role === 'admin' || user?.role === 'manager') && (
+            <Form.Group className="mb-3">
+              <Form.Check
+                label="Verified"
+                type="checkbox"
+                checked={product.inventory_verified ?? false}
+                onChange={(e) =>
+                  handleChange({ inventory_verified: e.target.checked })
+                }
+              />
+            </Form.Group>
+          )}
         </Modal.Body>
 
         <Modal.Footer>
