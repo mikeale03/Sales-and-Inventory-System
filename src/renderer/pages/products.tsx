@@ -13,6 +13,7 @@ import { Product } from 'main/service/productsRealm';
 import { toast } from 'react-toastify';
 import UserContext from 'renderer/context/userContext';
 import format from 'date-fns/format';
+import { createProductDeleteActivity } from 'renderer/service/activities';
 
 const ProductsPage = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | undefined>();
@@ -70,13 +71,20 @@ const ProductsPage = () => {
   };
 
   const handleDeleteProduct = async () => {
+    if (!user) return;
     if (selectedProduct) {
       const response = await deleteProduct(selectedProduct._id);
-      response.isSuccess
-        ? setProducts(
-            products.filter((prod) => prod._id !== selectedProduct._id)
-          )
-        : toast.error(response.message);
+      if (response.isSuccess) {
+        setProducts(
+          products.filter((prod) => prod._id !== selectedProduct._id)
+        );
+        createProductDeleteActivity({
+          product: selectedProduct,
+          transact_by: user.username,
+          transact_by_user_id: user._id,
+        });
+      }
+      toast.error(response.message);
     }
   };
 

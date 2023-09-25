@@ -17,6 +17,7 @@ module.exports = {
     'react/function-component-definition': 'off',
     'import/no-relative-packages': 'off',
     'no-unused-vars': 'off',
+    'no-console': 'off',
   },
   parserOptions: {
     ecmaVersion: 2020,

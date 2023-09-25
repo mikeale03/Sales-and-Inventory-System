@@ -20,6 +20,7 @@ import ConfirmationModal from 'renderer/components/common/modals/confirmation';
 import { toast } from 'react-toastify';
 import SalesFilter from 'renderer/components/sales/salesFilters';
 import FilterContext from 'renderer/context/filterContext';
+import { createSalesDeleteActivity } from 'renderer/service/activities';
 
 const SalesPage = () => {
   const [sales, setSales] = useState<Sales[]>([]);
@@ -87,10 +88,15 @@ const SalesPage = () => {
   });
 
   const handleDeleteSale = async () => {
-    if (!selectedSale) return;
+    if (!selectedSale || !user) return;
     const response = await deleteSale(selectedSale._id);
     if (response.isSuccess) {
       setSales(sales.filter((item) => item._id !== selectedSale._id));
+      createSalesDeleteActivity({
+        sales: selectedSale,
+        transact_by: user.username,
+        transact_by_user_id: user._id,
+      });
     } else toast.error(response.message);
   };
 

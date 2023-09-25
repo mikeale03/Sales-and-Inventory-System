@@ -3,6 +3,7 @@ import { FormEvent, useContext, useState } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import UserContext from 'renderer/context/userContext';
+import { createProductAddQtyActivity } from 'renderer/service/activities';
 import { updateProduct } from 'renderer/service/products';
 
 export type Props = {
@@ -29,18 +30,25 @@ const AddQuantityModal = ({
   const handleOnSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.stopPropagation();
     e.preventDefault();
-    const numQuality = +quantity;
+    const numQuantity = +quantity;
 
     if (selectedProduct && user) {
       const response = await updateProduct({
         _id: selectedProduct._id,
-        quantity: selectedProduct.quantity + numQuality,
+        quantity: selectedProduct.quantity + numQuantity,
         updated_by: user?.username,
         updated_by_user_id: user._id,
       });
 
-      if (response.isSuccess && response.result) onUpdate(response.result);
-      else toast(response.message);
+      if (response.isSuccess && response.result) {
+        onUpdate(response.result);
+        createProductAddQtyActivity({
+          product_name: selectedProduct.name,
+          quantity: numQuantity,
+          transact_by: user.username,
+          transact_by_user_id: user._id,
+        });
+      } else toast(response.message);
 
       onHide();
     }

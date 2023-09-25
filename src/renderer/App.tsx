@@ -5,13 +5,14 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-datepicker/dist/react-datepicker.css';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
-import { User } from 'main/service/usersRealm';
+import { User } from 'globalTypes/realm/user.types';
 import LoginPage from './pages/login';
 import HomePage from './pages/home';
 import CashRegisterPage from './pages/cashRegister';
 import ProductsPage from './pages/products';
 import SalesPage from './pages/sales';
 import ReportsPage from './pages/reports';
+import ActivitiesPage from './pages/activities';
 import UserContext from './context/userContext';
 import AdminPage from './pages/admin';
 import UsersPage from './pages/admin/users';
@@ -63,6 +64,7 @@ export default function App() {
                 element={<GcashTransactionsPage />}
               />
               <Route path="reports" element={<ReportsPage />} />
+              <Route path="activities" element={<ActivitiesPage />} />
               <Route path="admin" element={<AdminPage />} />
               <Route path="admin/users" element={<UsersPage />} />
             </Route>
