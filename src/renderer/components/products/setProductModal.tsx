@@ -4,6 +4,10 @@ import { Button, Form, Modal } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import UserContext from 'renderer/context/userContext';
 import { createProduct, updateProduct } from 'renderer/service/products';
+import {
+  createProductAddActivity,
+  createProductEditActivity,
+} from 'renderer/service/activities';
 import FormInput from '../common/forms/formInput';
 
 type ProductForm = {
@@ -58,6 +62,13 @@ const SetProductModal = ({
         onUpdate?.(response.result);
         toast.success(response.message);
         toggle(false);
+        const result = await createProductEditActivity({
+          oldProduct: selectedProduct!,
+          newProduct: product,
+          transact_by: user.username,
+          transact_by_user_id: user._id,
+        });
+        window.console.log(result);
         return;
       }
       toast.error(response.message);
@@ -72,6 +83,12 @@ const SetProductModal = ({
         productNameInputRef.current?.focus();
         toast.success(response.message);
         onCreate?.(response.result);
+        const result = await createProductAddActivity({
+          product,
+          transact_by: user.username,
+          transact_by_user_id: user._id,
+        });
+        window.console.log(result);
         return;
       }
       toast.error(response.message);

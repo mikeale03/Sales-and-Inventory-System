@@ -6,6 +6,14 @@ a {
   text-decoration: none;
 }
 
+.scroll-sm::-webkit-scrollbar {
+  width: 5px;
+}
+
+.scroll-sm::-webkit-scrollbar-thumb {
+  background: #cecdcd;
+}
+
 .nav-link.active {
   box-shadow: 5px 5px 5px gray !important;
   outline: thin solid gray;
