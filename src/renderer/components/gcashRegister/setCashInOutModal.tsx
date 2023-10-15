@@ -7,6 +7,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState, FormEvent } from 'react';
 import { Button, Modal, Form, FormSelect, FormControl } from 'react-bootstrap';
+import ReactDatePicker from 'react-datepicker';
 import { pesoFormat } from 'renderer/utils/helper';
 
 type GCashForm = {
@@ -16,6 +17,7 @@ type GCashForm = {
   charge: number | string;
   charge_payment: string;
   type: string;
+  date_transacted: Date | null;
 };
 
 export type GCashItem = {
@@ -25,6 +27,7 @@ export type GCashItem = {
   charge: number;
   charge_payment: 'cash' | 'gcash';
   type: 'cash in' | 'cash out';
+  date_transacted: Date;
 };
 
 export type Props = {
@@ -43,6 +46,7 @@ const initItem = {
   charge: 0,
   charge_payment: 'cash',
   type: '',
+  date_transacted: new Date(),
 };
 
 const SetCashInOutModal = ({
@@ -66,13 +70,15 @@ const SetCashInOutModal = ({
     e.stopPropagation();
     e.preventDefault();
     toggle(false);
-    const { type: typ, amount, charge_payment, charge } = item;
+    const { type: typ, amount, charge_payment, charge, date_transacted } = item;
+    if (!date_transacted) return;
     if (
       (typ === 'cash in' || typ === 'cash out') &&
       (charge_payment === 'cash' || charge_payment === 'gcash')
     )
       onConfirm(type, {
         ...item,
+        date_transacted,
         amount: +amount,
         type: typ,
         charge_payment,
@@ -85,9 +91,13 @@ const SetCashInOutModal = ({
   };
 
   const handleChange = (update: Partial<GCashForm>) => {
+    console.log(update);
     if (update.type === 'cash in') update.charge_payment = 'cash';
     if (update.amount !== undefined)
       update.charge = Math.ceil(+update.amount / 500) * 10;
+    if (update.date_transacted && update.date_transacted > new Date()) {
+      update.date_transacted = new Date();
+    }
 
     setItem({ ...item, ...update });
   };
@@ -140,6 +150,19 @@ const SetCashInOutModal = ({
               min={0}
               onChange={(e) => handleChange({ amount: e.target.value })}
               required
+            />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>
+              Date <span className="text-danger">*</span>
+            </Form.Label>
+            <ReactDatePicker
+              className="form-control"
+              selected={item.date_transacted}
+              onChange={(date_transacted) => handleChange({ date_transacted })}
+              showTimeInput
+              maxDate={new Date()}
+              dateFormat="MM/dd/yyyy h:mm aa"
             />
           </Form.Group>
           <p className="m-0 mb-1">

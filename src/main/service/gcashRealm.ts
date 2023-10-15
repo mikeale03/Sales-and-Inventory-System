@@ -1,3 +1,4 @@
+/* eslint-disable lines-between-class-members */
 import { Sales } from 'globalTypes/realm/sales.types';
 import Realm, { ObjectSchema } from 'realm';
 import {
@@ -11,7 +12,7 @@ import { createSales, openSalesRealm } from './salesRealm';
 
 const GCASH = 'Gcash';
 
-export class GcashSchema extends Realm.Object {
+export class GcashSchema extends Realm.Object<Gcash> {
   static schema: ObjectSchema = {
     name: GCASH,
     properties: {
@@ -20,7 +21,8 @@ export class GcashSchema extends Realm.Object {
       amount: 'float',
       charge: 'float',
       number: 'string?',
-      date_created: 'date',
+      date_transacted: { type: 'date?', indexed: true },
+      date_created: { type: 'date', indexed: true },
       transact_by: 'string',
       transact_by_user_id: 'string',
       updated_by: 'string?',
@@ -30,6 +32,8 @@ export class GcashSchema extends Realm.Object {
       is_product_gcash_pay: 'bool?',
       charge_payment: 'string',
       related_gcash_id: 'string?',
+      note: 'string?',
+      gcash_balance: 'float',
     },
     primaryKey: '_id',
   };
@@ -40,12 +44,67 @@ export const openGcashRealm = async () => {
     const realm = await Realm.open({
       path: '../realm/gcash',
       schema: [GcashSchema],
-      schemaVersion: 4,
+      schemaVersion: 6,
     });
     return realm;
   } catch (error) {
     return undefined;
   }
+};
+
+export const getGcashBeforeDate = (
+  gcashObjects: Realm.Results<Gcash>,
+  date: Date
+) => {
+  const result = gcashObjects.filtered(
+    'date_transacted != $0 AND date_transacted < $1 SORT(date_transacted DESC) LIMIT(1)',
+    null,
+    date
+  );
+
+  return result.length ? result[0] : null;
+};
+
+export const addBalanceFromDate = (
+  gcashRealm: Realm,
+  gcashObjects: Realm.Results<Gcash>,
+  date: Date,
+  amount: number
+) => {
+  const transactions = gcashObjects.filtered(
+    'date_transacted != $0 AND date_transacted > $1',
+    null,
+    date
+  );
+  gcashRealm.write(() => {
+    for (const tran of transactions) {
+      tran.gcash_balance = tran.gcash_balance
+        ? +(tran.gcash_balance + amount).toFixed(2)
+        : amount;
+    }
+  });
+  return transactions;
+};
+
+export const deductBalanceFromDate = (
+  gcashRealm: Realm,
+  gcashObjects: Realm.Results<Gcash>,
+  date: Date,
+  amount: number
+) => {
+  const transactions = gcashObjects.filtered(
+    'date_transacted != $0 AND date_transacted > $1',
+    null,
+    date
+  );
+  gcashRealm.write(() => {
+    for (const tran of transactions) {
+      tran.gcash_balance = tran.gcash_balance
+        ? +(tran.gcash_balance - amount).toFixed(2)
+        : 0 - amount;
+    }
+  });
+  return transactions;
 };
 
 export const createGcashTransactions = async (
@@ -62,14 +121,31 @@ export const createGcashTransactions = async (
   const sales: Omit<Sales, '_id'>[] = [];
   try {
     gcashTrans.forEach((gcashTran) => {
-      const task = create<GcashCreate & { _id?: string; date_created: Date }>(
+      const { date_transacted, type, amount } = gcashTran;
+      const gcashObjects = realm.objects<Gcash>(GCASH);
+      const { gcash_balance = 0 } =
+        getGcashBeforeDate(gcashObjects, date_transacted) ?? {};
+
+      let balance = gcash_balance;
+
+      if (type === 'cash in') {
+        balance = +(gcash_balance - amount).toFixed(2);
+        deductBalanceFromDate(realm, gcashObjects, date_transacted, amount);
+      } else if (type === 'cash out') {
+        balance = +(gcash_balance + amount).toFixed(2);
+        addBalanceFromDate(realm, gcashObjects, date_transacted, amount);
+      }
+
+      const data = {
+        ...gcashTran,
+        date_created: new Date(),
+        gcash_balance: balance,
+      };
+
+      const task = create<typeof data & { _id?: string; date_created: Date }>(
         realm,
         GCASH,
-        {
-          ...gcashTran,
-          date_created: new Date(),
-          transaction_id: gcashTran.transaction_id,
-        }
+        data
       );
 
       // if (gcashTran.charge_payment === 'gcash') {
@@ -123,6 +199,7 @@ export const createGcashTransactions = async (
   } catch (error) {
     realm.close();
     salesRealm?.close();
+    console.log(error);
     return {
       isSuccess: false,
       message: 'Failed to create a gcash transaction',
@@ -132,9 +209,11 @@ export const createGcashTransactions = async (
 };
 
 export const createGcashTransQuery = (filter: GcashTransFilter) => {
-  const { transactBy, startDate, endDate, number, type } = filter;
+  const { transactBy, startDate, endDate, number, type, dateFilter } = filter;
   const query: string[] = [];
   const params = [];
+  const dateField =
+    dateFilter === 'Date Created' ? 'date_created' : 'date_transacted';
 
   if (number) {
     query.push(
@@ -154,11 +233,11 @@ export const createGcashTransQuery = (filter: GcashTransFilter) => {
     params.push(type);
   }
   if (startDate) {
-    query.push(`date_created >= $${params.length}`);
+    query.push(`${dateField} >= $${params.length}`);
     params.push(startDate);
   }
   if (endDate) {
-    query.push(`date_created <= $${params.length}`);
+    query.push(`${dateField} <= $${params.length}`);
     params.push(endDate);
   }
 
@@ -179,10 +258,17 @@ export const getGcashTransactions = async (
     };
   try {
     const task = realm?.objects<Gcash>(GCASH);
+    const { dateFilter } = filter ?? {};
+    const sortFilter =
+      dateFilter === 'Date Created'
+        ? 'SORT(date_created DESC)'
+        : 'SORT(date_transacted DESC)';
+
     const query = filter && createGcashTransQuery(filter);
     const filtered = query?.query
-      ? task.filtered(`${query.query} SORT(date_created DESC)`, ...query.params)
+      ? task.filtered(`${query.query} ${sortFilter}`, ...query.params)
       : task;
+    // console.log(filtered[0].date_transacted);
     const gcashTrans = filtered.toJSON() as Gcash[];
     realm.close();
     return {
@@ -240,6 +326,36 @@ export const deleteGcashTransaction = async (
     return {
       isSuccess: false,
       message: 'Failed to delete a GCash transaction',
+      error,
+    };
+  }
+};
+
+export const getLatestBalance = async () => {
+  const realm = await openGcashRealm();
+  if (!realm)
+    return {
+      isSuccess: false,
+      message: 'Error opening Sales realm db',
+    };
+  try {
+    const task = realm?.objects<Gcash>(GCASH);
+    const latestGcash = task.filtered(
+      'date_transacted != $0 SORT(date_transacted DESC) LIMIT(1)',
+      null
+    );
+    const balance = latestGcash[0].gcash_balance;
+    realm.close();
+    return {
+      isSuccess: true,
+      message: 'Successfully get GCash Balance',
+      result: balance,
+    };
+  } catch (error) {
+    realm.close();
+    return {
+      isSuccess: false,
+      message: 'Failed to get GCash Balance',
       error,
     };
   }

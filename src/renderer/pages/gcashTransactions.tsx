@@ -36,12 +36,19 @@ const GcashTransactionsPage = () => {
   const [confirmationModal, setConfirmationModal] = useState(false);
   const { user } = useContext(UserContext);
   const {
-    gcashTransFilter: { userOption, selectedType, startDate, endDate },
+    gcashTransFilter: {
+      userOption,
+      selectedDateFilter,
+      selectedType,
+      startDate,
+      endDate,
+    },
   } = useContext(FilterContext);
 
   const handleGetGcashTransactions = async (filter?: TransFilter) => {
     const response = await getGcashTransactions(filter);
     if (response.isSuccess && response.result) {
+      console.log(response.result);
       setTransactions(response.result);
     } else toast.error(response.message);
   };
@@ -70,10 +77,18 @@ const GcashTransactionsPage = () => {
         transactBy: userOption === 'all' ? undefined : userOption,
         type: selectedType,
         number: search,
+        dateFilter: selectedDateFilter,
         startDate,
         endDate,
       });
-  }, [userOption, selectedType, startDate, endDate, search]);
+  }, [
+    userOption,
+    selectedType,
+    startDate,
+    selectedDateFilter,
+    endDate,
+    search,
+  ]);
 
   const handleSearch = debounce((e) => {
     setSearch(e.target.value);
@@ -150,8 +165,10 @@ const GcashTransactionsPage = () => {
                 <th>Amount</th>
                 <th>Charge</th>
                 <th>Number</th>
-                <th>Date</th>
+                <th>Date Transacted</th>
+                <th>GCash Balance</th>
                 <th>Transact By</th>
+                <th>Date Created</th>
                 <th> </th>
               </tr>
             </thead>
@@ -174,8 +191,21 @@ const GcashTransactionsPage = () => {
                     )}
                   </td>
                   <td>{item.number}</td>
-                  <td>{format(item.date_created, 'MM/dd/yyyy hh:mm aaa')}</td>
+                  <td>
+                    {item.date_transacted &&
+                      format(
+                        new Date(item.date_transacted),
+                        'MM/dd/yyyy hh:mm aaa'
+                      )}
+                  </td>
+                  <td>{pesoFormat(item.gcash_balance)}</td>
                   <td>{item.transact_by}</td>
+                  <td>
+                    {format(
+                      new Date(item.date_created),
+                      'MM/dd/yyyy hh:mm aaa'
+                    )}
+                  </td>
                   <td className="d-flex justify-content-around">
                     <FormCheck type="checkbox" />
                     {user?.role === 'admin' && (

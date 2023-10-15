@@ -18,6 +18,13 @@ export const getGcashTransactions = async (filter?: GcashTransFilter) => {
   return response;
 };
 
+export const getGcashBalance = async () => {
+  const response = await ipcRenderer.invoke<Response<number>>(
+    Channels.getGcashBalance
+  );
+  return response;
+};
+
 export const createGcashTransactions = async (gcashTrans: GcashCreate[]) => {
   const response = await ipcRenderer.invoke<Response<Gcash[]>>(
     Channels.createTransactions,
