@@ -55,9 +55,11 @@ const SetProductModal = ({
       const response = await updateProduct({
         ...product,
         _id: product._id,
+        barcode: product.barcode || null,
         updated_by: user.username,
         updated_by_user_id: user._id,
       });
+      console.log(response);
       if (response.isSuccess && response.result) {
         onUpdate?.(response.result);
         toast.success(response.message);
@@ -78,6 +80,7 @@ const SetProductModal = ({
         created_by: user.username,
         created_by_user_id: user._id,
       });
+      console.log(response);
       if (response.isSuccess && response.result) {
         setProduct(initProduct);
         productNameInputRef.current?.focus();

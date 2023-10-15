@@ -40,3 +40,11 @@ export const deleteGcashTransaction = async (id: string) => {
   );
   return response;
 };
+
+export const addGcashBalance = async (amount: number) => {
+  const response = await ipcRenderer.invoke<Response<number>>(
+    Channels.addGcashBalance,
+    amount
+  );
+  return response;
+};

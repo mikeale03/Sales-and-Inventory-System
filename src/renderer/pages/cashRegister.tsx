@@ -156,7 +156,7 @@ function CashRegisterPage() {
           <Col lg="8" style={{ position: 'relative' }}>
             <Card style={{ minHeight: '100%' }}>
               <Card.Body>
-                <Table size="sm">
+                <Table size="sm" hover>
                   <thead>
                     <tr>
                       <th>Name</th>

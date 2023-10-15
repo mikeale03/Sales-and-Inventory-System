@@ -57,7 +57,7 @@ export const getGcashBeforeDate = (
   date: Date
 ) => {
   const result = gcashObjects.filtered(
-    'date_transacted != $0 AND date_transacted < $1 SORT(date_transacted DESC) LIMIT(1)',
+    'date_transacted != $0 AND date_transacted <= $1 SORT(date_transacted DESC) LIMIT(1)',
     null,
     date
   );
@@ -128,10 +128,10 @@ export const createGcashTransactions = async (
 
       let balance = gcash_balance;
 
-      if (type === 'cash in') {
+      if (type === 'cash in' || type === 'deduct balance') {
         balance = +(gcash_balance - amount).toFixed(2);
         deductBalanceFromDate(realm, gcashObjects, date_transacted, amount);
-      } else if (type === 'cash out') {
+      } else if (type === 'cash out' || type === 'add balance') {
         balance = +(gcash_balance + amount).toFixed(2);
         addBalanceFromDate(realm, gcashObjects, date_transacted, amount);
       }
@@ -261,8 +261,8 @@ export const getGcashTransactions = async (
     const { dateFilter } = filter ?? {};
     const sortFilter =
       dateFilter === 'Date Created'
-        ? 'SORT(date_created DESC)'
-        : 'SORT(date_transacted DESC)';
+        ? 'SORT(date_created ASC)'
+        : 'SORT(date_transacted ASC)';
 
     const query = filter && createGcashTransQuery(filter);
     const filtered = query?.query
@@ -310,6 +310,24 @@ export const deleteGcashTransaction = async (
         isSuccess: false,
         message: 'GCash transaction not found',
       };
+    }
+    const gcashObjects = realm.objects<Gcash>(GCASH);
+    if (gcash.type === 'cash in' || gcash.type === 'deduct balance') {
+      gcash.date_transacted &&
+        addBalanceFromDate(
+          realm,
+          gcashObjects,
+          gcash.date_transacted,
+          gcash.amount
+        );
+    } else if (gcash.type === 'cash out' || gcash.type === 'add balance') {
+      gcash.date_transacted &&
+        deductBalanceFromDate(
+          realm,
+          gcashObjects,
+          gcash.date_transacted,
+          gcash.amount
+        );
     }
 
     realm.write(() => {

@@ -152,7 +152,7 @@ const ProductsPage = () => {
 
       <Card className="d-flex">
         <Card.Body className="flex-grow-1">
-          <Table responsive>
+          <Table responsive hover>
             <thead>
               <tr>
                 <th>Name</th>
@@ -202,7 +202,8 @@ const ProductsPage = () => {
                         tabIndex={0}
                       />
                     )}
-                    {user?.role === 'admin' && (
+                    {(user?.role === 'admin' ||
+                      (user?.role === 'manager' && !d.inventory_verified)) && (
                       <FontAwesomeIcon
                         onClick={() => handleShowConfirmationModal(d)}
                         icon={faTrashCan}

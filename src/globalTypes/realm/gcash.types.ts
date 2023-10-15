@@ -1,6 +1,13 @@
+export type GcashType =
+  | 'cash in'
+  | 'cash out'
+  | 'gcash pay'
+  | 'add balance'
+  | 'deduct balance';
+
 export type Gcash = {
   _id: string;
-  type: 'cash in' | 'cash out' | 'gcash pay';
+  type: GcashType;
   amount: number;
   charge: number;
   number?: string;
