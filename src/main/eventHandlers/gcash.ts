@@ -8,6 +8,7 @@ import {
   createGcashTransactions,
   deleteGcashTransaction,
   getGcashTransactions,
+  getLatestBalance,
 } from '../service/gcashRealm';
 
 const setGcashEventHandler = (ipcMain: IpcMain) => {
@@ -15,6 +16,13 @@ const setGcashEventHandler = (ipcMain: IpcMain) => {
     Channels.getTransactions,
     async (event: IpcMainInvokeEvent, filter?: GcashTransFilter) => {
       const result = await getGcashTransactions(filter);
+      return result;
+    }
+  );
+  ipcMain.handle(
+    Channels.getGcashBalance,
+    async (event: IpcMainInvokeEvent) => {
+      const result = await getLatestBalance();
       return result;
     }
   );

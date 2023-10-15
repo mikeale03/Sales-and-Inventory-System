@@ -12,6 +12,7 @@ export type GcashFilter = {
   userOption: string;
   selectedPeriod: string;
   selectedType?: 'cash in' | 'cash out';
+  selectedDateFilter: 'Date Transacted' | 'Date Created';
   selectedDate: Date;
   startDate: Date;
   endDate: Date;
@@ -35,6 +36,7 @@ const FilterContext = createContext<{
     selectedDate: new Date(),
     userOption: '',
     selectedPeriod: 'Daily',
+    selectedDateFilter: 'Date Transacted',
     selectedType: undefined,
     startDate: new Date(new Date().setHours(0, 0, 0, 0)),
     endDate: new Date(new Date().setHours(23, 59, 59, 999)),

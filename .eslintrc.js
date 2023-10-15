@@ -18,6 +18,7 @@ module.exports = {
     'import/no-relative-packages': 'off',
     'no-unused-vars': 'off',
     'no-console': 'off',
+    'no-restricted-syntax': 'off',
   },
   parserOptions: {
     ecmaVersion: 2020,

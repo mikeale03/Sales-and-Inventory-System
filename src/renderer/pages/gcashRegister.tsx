@@ -15,8 +15,12 @@ import SetCashInOutModal, {
   GCashItem,
 } from 'renderer/components/gcashRegister/setCashInOutModal';
 import UserContext from 'renderer/context/userContext';
-import { createGcashTransactions } from 'renderer/service/gcash';
+import {
+  createGcashTransactions,
+  getGcashBalance,
+} from 'renderer/service/gcash';
 import { pesoFormat } from 'renderer/utils/helper';
+import format from 'date-fns/format';
 
 let key = 0;
 
@@ -31,8 +35,23 @@ const GcashRegisterPage = () => {
   const [totalChargeCash, setTotalChargeCash] = useState(0);
   const [totalChargeGcash, setTotalChargeGcash] = useState(0);
   const [totalAmount, setTotalAmount] = useState(0);
+  const [gcashBalance, setGcashBalance] = useState(0);
+  const [balances, setBalances] = useState<number[]>([]);
 
   const { user } = useContext(UserContext);
+
+  useEffect(() => {
+    (async () => {
+      const response = await getGcashBalance();
+      console.log(response);
+      if (response.isSuccess) {
+        console.log(response.result);
+        setGcashBalance(response.result ?? 0);
+      } else {
+        toast.error(response.message);
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     let tCashIn = 0;
@@ -40,6 +59,7 @@ const GcashRegisterPage = () => {
     let tChargeCash = 0;
     let tChargeGcash = 0;
     let tAmount = 0;
+    const balanceArr: number[] = [];
     items.forEach((item) => {
       if (item.type === 'cash in') tCashIn += item.amount;
       else tCashOut += item.amount;
@@ -47,13 +67,27 @@ const GcashRegisterPage = () => {
       tChargeCash += item.charge_payment === 'cash' ? item.charge : 0;
       tChargeGcash += item.charge_payment !== 'cash' ? item.charge : 0;
       tAmount += item.amount + item.charge;
+
+      const currentBalance = balanceArr.length
+        ? balanceArr[balanceArr.length - 1]
+        : gcashBalance;
+
+      let balance = currentBalance;
+      if (item.type === 'cash in') {
+        balance -= item.amount;
+      } else if (item.type === 'cash out') {
+        balance += item.amount;
+      }
+
+      balanceArr.push(balance);
     });
     setTotalCashIn(tCashIn);
     setTotalCashOut(tCashOut);
     setTotalChargeCash(tChargeCash);
     setTotalChargeGcash(tChargeGcash);
     setTotalAmount(tAmount);
-  }, [items]);
+    setBalances(balanceArr);
+  }, [items, gcashBalance]);
 
   const handleSetCashInCashOutModal = (
     _type: 'cash in' | 'cash out',
@@ -67,14 +101,18 @@ const GcashRegisterPage = () => {
   const handleSetItem = (_type: 'cash in' | 'cash out', item: GCashItem) => {
     if (item.key) {
       setItems(
-        items.map((itm) =>
-          itm.key === item.key
-            ? {
-                ...itm,
-                ...item,
-              }
-            : itm
-        )
+        items
+          .map((itm) =>
+            itm.key === item.key
+              ? {
+                  ...itm,
+                  ...item,
+                }
+              : itm
+          )
+          .sort(
+            (a, b) => (a.date_transacted as any) - (b.date_transacted as any)
+          )
       );
       return;
     }
@@ -85,7 +123,11 @@ const GcashRegisterPage = () => {
       key,
       type: _type,
     };
-    setItems([itm, ...items]);
+    setItems(
+      [itm, ...items].sort(
+        (a, b) => (a.date_transacted as any) - (b.date_transacted as any)
+      )
+    );
   };
 
   const handleSubmit = async () => {
@@ -210,6 +252,15 @@ const GcashRegisterPage = () => {
 
       <Card>
         <Card.Body>
+          <div className="d-xl-flex justify-content-between">
+            <p className="ms-2 my-2">
+              Starting Balance: {pesoFormat(gcashBalance)}
+            </p>
+            <p className="me-2 my-2">
+              Ending Balance:{' '}
+              {pesoFormat(balances[balances.length - 1] ?? gcashBalance)}
+            </p>
+          </div>
           <Table>
             <thead>
               <tr>
@@ -218,11 +269,13 @@ const GcashRegisterPage = () => {
                 <th>Charge</th>
                 <th>Type</th>
                 <th>Total</th>
+                <th>Date Transacted</th>
+                <th>GCash Balance</th>
                 <th> </th>
               </tr>
             </thead>
             <tbody>
-              {items.map((item) => (
+              {items.map((item, index) => (
                 <tr key={`${item.key}`}>
                   <td>{item.number}</td>
                   <td>{pesoFormat(item.amount)}</td>
@@ -242,7 +295,8 @@ const GcashRegisterPage = () => {
                     {item.type}
                   </td>
                   <td>{pesoFormat(item.amount + item.charge)}</td>
-
+                  <td>{format(item.date_transacted, 'MM/dd/yyyy h:mm aa')}</td>
+                  <td>{pesoFormat(balances[index])}</td>
                   <td className="align-middle text-center">
                     <FontAwesomeIcon
                       onClick={() =>

@@ -1,4 +1,7 @@
-import { GcashTransFilterType } from 'globalTypes/realm/gcash.types';
+import {
+  GcashTransDateFilterType,
+  GcashTransFilterType,
+} from 'globalTypes/realm/gcash.types';
 import { User } from 'globalTypes/realm/user.types';
 import { useContext, useEffect, useState, ChangeEvent } from 'react';
 import { Col, FormLabel, FormSelect, Row } from 'react-bootstrap';
@@ -91,9 +94,18 @@ const GcashTransFilter = () => {
     });
   };
 
+  const handleDateFilterSelect = (e: ChangeEvent<HTMLSelectElement>) => {
+    if (!gcashTransFilter) return;
+    const { value } = e.target;
+    setGcashTransFilter({
+      ...gcashTransFilter,
+      selectedDateFilter: value as GcashTransDateFilterType,
+    });
+  };
+
   return (
     <Row>
-      <Col md="2" className="mb-3">
+      <Col md="4" xl="2" className="mb-3">
         <FormLabel>User</FormLabel>
         <FormSelect
           value={gcashTransFilter.userOption}
@@ -112,7 +124,7 @@ const GcashTransFilter = () => {
           ))}
         </FormSelect>
       </Col>
-      <Col md="2" className="mb-3">
+      <Col md="4" xl="1" className="mb-3">
         <FormLabel>Period</FormLabel>
         <FormSelect
           value={gcashTransFilter.selectedPeriod}
@@ -122,7 +134,7 @@ const GcashTransFilter = () => {
           <option>Monthly</option>
         </FormSelect>
       </Col>
-      <Col md="2" className="mb-3">
+      <Col md="4" xl="1" className="mb-3">
         <FormLabel>Type</FormLabel>
         <FormSelect
           value={gcashTransFilter.selectedType ?? 'all'}
@@ -133,7 +145,17 @@ const GcashTransFilter = () => {
           <option value="cash out">Cash Out</option>
         </FormSelect>
       </Col>
-      <Col md="2" className="mb-3">
+      <Col md="3" xl="2" className="mb-3">
+        <FormLabel>Date Filter</FormLabel>
+        <FormSelect
+          value={gcashTransFilter.selectedDateFilter}
+          onChange={handleDateFilterSelect}
+        >
+          <option>Date Transacted</option>
+          <option>Date Created</option>
+        </FormSelect>
+      </Col>
+      <Col md="3" xl="2" className="mb-3">
         <FormLabel>Select {isDaily ? 'Date' : 'Month'}</FormLabel>
         <DatePicker
           className="form-control"
@@ -148,7 +170,7 @@ const GcashTransFilter = () => {
           todayButton="Today"
         />
       </Col>
-      <Col md="2" className="mb-3">
+      <Col md="3" xl="2" className="mb-3">
         <FormLabel>Start {isDaily ? 'Time' : 'Date'}</FormLabel>
         <DatePicker
           className="form-control"
@@ -167,7 +189,7 @@ const GcashTransFilter = () => {
           dateFormat={isDaily ? 'h:mm aa' : 'MM/dd/yyyy h:mm aa'}
         />
       </Col>
-      <Col md="2" className="mb-3">
+      <Col md="3" xl="2" className="mb-3">
         <FormLabel>End {isDaily ? 'Time' : 'Date'}</FormLabel>
         <DatePicker
           className="form-control"
