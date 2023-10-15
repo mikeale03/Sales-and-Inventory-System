@@ -110,9 +110,17 @@ const GcashTransactionsPage = () => {
       return;
     }
     window.console.log(response2);
-    setTransactions(
-      transactions.filter((item) => item._id !== selectedTrans._id)
-    );
+    // setTransactions(
+    //   transactions.filter((item) => item._id !== selectedTrans._id)
+    // );
+    await handleGetGcashTransactions({
+      transactBy: userOption === 'all' ? undefined : userOption,
+      type: selectedType,
+      number: search,
+      dateFilter: selectedDateFilter,
+      startDate,
+      endDate,
+    });
   };
 
   return (
@@ -158,7 +166,7 @@ const GcashTransactionsPage = () => {
             </p>
           </div>
           <hr />
-          <Table>
+          <Table responsive hover>
             <thead>
               <tr>
                 <th>Type</th>
@@ -169,6 +177,7 @@ const GcashTransactionsPage = () => {
                 <th>GCash Balance</th>
                 <th>Transact By</th>
                 <th>Date Created</th>
+                <th>Note</th>
                 <th> </th>
               </tr>
             </thead>
@@ -206,19 +215,22 @@ const GcashTransactionsPage = () => {
                       'MM/dd/yyyy hh:mm aaa'
                     )}
                   </td>
-                  <td className="d-flex justify-content-around">
-                    <FormCheck type="checkbox" />
-                    {user?.role === 'admin' && (
-                      <FontAwesomeIcon
-                        onClick={() => handleShowConfirmationModal(item)}
-                        icon={faTrashCan}
-                        title="Delete"
-                        size="xl"
-                        className="me-2 cursor-pointer"
-                        role="button"
-                        tabIndex={0}
-                      />
-                    )}
+                  <td>{item.note}</td>
+                  <td>
+                    <div className="d-flex justify-content-around">
+                      <FormCheck className="me-2" type="checkbox" />
+                      {user?.role === 'admin' && (
+                        <FontAwesomeIcon
+                          onClick={() => handleShowConfirmationModal(item)}
+                          icon={faTrashCan}
+                          title="Delete"
+                          size="xl"
+                          className="me-2 cursor-pointer"
+                          role="button"
+                          tabIndex={0}
+                        />
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

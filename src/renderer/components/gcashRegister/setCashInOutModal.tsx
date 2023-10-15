@@ -5,10 +5,13 @@ import {
   faRotateRight,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { GcashType } from 'globalTypes/realm/gcash.types';
 import { useState, FormEvent } from 'react';
 import { Button, Modal, Form, FormSelect, FormControl } from 'react-bootstrap';
 import ReactDatePicker from 'react-datepicker';
 import { pesoFormat } from 'renderer/utils/helper';
+
+type Type = 'cash in' | 'cash out' | 'add balance' | 'deduct balance';
 
 type GCashForm = {
   key?: number;
@@ -26,16 +29,17 @@ export type GCashItem = {
   amount: number;
   charge: number;
   charge_payment: 'cash' | 'gcash';
-  type: 'cash in' | 'cash out';
+  type: GcashType;
   date_transacted: Date;
+  note?: string;
 };
 
 export type Props = {
   show: boolean;
   toggle: (show: boolean) => void;
-  type: 'cash in' | 'cash out';
+  type: GcashType;
   selectedItem?: GCashItem;
-  onConfirm: (type: 'cash in' | 'cash out', item: GCashItem) => void;
+  onConfirm: (type: Type, item: GCashItem) => void;
   onCancel?: () => void;
   onExited?: () => void;
 };
@@ -76,7 +80,7 @@ const SetCashInOutModal = ({
       (typ === 'cash in' || typ === 'cash out') &&
       (charge_payment === 'cash' || charge_payment === 'gcash')
     )
-      onConfirm(type, {
+      onConfirm(type as Type, {
         ...item,
         date_transacted,
         amount: +amount,
@@ -87,7 +91,9 @@ const SetCashInOutModal = ({
   };
 
   const onShow = () => {
-    selectedItem ? setItem(selectedItem) : setItem({ ...initItem, type });
+    selectedItem
+      ? setItem(selectedItem)
+      : setItem({ ...initItem, type, date_transacted: new Date() });
   };
 
   const handleChange = (update: Partial<GCashForm>) => {

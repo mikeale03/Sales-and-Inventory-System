@@ -5,6 +5,7 @@ import {
   GcashTransFilter,
 } from '../../globalTypes/realm/gcash.types';
 import {
+  addGcashBalance,
   createGcashTransactions,
   deleteGcashTransaction,
   getGcashTransactions,
@@ -37,6 +38,13 @@ const setGcashEventHandler = (ipcMain: IpcMain) => {
     Channels.deleteTransaction,
     async (event: IpcMainInvokeEvent, id: string) => {
       const result = await deleteGcashTransaction(id);
+      return result;
+    }
+  );
+  ipcMain.handle(
+    Channels.addGcashBalance,
+    async (event: IpcMainInvokeEvent, amount: number) => {
+      const result = await addGcashBalance(amount);
       return result;
     }
   );

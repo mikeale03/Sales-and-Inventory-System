@@ -4,7 +4,7 @@ import { Product } from '../../main/service/productsRealm';
 
 type ProductUpdateParam = Partial<{
   name: string;
-  barcode: string | number;
+  barcode: string | number | null;
   description: string;
   quantity: string | number;
   price: string | number;
@@ -12,7 +12,7 @@ type ProductUpdateParam = Partial<{
 
 type ProductCreateParam = {
   name: string;
-  barcode?: string | number;
+  barcode?: string | number | null;
   description?: string;
   quantity: string | number;
   price: string | number;

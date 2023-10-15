@@ -154,7 +154,7 @@ const SalesPage = () => {
               <p className="m-0">Total Rows: {sales.length.toLocaleString()}</p>
             </div>
             <hr />
-            <Table responsive>
+            <Table responsive hover>
               <thead>
                 <tr>
                   <th>Product Name</th>

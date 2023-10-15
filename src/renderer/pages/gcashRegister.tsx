@@ -1,13 +1,16 @@
+/* eslint-disable no-nested-ternary */
 import {
   faBuildingColumns,
+  faCircleMinus,
+  faCirclePlus,
   faPaperPlane,
   faPenToSquare,
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { v4 as uuid } from 'uuid';
-import { GcashCreate } from 'globalTypes/realm/gcash.types';
-import { useContext, useEffect, useState } from 'react';
+import { GcashCreate, GcashType } from 'globalTypes/realm/gcash.types';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { Button, Card, Col, Row, Table } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import ConfirmationModal from 'renderer/components/common/modals/confirmation';
@@ -21,13 +24,16 @@ import {
 } from 'renderer/service/gcash';
 import { pesoFormat } from 'renderer/utils/helper';
 import format from 'date-fns/format';
+import AddDeductGcashBalanceModal from 'renderer/components/gcashRegister/addDeductGcashBalanceModal';
 
 let key = 0;
 
 const GcashRegisterPage = () => {
   const [showCashInOutModal, setShowCashInOutModal] = useState(false);
+  const [showAddDeductBalanceModal, setShowAddDeductBalanceModal] =
+    useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
-  const [type, setType] = useState<'cash in' | 'cash out'>('cash in');
+  const [type, setType] = useState<GcashType>('cash in');
   const [items, setItems] = useState<GCashItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<GCashItem | undefined>();
   const [totalCashIn, setTotalCashIn] = useState(0);
@@ -35,23 +41,25 @@ const GcashRegisterPage = () => {
   const [totalChargeCash, setTotalChargeCash] = useState(0);
   const [totalChargeGcash, setTotalChargeGcash] = useState(0);
   const [totalAmount, setTotalAmount] = useState(0);
+  const [totalAddBalance, setTotalAddBalance] = useState(0);
+  const [totalDeductBalance, setTotalDeductBalance] = useState(0);
   const [gcashBalance, setGcashBalance] = useState(0);
   const [balances, setBalances] = useState<number[]>([]);
 
   const { user } = useContext(UserContext);
 
-  useEffect(() => {
-    (async () => {
-      const response = await getGcashBalance();
-      console.log(response);
-      if (response.isSuccess) {
-        console.log(response.result);
-        setGcashBalance(response.result ?? 0);
-      } else {
-        toast.error(response.message);
-      }
-    })();
+  const handleGetBalance = useCallback(async () => {
+    const response = await getGcashBalance();
+    if (response.isSuccess) {
+      setGcashBalance(response.result ?? 0);
+    } else {
+      toast.error(response.message);
+    }
   }, []);
+
+  useEffect(() => {
+    handleGetBalance();
+  }, [handleGetBalance]);
 
   useEffect(() => {
     let tCashIn = 0;
@@ -59,10 +67,15 @@ const GcashRegisterPage = () => {
     let tChargeCash = 0;
     let tChargeGcash = 0;
     let tAmount = 0;
+    let tAddBalance = 0;
+    let tDeductBalance = 0;
+
     const balanceArr: number[] = [];
     items.forEach((item) => {
       if (item.type === 'cash in') tCashIn += item.amount;
-      else tCashOut += item.amount;
+      else if (item.type === 'cash out') tCashOut += item.amount;
+      else if (item.type === 'add balance') tAddBalance += item.amount;
+      else if (item.type === 'deduct balance') tDeductBalance += item.amount;
 
       tChargeCash += item.charge_payment === 'cash' ? item.charge : 0;
       tChargeGcash += item.charge_payment !== 'cash' ? item.charge : 0;
@@ -73,9 +86,9 @@ const GcashRegisterPage = () => {
         : gcashBalance;
 
       let balance = currentBalance;
-      if (item.type === 'cash in') {
+      if (item.type === 'cash in' || item.type === 'deduct balance') {
         balance -= item.amount;
-      } else if (item.type === 'cash out') {
+      } else if (item.type === 'cash out' || item.type === 'add balance') {
         balance += item.amount;
       }
 
@@ -85,20 +98,26 @@ const GcashRegisterPage = () => {
     setTotalCashOut(tCashOut);
     setTotalChargeCash(tChargeCash);
     setTotalChargeGcash(tChargeGcash);
+    setTotalAddBalance(tAddBalance);
+    setTotalDeductBalance(tDeductBalance);
     setTotalAmount(tAmount);
     setBalances(balanceArr);
   }, [items, gcashBalance]);
 
-  const handleSetCashInCashOutModal = (
-    _type: 'cash in' | 'cash out',
-    item?: GCashItem
-  ) => {
+  const handleSetCashInCashOutModal = (_type: GcashType, item?: GCashItem) => {
     setSelectedItem(item);
     setType(_type);
     setShowCashInOutModal(true);
   };
 
-  const handleSetItem = (_type: 'cash in' | 'cash out', item: GCashItem) => {
+  const handleAddDeductBalanceModal = (_type: GcashType, item?: GCashItem) => {
+    setSelectedItem(item);
+    setType(_type);
+    setShowAddDeductBalanceModal(true);
+  };
+
+  const handleSetItem = (_type: GcashType, item: GCashItem) => {
+    // if is edit
     if (item.key) {
       setItems(
         items
@@ -145,6 +164,7 @@ const GcashRegisterPage = () => {
     if (response.isSuccess) {
       toast.success(response.message);
       setItems([]);
+      handleGetBalance();
     } else {
       toast.error(response.message);
       window.console.log(response.error);
@@ -162,6 +182,14 @@ const GcashRegisterPage = () => {
         toggle={setShowCashInOutModal}
         type={type}
         selectedItem={selectedItem}
+        onConfirm={handleSetItem}
+      />
+
+      <AddDeductGcashBalanceModal
+        show={showAddDeductBalanceModal}
+        toggle={setShowAddDeductBalanceModal}
+        selectedItem={selectedItem}
+        type={type}
         onConfirm={handleSetItem}
       />
 
@@ -193,6 +221,30 @@ const GcashRegisterPage = () => {
                   <Col xs="6">
                     <p className="m-0 mb-1 fs-5 text-end text-danger">
                       <strong>{pesoFormat(totalCashOut)}</strong>
+                    </p>
+                  </Col>
+                </Row>
+              )}
+              {totalAddBalance > 0 && (
+                <Row>
+                  <Col xs="6" className="fs-5">
+                    Add Balance:
+                  </Col>
+                  <Col xs="6">
+                    <p className="m-0 mb-1 fs-5 text-end">
+                      <strong>{pesoFormat(totalAddBalance)}</strong>
+                    </p>
+                  </Col>
+                </Row>
+              )}
+              {totalDeductBalance > 0 && (
+                <Row>
+                  <Col xs="6" className="fs-5">
+                    Deduct Balance:
+                  </Col>
+                  <Col xs="6">
+                    <p className="m-0 mb-1 fs-5 text-end">
+                      <strong>{pesoFormat(totalDeductBalance)}</strong>
                     </p>
                   </Col>
                 </Row>
@@ -242,26 +294,42 @@ const GcashRegisterPage = () => {
           Cash In <FontAwesomeIcon icon={faBuildingColumns} />
         </Button>
         <Button
+          className="me-2"
           variant="outline-primary"
           style={{ width: 120 }}
           onClick={() => handleSetCashInCashOutModal('cash out')}
         >
           Cash Out <FontAwesomeIcon icon={faPaperPlane} color="red" />
         </Button>
+        <Button
+          className="me-2"
+          variant="secondary"
+          style={{ width: 160 }}
+          onClick={() => handleAddDeductBalanceModal('add balance')}
+        >
+          Add Balance <FontAwesomeIcon icon={faCirclePlus} />
+        </Button>
+        <Button
+          variant="outline-secondary"
+          style={{ width: 160 }}
+          onClick={() => handleAddDeductBalanceModal('deduct balance')}
+        >
+          Deduct Balance <FontAwesomeIcon icon={faCircleMinus} />
+        </Button>
       </div>
 
       <Card>
         <Card.Body>
           <div className="d-xl-flex justify-content-between">
-            <p className="ms-2 my-2">
+            <p className="mx-2 my-2">
               Starting Balance: {pesoFormat(gcashBalance)}
             </p>
-            <p className="me-2 my-2">
-              Ending Balance:{' '}
+            <p className="mx-2 my-2">
+              Resulting Balance:{' '}
               {pesoFormat(balances[balances.length - 1] ?? gcashBalance)}
             </p>
           </div>
-          <Table>
+          <Table responsive hover>
             <thead>
               <tr>
                 <th>Number</th>
@@ -271,6 +339,7 @@ const GcashRegisterPage = () => {
                 <th>Total</th>
                 <th>Date Transacted</th>
                 <th>GCash Balance</th>
+                <th>Note</th>
                 <th> </th>
               </tr>
             </thead>
@@ -289,7 +358,11 @@ const GcashRegisterPage = () => {
                   </td>
                   <td
                     className={`text-capitalize ${
-                      item.type === 'cash in' ? 'text-primary' : 'text-danger'
+                      item.type === 'cash in'
+                        ? 'text-primary'
+                        : item.type === 'cash out'
+                        ? 'text-danger'
+                        : ''
                     }`}
                   >
                     {item.type}
@@ -297,10 +370,13 @@ const GcashRegisterPage = () => {
                   <td>{pesoFormat(item.amount + item.charge)}</td>
                   <td>{format(item.date_transacted, 'MM/dd/yyyy h:mm aa')}</td>
                   <td>{pesoFormat(balances[index])}</td>
+                  <td>{item.note}</td>
                   <td className="align-middle text-center">
                     <FontAwesomeIcon
                       onClick={() =>
-                        handleSetCashInCashOutModal(item.type, item)
+                        item.type === 'cash in' || item.type === 'cash out'
+                          ? handleSetCashInCashOutModal(item.type, item)
+                          : handleAddDeductBalanceModal(item.type, item)
                       }
                       icon={faPenToSquare}
                       title="Edit"

@@ -40,7 +40,7 @@ function ActivitiesPage() {
       <ActivitiesFilter onFilter={onFilter} />
       <Card>
         <Card.Body>
-          <Table responsive>
+          <Table responsive hover>
             <thead>
               <tr>
                 <th>Activity</th>
