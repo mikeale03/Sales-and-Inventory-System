@@ -20,13 +20,13 @@ const AddDeductGcashBalanceModal = ({
   onConfirm,
 }: Props) => {
   const [amount, setAmount] = useState<number | string>('');
-  const [date, setDate] = useState<Date | null>(new Date());
+  const [date, setDate] = useState<Date | null>(null);
   const [localType, setLocalType] = useState<GcashType>(type);
   const [note, setNote] = useState('');
 
   const onShow = () => {
     setAmount('');
-    setDate(new Date());
+    setDate(null);
     setNote('');
     if (selectedItem) {
       setAmount(selectedItem.amount);
@@ -65,6 +65,7 @@ const AddDeductGcashBalanceModal = ({
       onHide={() => toggle(false)}
       size="sm"
       centered
+      backdrop="static"
     >
       <Form onSubmit={onSubmit}>
         <Modal.Header>
