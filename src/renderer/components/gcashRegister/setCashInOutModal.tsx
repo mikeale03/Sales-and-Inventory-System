@@ -50,7 +50,7 @@ const initItem = {
   charge: 0,
   charge_payment: 'cash',
   type: '',
-  date_transacted: new Date(),
+  date_transacted: null,
 };
 
 const SetCashInOutModal = ({
@@ -91,9 +91,7 @@ const SetCashInOutModal = ({
   };
 
   const onShow = () => {
-    selectedItem
-      ? setItem(selectedItem)
-      : setItem({ ...initItem, type, date_transacted: new Date() });
+    selectedItem ? setItem(selectedItem) : setItem({ ...initItem, type });
   };
 
   const handleChange = (update: Partial<GCashForm>) => {
@@ -116,6 +114,7 @@ const SetCashInOutModal = ({
       size="sm"
       onExited={onExited}
       centered
+      backdrop="static"
     >
       <Form onSubmit={handleConfirm}>
         <Modal.Header>
@@ -169,6 +168,7 @@ const SetCashInOutModal = ({
               showTimeInput
               maxDate={new Date()}
               dateFormat="MM/dd/yyyy h:mm aa"
+              required
             />
           </Form.Group>
           <p className="m-0 mb-1">
