@@ -122,24 +122,30 @@ export const salesPurchase = async (
 };
 
 export const getSalesByProducts = async (filter?: {
-  transactBy?: string;
+  transactByUserId?: string;
   startDate?: Date;
   endDate?: Date;
+  productName?: string;
 }): Promise<Response<Sales[]>> => {
   let realm: Realm | undefined;
   try {
     realm = await openSalesRealm();
     let sales = realm.objects<Sales>(SALES);
 
-    const transactBy = filter?.transactBy;
+    const transactBy = filter?.transactByUserId;
     const startDate = filter?.startDate;
     const endDate = filter?.endDate;
+    const productName = filter?.productName;
 
     const query: string[] = [];
     const args = [];
 
+    if (productName) {
+      query.push(`product_name CONTAINS[c] $${args.length}`);
+      args.push(productName);
+    }
     if (transactBy) {
-      query.push(`transact_by == $${args.length}`);
+      query.push(`transact_by_user_id == $${args.length}`);
       args.push(transactBy);
     }
     if (startDate) {
@@ -150,7 +156,9 @@ export const getSalesByProducts = async (filter?: {
       query.push(`date_created <= $${args.length}`);
       args.push(endDate);
     }
-    sales = args.length ? sales.filtered(query.join(' && '), ...args) : sales;
+    sales = args.length
+      ? sales.filtered(`${query.join(' && ')} SORT(date_created DESC)`, ...args)
+      : sales;
 
     const salesMap = new Map<string, Sales>();
     const result: Sales[] = [];
@@ -159,17 +167,23 @@ export const getSalesByProducts = async (filter?: {
       const saleObj = sale.toJSON() as Sales;
       saleObj._id = saleObj._id.toString();
       const { product_name, quantity, total_price } = saleObj;
+      let product = '';
 
-      if (salesMap.has(product_name)) {
-        const item = salesMap.get(product_name);
-        item &&
-          salesMap.set(product_name, {
-            ...item,
-            quantity: item.quantity + quantity,
-            total_price: item.total_price + total_price,
-          });
+      if (product_name.includes('GCash-Out')) {
+        product = 'GCash-Out';
+      } else if (product_name.includes('GCash-In')) {
+        product = 'GCash-In';
       } else {
-        salesMap.set(product_name, saleObj);
+        product = product_name;
+      }
+
+      const item = salesMap.get(product);
+      if (item) {
+        item.product_name = product;
+        item.quantity += quantity;
+        item.total_price = +(item.total_price + total_price).toFixed(2);
+      } else {
+        salesMap.set(product, saleObj);
       }
     });
     const values = salesMap.values();

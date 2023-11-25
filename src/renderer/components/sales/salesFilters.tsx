@@ -5,7 +5,11 @@ import FilterContext from 'renderer/context/filterContext';
 import UserContext from 'renderer/context/userContext';
 import UsersSelect from '../common/selects/usersSelect';
 
-const SalesFilter = () => {
+type Props = {
+  className?: string;
+};
+
+const SalesFilter = ({ className }: Props) => {
   const { user } = useContext(UserContext);
   const { salesFilter, setSalesFilter } = useContext(FilterContext);
   const isDaily = salesFilter.selectedPeriod === 'Daily';
@@ -73,7 +77,7 @@ const SalesFilter = () => {
   };
 
   return (
-    <Row>
+    <Row className={className}>
       <Col md="2" className="mb-3">
         <UsersSelect
           value={salesFilter.userOption}

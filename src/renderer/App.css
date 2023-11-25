@@ -31,4 +31,13 @@ a {
   .print-hide {
     display: none;
   }
+  .print-m1 {
+    margin: 10px;
+  }
+  .print-mr1 {
+    margin-right: 10px;
+  }
+  .print-ml1 {
+    margin-left: 10px;
+  }
 }
