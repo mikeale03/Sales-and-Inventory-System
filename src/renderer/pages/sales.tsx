@@ -1,5 +1,5 @@
 import { Sales } from 'main/service/salesRealm';
-import { useEffect, useState, useRef, useContext } from 'react';
+import { useEffect, useState, useRef, useContext, useCallback } from 'react';
 import {
   Card,
   Table,
@@ -8,8 +8,13 @@ import {
   DropdownButton,
   Dropdown,
   FormControl,
+  FormCheck,
 } from 'react-bootstrap';
-import { deleteSale, getSalesByTransactions } from 'renderer/service/sales';
+import {
+  deleteSale,
+  getSalesByProducts,
+  getSalesByTransactions,
+} from 'renderer/service/sales';
 import { debounce, pesoFormat } from 'renderer/utils/helper';
 import format from 'date-fns/format';
 import UserContext from 'renderer/context/userContext';
@@ -31,25 +36,36 @@ const SalesPage = () => {
   const [searchText, setSearchText] = useState('');
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [selectedSale, setSelectedSale] = useState<Sales | undefined>();
+  const [isGroupByProduct, setIsGroupByProduct] = useState(false);
   const { user } = useContext(UserContext);
   const {
     salesFilter: { userOption, startDate, endDate },
   } = useContext(FilterContext);
   const printRef = useRef<HTMLDivElement | null>(null);
 
-  const handleGetSales = async (filter?: {
-    transactByUserId?: string;
-    startDate?: Date;
-    endDate?: Date;
-    productName: string;
-  }) => {
-    const response = await getSalesByTransactions(filter);
-    if (response.isSuccess && response.result) {
-      setSales(response.result);
-    } else {
-      toast.error(response.message);
-    }
-  };
+  const handleGetSales = useCallback(
+    async (
+      isGroupByProd: boolean,
+      filter?: {
+        transactByUserId?: string;
+        startDate?: Date;
+        endDate?: Date;
+        productName: string;
+      }
+    ) => {
+      const response = isGroupByProd
+        ? await getSalesByProducts(filter)
+        : await getSalesByTransactions(filter);
+
+      console.log(response);
+      if (response.isSuccess && response.result) {
+        setSales(response.result);
+      } else {
+        toast.error(response.message);
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     let qty = 0;
@@ -75,13 +91,20 @@ const SalesPage = () => {
 
   useEffect(() => {
     if (userOption)
-      handleGetSales({
+      handleGetSales(isGroupByProduct, {
         transactByUserId: userOption === 'all' ? undefined : userOption,
         startDate,
         endDate,
         productName: searchText,
       });
-  }, [userOption, startDate, endDate, searchText]);
+  }, [
+    userOption,
+    startDate,
+    endDate,
+    searchText,
+    isGroupByProduct,
+    handleGetSales,
+  ]);
 
   const handlePrint = useReactToPrint({
     content: () => printRef.current,
@@ -110,7 +133,7 @@ const SalesPage = () => {
   }, 300);
 
   return (
-    <div>
+    <>
       <ConfirmationModal
         show={showConfirmationModal}
         toggle={setShowConfirmationModal}
@@ -118,93 +141,124 @@ const SalesPage = () => {
         onConfirm={handleDeleteSale}
       />
 
-      <h3>Sales</h3>
-
-      <SalesFilter />
-
       <div ref={printRef}>
-        <Card className="d-flex">
-          <Card.Body className="flex-grow-1">
-            <Row className="mb-3 print-hide">
-              <Col lg="6" className="d-flex flex-row">
-                <DropdownButton
-                  id="dropdown-basic-button"
-                  title="Export"
-                  variant="outline-primary"
-                  className="me-3"
-                >
-                  {/* <Dropdown.Item>CSV</Dropdown.Item>
+        <h3 className="print-m1">Sales</h3>
+
+        <SalesFilter className="print-ml1 print-mr1" />
+
+        <div>
+          <Card className="d-flex">
+            <Card.Body className="flex-grow-1">
+              <Row className="mb-3 print-hide">
+                <Col lg="6" className="d-flex flex-row">
+                  <DropdownButton
+                    id="dropdown-basic-button"
+                    title="Export"
+                    variant="outline-primary"
+                    className="me-3"
+                  >
+                    {/* <Dropdown.Item>CSV</Dropdown.Item>
                   <Dropdown.Item>Excel</Dropdown.Item> */}
-                  <Dropdown.Item onClick={handlePrint}>Print</Dropdown.Item>
-                </DropdownButton>
-                <FormControl
-                  type="search"
-                  placeholder="Search product name"
-                  onChange={handleSearch}
-                />
-              </Col>
-            </Row>
-            <div className="d-lg-flex justify-content-between">
-              <p className="m-0">Total Cash: {pesoFormat(totalCash)}</p>
-              <p className="m-0">Total Gcash: {pesoFormat(totalGcash)}</p>
-              <p className="m-0">Total Amount: {pesoFormat(totalAmount)}</p>
-              <p className="m-0">
-                Total Quantity: {totalQuantity.toLocaleString()}
-              </p>
-              <p className="m-0">Total Rows: {sales.length.toLocaleString()}</p>
-            </div>
-            <hr />
-            <Table responsive hover>
-              <thead>
-                <tr>
-                  <th>Product Name</th>
-                  <th>Quantity</th>
-                  <th>Price</th>
-                  <th>Total Price</th>
-                  <th>Payment</th>
-                  <th>Date</th>
-                  <th>Transact By</th>
-                  {user?.role === 'admin' && <th> </th>}
-                </tr>
-              </thead>
-              <tbody>
-                {sales.map((d) => (
-                  <tr key={d._id}>
-                    <td>{d.product_name}</td>
-                    <td>{d.quantity.toLocaleString()}</td>
-                    <td>{pesoFormat(d.price)}</td>
-                    <td>{pesoFormat(d.total_price)}</td>
-                    <td className={d.payment === 'gcash' ? 'text-primary' : ''}>
-                      {d.payment === 'gcash' ? 'GCash' : 'Cash'}
-                    </td>
-                    <td>{format(d.date_created, 'MM/dd/yyyy hh:mm aaa')}</td>
-                    <td>{d.transact_by}</td>
+                    <Dropdown.Item onClick={handlePrint}>Print</Dropdown.Item>
+                  </DropdownButton>
+                  <FormControl
+                    type="search"
+                    placeholder="Search product name"
+                    onChange={handleSearch}
+                  />
+                </Col>
+                <Col
+                  lg="6"
+                  className="d-flex justify-content-end align-items-center"
+                >
+                  <FormCheck
+                    type="checkbox"
+                    label="Group by Product"
+                    checked={isGroupByProduct}
+                    onChange={(e) => setIsGroupByProduct(e.target.checked)}
+                  />
+                </Col>
+              </Row>
+              <div className="d-lg-flex justify-content-between">
+                {!isGroupByProduct && (
+                  <p className="m-0">Total Cash: {pesoFormat(totalCash)}</p>
+                )}
+                {!isGroupByProduct && (
+                  <p className="m-0">Total Gcash: {pesoFormat(totalGcash)}</p>
+                )}
+                <p className="m-0">Total Amount: {pesoFormat(totalAmount)}</p>
+                <p className="m-0">
+                  Total Quantity: {totalQuantity.toLocaleString()}
+                </p>
+                <p className="m-0">
+                  Total Rows: {sales.length.toLocaleString()}
+                </p>
+              </div>
+              <hr />
+              <Table responsive hover>
+                <thead>
+                  <tr>
+                    <th>Product Name</th>
+                    <th>Quantity</th>
+                    {!isGroupByProduct && <th>Price</th>}
+                    <th>Total Price</th>
+                    {!isGroupByProduct && <th>Payment</th>}
+                    {!isGroupByProduct && <th>Date</th>}
+                    <th>Transact By</th>
                     {user?.role === 'admin' && (
-                      <td>
-                        <FontAwesomeIcon
-                          onClick={() => handleShowConfirmationModal(d)}
-                          icon={faTrashCan}
-                          title="Delete"
-                          size="xl"
-                          className="me-2 cursor-pointer"
-                          role="button"
-                          tabIndex={0}
-                        />
-                      </td>
+                      <th className="print-hide"> </th>
                     )}
                   </tr>
-                ))}
-              </tbody>
-            </Table>
-            {sales.length === 0 && (
-              <span className="ms-2 fw-light fst-italic text-secondary">
-                no sales
-              </span>
-            )}
-          </Card.Body>
-        </Card>
+                </thead>
+                <tbody>
+                  {sales.map((d) => (
+                    <tr key={d._id}>
+                      <td>{d.product_name}</td>
+                      <td>{d.quantity.toLocaleString()}</td>
+                      {!isGroupByProduct && <td>{pesoFormat(d.price)}</td>}
+                      <td>{pesoFormat(d.total_price)}</td>
+                      {!isGroupByProduct && (
+                        <td
+                          className={
+                            d.payment === 'gcash' ? 'text-primary' : ''
+                          }
+                        >
+                          {d.payment === 'gcash' ? 'GCash' : 'Cash'}
+                        </td>
+                      )}
+                      {!isGroupByProduct && (
+                        <td>
+                          {format(d.date_created, 'MM/dd/yyyy hh:mm aaa')}
+                        </td>
+                      )}
+                      <td>{d.transact_by}</td>
+                      {user?.role === 'admin' && (
+                        <td className="print-hide">
+                          <FontAwesomeIcon
+                            onClick={() => handleShowConfirmationModal(d)}
+                            icon={faTrashCan}
+                            title="Delete"
+                            size="xl"
+                            className="me-2 cursor-pointer"
+                            role="button"
+                            tabIndex={0}
+                          />
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+              {sales.length === 0 && (
+                <span className="ms-2 fw-light fst-italic text-secondary">
+                  no sales
+                </span>
+              )}
+            </Card.Body>
+          </Card>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

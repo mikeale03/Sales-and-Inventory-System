@@ -26,9 +26,10 @@ const setSalesEventHandler = (ipcMain: IpcMain) => {
     async (
       event: IpcMainInvokeEvent,
       filter?: {
-        transactBy: string;
-        startDate: Date;
-        endDate: Date;
+        transactByUserId?: string;
+        startDate?: Date;
+        endDate?: Date;
+        productName?: string;
       }
     ) => {
       const result = await getSalesByProducts(filter);

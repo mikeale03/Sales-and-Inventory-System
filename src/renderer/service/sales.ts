@@ -17,9 +17,10 @@ export const salesPurchase = async (...args: SalesPurchaseArg) => {
 };
 
 export const getSalesByProducts = async (filter?: {
-  transactBy?: string;
+  transactByUserId?: string;
   startDate?: Date;
   endDate?: Date;
+  productName?: string;
 }) => {
   const response = await ipcRenderer.invoke<Response<Sales[]>>(
     Channels.getByProducts,
