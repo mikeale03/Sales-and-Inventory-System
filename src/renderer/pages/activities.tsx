@@ -20,7 +20,6 @@ function ActivitiesPage() {
     (async () => {
       const response = await getActivities(filter);
       if (response.isSuccess) {
-        console.log(response);
         setActivities(response.result ?? []);
       }
     })();
