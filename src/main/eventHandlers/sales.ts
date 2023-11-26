@@ -30,6 +30,7 @@ const setSalesEventHandler = (ipcMain: IpcMain) => {
         startDate?: Date;
         endDate?: Date;
         productName?: string;
+        verifiedOnly?: boolean;
       }
     ) => {
       const result = await getSalesByProducts(filter);

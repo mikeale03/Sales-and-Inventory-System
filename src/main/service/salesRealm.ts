@@ -126,10 +126,14 @@ export const getSalesByProducts = async (filter?: {
   startDate?: Date;
   endDate?: Date;
   productName?: string;
+  verifiedOnly?: boolean;
 }): Promise<Response<Sales[]>> => {
   let realm: Realm | undefined;
+  let prodRealm: Realm | undefined;
   try {
     realm = await openSalesRealm();
+    prodRealm = await openProductsRealm();
+
     let sales = realm.objects<Sales>(SALES);
 
     const transactBy = filter?.transactByUserId;
@@ -160,14 +164,15 @@ export const getSalesByProducts = async (filter?: {
       ? sales.filtered(`${query.join(' && ')} SORT(date_created DESC)`, ...args)
       : sales;
 
-    const salesMap = new Map<string, Sales>();
+    const salesMap = new Map<string, Sales & { isVerified: boolean }>();
     const result: Sales[] = [];
 
     sales.forEach((sale) => {
       const saleObj = sale.toJSON() as Sales;
       saleObj._id = saleObj._id.toString();
-      const { product_name, quantity, total_price } = saleObj;
+      const { product_name, quantity, total_price, product_id } = saleObj;
       let product = '';
+      let isVerified = true;
 
       if (product_name.includes('GCash-Out')) {
         product = 'GCash-Out';
@@ -179,18 +184,30 @@ export const getSalesByProducts = async (filter?: {
 
       const item = salesMap.get(product);
       if (item) {
-        item.product_name = product;
         item.quantity += quantity;
         item.total_price = +(item.total_price + total_price).toFixed(2);
       } else {
-        salesMap.set(product, saleObj);
+        if (filter?.verifiedOnly) {
+          isVerified =
+            prodRealm?.objectForPrimaryKey<Product>(
+              'Products',
+              new Realm.BSON.ObjectID(product_id)
+            )?.inventory_verified ?? false;
+        }
+        salesMap.set(product, {
+          ...saleObj,
+          product_name: product,
+          isVerified,
+        });
       }
     });
     const values = salesMap.values();
     let entry: IteratorResult<any, any> | undefined;
     do {
       entry = values.next();
-      entry.value && result.push(entry.value);
+      if (entry.value && entry.value.isVerified) {
+        result.push(entry.value);
+      }
     } while (!entry.done);
 
     realm?.close();
