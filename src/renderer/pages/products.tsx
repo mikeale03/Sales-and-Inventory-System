@@ -37,7 +37,6 @@ const ProductsPage = () => {
       if (response.isSuccess) {
         const data = response.result;
         const prods = data ?? [];
-        window.console.log(prods);
         setTotalPages(Math.ceil(prods.length / pageSize));
         setProducts(prods);
       }

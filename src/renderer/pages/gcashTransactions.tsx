@@ -48,7 +48,6 @@ const GcashTransactionsPage = () => {
   const handleGetGcashTransactions = async (filter?: TransFilter) => {
     const response = await getGcashTransactions(filter);
     if (response.isSuccess && response.result) {
-      console.log(response.result);
       setTransactions(response.result);
     } else toast.error(response.message);
   };

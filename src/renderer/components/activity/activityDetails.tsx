@@ -36,8 +36,9 @@ function ProductEditDetails({
   return (
     <div>
       <p className="m-0">Product Name: {details.product_name}</p>
-      {details.updates.map((d) => (
-        <p className="m-0">
+      {details.updates.map((d, i) => (
+        // eslint-disable-next-line react/no-array-index-key
+        <p key={`${i}`} className="m-0">
           Change{' '}
           <span className="text-capitalize fw-bold">
             {d.prop === 'inventory_verified' ? 'Verified' : d.prop}
