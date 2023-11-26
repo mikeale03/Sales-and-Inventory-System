@@ -59,7 +59,6 @@ const SetProductModal = ({
         updated_by: user.username,
         updated_by_user_id: user._id,
       });
-      console.log(response);
       if (response.isSuccess && response.result) {
         onUpdate?.(response.result);
         toast.success(response.message);
@@ -70,7 +69,6 @@ const SetProductModal = ({
           transact_by: user.username,
           transact_by_user_id: user._id,
         });
-        window.console.log(result);
         return;
       }
       toast.error(response.message);
@@ -80,7 +78,6 @@ const SetProductModal = ({
         created_by: user.username,
         created_by_user_id: user._id,
       });
-      console.log(response);
       if (response.isSuccess && response.result) {
         setProduct(initProduct);
         productNameInputRef.current?.focus();
@@ -91,7 +88,6 @@ const SetProductModal = ({
           transact_by: user.username,
           transact_by_user_id: user._id,
         });
-        window.console.log(result);
         return;
       }
       toast.error(response.message);

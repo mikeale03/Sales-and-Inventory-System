@@ -167,7 +167,6 @@ const GcashRegisterPage = () => {
       handleGetBalance();
     } else {
       toast.error(response.message);
-      window.console.log(response.error);
     }
   };
 

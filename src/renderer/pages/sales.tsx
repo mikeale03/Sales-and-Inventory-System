@@ -57,7 +57,6 @@ const SalesPage = () => {
         ? await getSalesByProducts({ ...filter, verifiedOnly: true })
         : await getSalesByTransactions(filter);
 
-      console.log(response);
       if (response.isSuccess && response.result) {
         setSales(response.result);
       } else {

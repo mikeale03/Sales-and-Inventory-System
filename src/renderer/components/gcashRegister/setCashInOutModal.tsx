@@ -95,7 +95,6 @@ const SetCashInOutModal = ({
   };
 
   const handleChange = (update: Partial<GCashForm>) => {
-    console.log(update);
     if (update.type === 'cash in') update.charge_payment = 'cash';
     if (update.amount !== undefined)
       update.charge = Math.ceil(+update.amount / 500) * 10;
