@@ -21,6 +21,7 @@ export const getSalesByProducts = async (filter?: {
   startDate?: Date;
   endDate?: Date;
   productName?: string;
+  verifiedOnly?: boolean;
 }) => {
   const response = await ipcRenderer.invoke<Response<Sales[]>>(
     Channels.getByProducts,

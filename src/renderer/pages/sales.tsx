@@ -54,7 +54,7 @@ const SalesPage = () => {
       }
     ) => {
       const response = isGroupByProd
-        ? await getSalesByProducts(filter)
+        ? await getSalesByProducts({ ...filter, verifiedOnly: true })
         : await getSalesByTransactions(filter);
 
       console.log(response);
@@ -173,7 +173,7 @@ const SalesPage = () => {
                 >
                   <FormCheck
                     type="checkbox"
-                    label="Group by Product"
+                    label="Group by Verified Products"
                     checked={isGroupByProduct}
                     onChange={(e) => setIsGroupByProduct(e.target.checked)}
                   />
