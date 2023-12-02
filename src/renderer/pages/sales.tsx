@@ -141,7 +141,12 @@ const SalesPage = () => {
       />
 
       <div ref={printRef}>
-        <h3 className="print-m1">Sales</h3>
+        <div className="d-flex justify-content-between align-items-center">
+          <h3 className="print-m1">Sales</h3>
+          <p className="mx-3 p-0 print-show">
+            Print date: {new Date().toLocaleString()}
+          </p>
+        </div>
 
         <SalesFilter className="print-ml1 print-mr1" />
 
@@ -201,9 +206,10 @@ const SalesPage = () => {
                     <th>Quantity</th>
                     {!isGroupByProduct && <th>Price</th>}
                     <th>Total Price</th>
+                    {isGroupByProduct && <th>Remaining Qty</th>}
                     {!isGroupByProduct && <th>Payment</th>}
                     {!isGroupByProduct && <th>Date</th>}
-                    <th>Transact By</th>
+                    {!isGroupByProduct && <th>Transact By</th>}
                     {user?.role === 'admin' && (
                       <th className="print-hide"> </th>
                     )}
@@ -216,6 +222,9 @@ const SalesPage = () => {
                       <td>{d.quantity.toLocaleString()}</td>
                       {!isGroupByProduct && <td>{pesoFormat(d.price)}</td>}
                       <td>{pesoFormat(d.total_price)}</td>
+                      {isGroupByProduct && (
+                        <td>{d.remaining_quantity?.toLocaleString()}</td>
+                      )}
                       {!isGroupByProduct && (
                         <td
                           className={
@@ -230,7 +239,7 @@ const SalesPage = () => {
                           {format(d.date_created, 'MM/dd/yyyy hh:mm aaa')}
                         </td>
                       )}
-                      <td>{d.transact_by}</td>
+                      {!isGroupByProduct && <td>{d.transact_by}</td>}
                       {user?.role === 'admin' && (
                         <td className="print-hide">
                           <FontAwesomeIcon
