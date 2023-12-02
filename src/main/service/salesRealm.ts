@@ -19,6 +19,7 @@ export type Sales = {
   transact_by: string;
   transact_by_user_id: string;
   transaction_id: string;
+  remaining_quantity?: number;
 };
 
 export class SalesSchema extends Realm.Object {
@@ -172,7 +173,7 @@ export const getSalesByProducts = async (filter?: {
       saleObj._id = saleObj._id.toString();
       const { product_name, quantity, total_price, product_id } = saleObj;
       let product = '';
-      let isVerified = true;
+      // let isVerified = true;
 
       if (product_name.includes('GCash-Out')) {
         product = 'GCash-Out';
@@ -187,17 +188,20 @@ export const getSalesByProducts = async (filter?: {
         item.quantity += quantity;
         item.total_price = +(item.total_price + total_price).toFixed(2);
       } else {
+        let prod: Product | undefined | null;
         if (filter?.verifiedOnly) {
-          isVerified =
-            prodRealm?.objectForPrimaryKey<Product>(
-              'Products',
-              new Realm.BSON.ObjectID(product_id)
-            )?.inventory_verified ?? false;
+          prod = prodRealm?.objectForPrimaryKey<Product>(
+            'Products',
+            new Realm.BSON.ObjectID(product_id)
+          );
         }
         salesMap.set(product, {
           ...saleObj,
           product_name: product,
-          isVerified,
+          remaining_quantity: prod?.quantity,
+          isVerified: filter?.verifiedOnly
+            ? prod?.inventory_verified ?? false
+            : true,
         });
       }
     });
