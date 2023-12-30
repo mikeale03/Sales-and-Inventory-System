@@ -5,7 +5,7 @@ import {
   GcashTransFilter,
 } from '../../globalTypes/realm/gcash.types';
 import {
-  addGcashBalance,
+  // addGcashBalance,
   createGcashTransactions,
   deleteGcashTransaction,
   getGcashTransactions,
@@ -41,13 +41,13 @@ const setGcashEventHandler = (ipcMain: IpcMain) => {
       return result;
     }
   );
-  ipcMain.handle(
-    Channels.addGcashBalance,
-    async (event: IpcMainInvokeEvent, amount: number) => {
-      const result = await addGcashBalance(amount);
-      return result;
-    }
-  );
+  // ipcMain.handle(
+  //   Channels.addGcashBalance,
+  //   async (event: IpcMainInvokeEvent, amount: number) => {
+  //     const result = await addGcashBalance(amount);
+  //     return result;
+  //   }
+  // );
 };
 
 export default setGcashEventHandler;

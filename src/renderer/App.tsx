@@ -18,7 +18,8 @@ import AdminPage from './pages/admin';
 import UsersPage from './pages/admin/users';
 import GcashRegisterPage from './pages/gcashRegister';
 import GcashTransactionsPage from './pages/gcashTransactions';
-import FilterContext, { Filter } from './context/filterContext';
+import FilterContext, { Filter, GcashFilter } from './context/filterContext';
+import ExpensesPage from './pages/expenses';
 
 export default function App() {
   const [user, setUser] = useState<User | undefined>();
@@ -29,10 +30,11 @@ export default function App() {
     startDate: new Date(new Date().setHours(0, 0, 0, 0)),
     endDate: new Date(new Date().setHours(23, 59, 59, 999)),
   });
-  const [gcashTransFilter, setGcashTransFilter] = useState<Filter>({
+  const [gcashTransFilter, setGcashTransFilter] = useState<GcashFilter>({
     selectedDate: new Date(),
     userOption: '',
     selectedPeriod: 'Daily',
+    selectedDateFilter: 'Date Transacted',
     startDate: new Date(new Date().setHours(0, 0, 0, 0)),
     endDate: new Date(new Date().setHours(23, 59, 59, 999)),
   });
@@ -63,6 +65,7 @@ export default function App() {
                 path="gcash-transactions"
                 element={<GcashTransactionsPage />}
               />
+              <Route path="expenses" element={<ExpensesPage />} />
               <Route path="reports" element={<ReportsPage />} />
               <Route path="activities" element={<ActivitiesPage />} />
               <Route path="admin" element={<AdminPage />} />
