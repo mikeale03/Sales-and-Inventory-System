@@ -1,9 +1,12 @@
 import { useContext } from 'react';
 import {
+  faCartArrowDown,
   faCartShopping,
   faCashRegister,
+  faChartLine,
   faMobileRetro,
   faMoneyBillTransfer,
+  faPersonDigging,
   faPesoSign,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -87,6 +90,18 @@ const Sidebar = () => {
               </li>
             )}
           </NavLink>
+          <NavLink to="expenses" className="mb-3">
+            {({ isActive }) => (
+              <li
+                className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 shadow-sm transition-all
+            ${isActive && 'active'}`}
+                style={{ fontSize: '0.8em' }}
+              >
+                <FontAwesomeIcon icon={faCartArrowDown} size="xl" />
+                <p className="m-0 text-center">Expenses</p>
+              </li>
+            )}
+          </NavLink>
           <NavLink to="reports" className="mb-3">
             {({ isActive }) => (
               <li
@@ -94,7 +109,7 @@ const Sidebar = () => {
             ${isActive && 'active'}`}
                 style={{ fontSize: '0.8em' }}
               >
-                <FontAwesomeIcon icon={faMoneyBillTransfer} size="xl" />
+                <FontAwesomeIcon icon={faChartLine} size="xl" />
                 <p className="m-0 text-center">Reports</p>
               </li>
             )}
@@ -106,7 +121,7 @@ const Sidebar = () => {
             ${isActive && 'active'}`}
                 style={{ fontSize: '0.8em' }}
               >
-                <FontAwesomeIcon icon={faMoneyBillTransfer} size="xl" />
+                <FontAwesomeIcon icon={faPersonDigging} size="xl" />
                 <p className="m-0 text-center">Activities</p>
               </li>
             )}

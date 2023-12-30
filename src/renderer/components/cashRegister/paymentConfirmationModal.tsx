@@ -1,20 +1,37 @@
 /* eslint-disable no-restricted-syntax */
-import { useContext, useEffect, useState, memo, useRef } from 'react';
+import {
+  useContext,
+  useEffect,
+  useState,
+  memo,
+  useRef,
+  ReactNode,
+} from 'react';
 import { Button, Col, Modal, Row } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { v4 as uuid } from 'uuid';
 import UserContext from 'renderer/context/userContext';
-import { createGcashTransactions } from 'renderer/service/gcash';
+// import { createGcashTransactions } from 'renderer/service/gcash';
 import { salesPurchase } from 'renderer/service/sales';
 import { pesoFormat } from 'renderer/utils/helper';
-import ConfirmationModal from '../common/modals/confirmation';
+import { User } from 'globalTypes/realm/user.types';
+import { createExpense } from 'renderer/service/expenses';
+import ChargeToUserModal from 'renderer/components/cashRegister/chargeToUserModal';
+import ConfirmationModal from 'renderer/components/common/modals/confirmation';
+import { ExpenseDescriptionJson } from 'globalTypes/realm/expenses.type';
 
 type Props = {
   show: boolean;
   toggle: (show: boolean) => void;
   items: Record<
     string,
-    { _id: string; quantity: number; price: number; totalPrice: number }
+    {
+      _id: string;
+      quantity: number;
+      price: number;
+      totalPrice: number;
+      name: string;
+    }
   >;
   paymentAmount: number;
   onSuccess: () => void;
@@ -34,9 +51,20 @@ const PaymentConfirmationModal = ({
   const [lines, setLines] = useState(1);
   const [total, setTotal] = useState(0);
   const [showGcashConfirmation, setShowGcashConfirmation] = useState(false);
+  const [showChargeToModal, setShowChargeToModal] = useState(false);
+  const [isChargeToUser, setIsChargeToUser] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | undefined>();
   const { user } = useContext(UserContext);
   const cancelRef = useRef<HTMLButtonElement | null>(null);
   const change = paymentAmount - total;
+
+  const [message, setMessage] = useState<ReactNode>(
+    <p className="text-center">
+      Are you sure to pay with{' '}
+      <span className="text-primary fw-bold">GCash</span> amounting{' '}
+      <span className="text-primary fw-bold">{pesoFormat(total)}</span>
+    </p>
+  );
 
   useEffect(() => {
     const keys = Object.keys(items);
@@ -95,20 +123,81 @@ const PaymentConfirmationModal = ({
     toggle(false);
   };
 
+  const handleChargeToUser = async () => {
+    if (!selectedUser || !user) return;
+    const description: ExpenseDescriptionJson = {
+      chargeToId: selectedUser?._id,
+      chargeToUser: selectedUser?.username,
+      items: Object.values(items).map((i) => ({
+        productId: i._id,
+        productName: i.name,
+        quantity: i.quantity,
+        amount: i.totalPrice,
+      })),
+    };
+    const response = await createExpense({
+      type: 'item charge',
+      amount: total,
+      description: JSON.stringify(description),
+      charge_to_user_id: selectedUser._id,
+      transact_by: user.username,
+      transact_by_user_id: user._id,
+    });
+
+    if (response.isSuccess) {
+      toast.success(response.message);
+      onSuccess();
+      toggle(false);
+    } else {
+      toast.error(response.message);
+    }
+  };
+
+  const handleShowGcashPaymentConfirmation = () => {
+    setShowGcashConfirmation(true);
+    setMessage(
+      <p className="text-center">
+        Are you sure to pay with{' '}
+        <span className="text-primary fw-bold">GCash</span> amounting{' '}
+        <span className="text-primary fw-bold">{pesoFormat(total)}</span>
+      </p>
+    );
+    toggle(false);
+  };
+
+  const handleShowChargeToUserConfirmation = (chargedUser: User) => {
+    setShowGcashConfirmation(true);
+    setMessage(
+      <p className="text-center">
+        Are you sure to charge the item/s to{' '}
+        <span className="text-primary fw-bold">{chargedUser.username}</span>{' '}
+        amounting{' '}
+        <span className="text-primary fw-bold">{pesoFormat(total)}</span>
+      </p>
+    );
+    setShowChargeToModal(false);
+    setSelectedUser(chargedUser);
+    setIsChargeToUser(true);
+  };
+
+  const handleConfirm = () => {
+    isChargeToUser ? handleChargeToUser() : handlePayment(true);
+    setIsChargeToUser(false);
+  };
+
   return (
     <>
+      <ChargeToUserModal
+        show={showChargeToModal}
+        toggle={setShowChargeToModal}
+        onConfirm={handleShowChargeToUserConfirmation}
+      />
       <ConfirmationModal
         show={showGcashConfirmation}
         toggle={setShowGcashConfirmation}
-        onConfirm={() => handlePayment(true)}
+        onConfirm={handleConfirm}
         onCancel={() => toggle(true)}
-        message={
-          <p className="text-center">
-            Are you sure to pay with{' '}
-            <span className="text-primary fw-bold">GCash</span> amounting{' '}
-            <span className="text-primary fw-bold">{pesoFormat(total)}</span>
-          </p>
-        }
+        message={message}
       />
       <Modal
         show={show}
@@ -160,16 +249,26 @@ const PaymentConfirmationModal = ({
           </Row>
         </Modal.Body>
         <Modal.Footer className="d-flex justify-content-between">
-          <Button
-            variant="outline-primary"
-            size="sm"
-            onClick={() => {
-              setShowGcashConfirmation(true);
-              toggle(false);
-            }}
-          >
-            GCash Payment
-          </Button>
+          <div>
+            <Button
+              variant="outline-primary me-2"
+              size="sm"
+              onClick={handleShowGcashPaymentConfirmation}
+            >
+              GCash Payment
+            </Button>
+            <Button
+              variant="outline-primary"
+              size="sm"
+              onClick={() => {
+                setShowChargeToModal(true);
+                toggle(false);
+              }}
+            >
+              Charge to User
+            </Button>
+          </div>
+
           <div>
             <Button
               variant="secondary"

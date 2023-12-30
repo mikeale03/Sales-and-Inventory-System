@@ -1,7 +1,7 @@
 import { Response } from 'globalTypes/realm/response.types';
 import Realm, { ObjectSchema } from 'realm';
 
-const PRODUCTS = 'Products';
+export const PRODUCTS = 'Products';
 
 export type Product = {
   _id: string;
