@@ -101,23 +101,23 @@ const ExpensesFilter = ({ onFilter }: Props) => {
 
   return (
     <Row>
-      <Col md="4" className="mb-3">
+      <Col lg="2" className="mb-3">
         <UsersSelect
           value={filter.userOption}
           onSelect={(value) => setFilter({ ...filter, userOption: value })}
         />
       </Col>
-      <Col md="4" className="mb-3">
+      <Col lg="2" className="mb-3">
         <ExpenseTypeSelect onSelect={setType} />
       </Col>
-      <Col md="4" className="mb-3">
+      <Col lg="2" className="mb-3">
         <FormLabel>Period</FormLabel>
         <FormSelect value={filter.selectedPeriod} onChange={handlePeriodSelect}>
           <option>Daily</option>
           <option>Monthly</option>
         </FormSelect>
       </Col>
-      <Col md="4" className="mb-3">
+      <Col lg="2" className="mb-3">
         <FormLabel>Select {isDaily ? 'Date' : 'Month'}</FormLabel>
         <DatePicker
           className="form-control"
@@ -130,7 +130,7 @@ const ExpensesFilter = ({ onFilter }: Props) => {
           todayButton="Today"
         />
       </Col>
-      <Col md="4" className="mb-3">
+      <Col lg="2" className="mb-3">
         <FormLabel>Start {isDaily ? 'Time' : 'Date'}</FormLabel>
         <DatePicker
           className="form-control"
@@ -147,7 +147,7 @@ const ExpensesFilter = ({ onFilter }: Props) => {
           dateFormat={isDaily ? 'h:mm aa' : 'MM/dd/yyyy h:mm aa'}
         />
       </Col>
-      <Col md="4" className="mb-3">
+      <Col lg="2" className="mb-3">
         <FormLabel>End {isDaily ? 'Time' : 'Date'}</FormLabel>
         <DatePicker
           className="form-control"

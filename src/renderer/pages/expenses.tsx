@@ -11,6 +11,7 @@ import AddExpenseModal from 'renderer/components/expenses/addExpenseModal';
 import ExpensesFilter from 'renderer/components/expenses/expensesFilter';
 import ItemChargeDescription from 'renderer/components/expenses/itemChargeDesciption';
 import { getExpenses } from 'renderer/service/expenses';
+import { pesoFormat } from 'renderer/utils/helper';
 
 function ExpensesPage() {
   const [filter, setFilter] = useState<GetExpensesFilter>({
@@ -21,16 +22,22 @@ function ExpensesPage() {
 
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
+  const [totalAmount, setTotalAmount] = useState(0);
 
   const onFilter = useCallback((filterValue: GetExpensesFilter) => {
     setFilter({ ...filterValue });
   }, []);
 
   useEffect(() => {
+    let amount = 0;
     (async () => {
       const response = await getExpenses(filter);
       if (response.isSuccess && response.result) {
+        response.result.forEach((exp) => {
+          amount += exp.amount;
+        });
         setExpenses(response.result);
+        setTotalAmount(amount);
       } else {
         toast.error(response.message);
       }
@@ -54,6 +61,8 @@ function ExpensesPage() {
       <ExpensesFilter onFilter={onFilter} />
       <Card>
         <Card.Body>
+          <p className="m-0">Total Amount: {pesoFormat(totalAmount)}</p>
+          <hr />
           <Table responsive hover>
             <thead>
               <tr>
@@ -68,7 +77,7 @@ function ExpensesPage() {
               {expenses.map((exp) => (
                 <tr>
                   <td>{exp.type}</td>
-                  <td>{exp.amount.toLocaleString()}</td>
+                  <td>{pesoFormat(exp.amount)}</td>
                   <td>
                     {exp.type === 'item charge' ? (
                       <ItemChargeDescription

@@ -42,6 +42,10 @@ const AddExpenseModal = ({ show, toggle, onSuccess }: Props) => {
 
   const handleConfirm = async () => {
     if (!user) return;
+    if (expense.type.toLocaleLowerCase() === 'item charge') {
+      toast.error('"Item Charge" as Expense Type is not allowed');
+      return;
+    }
     const response = await createExpense({
       type: expense.type,
       amount: +expense.amount,
