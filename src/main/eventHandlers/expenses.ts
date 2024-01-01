@@ -4,7 +4,11 @@ import {
   CreateExpenseRequest,
   GetExpensesFilter,
 } from '../../globalTypes/realm/expenses.type';
-import { createExpense, getExpenses } from '../service/expenseRealm';
+import {
+  createExpense,
+  deleteExpense,
+  getExpenses,
+} from '../service/expenseRealm';
 
 const setExpensesEventHandler = (ipcMain: IpcMain) => {
   ipcMain.handle(
@@ -18,6 +22,13 @@ const setExpensesEventHandler = (ipcMain: IpcMain) => {
     Channels.getAll,
     async (event: IpcMainInvokeEvent, filter?: GetExpensesFilter) => {
       const result = await getExpenses(filter);
+      return result;
+    }
+  );
+  ipcMain.handle(
+    Channels.delete,
+    async (event: IpcMainInvokeEvent, id: string) => {
+      const result = await deleteExpense(id);
       return result;
     }
   );

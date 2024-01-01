@@ -25,3 +25,11 @@ export const getExpenses = async (filter?: GetExpensesFilter) => {
   );
   return response;
 };
+
+export const deleteExpense = async (id: string) => {
+  const response = await ipcRenderer.invoke<Response<undefined>>(
+    Channels.delete,
+    id
+  );
+  return response;
+};
