@@ -163,3 +163,68 @@ export const getExpenses = async (filter?: GetExpensesFilter) => {
     };
   }
 };
+
+export const deleteExpense = async (id: string) => {
+  const realm = await openExpensesRealm();
+  let productsRealm: Realm | undefined;
+
+  if (!realm)
+    return {
+      isSuccess: false,
+      message: 'Error opening realm db',
+    };
+
+  try {
+    let expense = realm.objectForPrimaryKey<Expense>(
+      EXPENSES,
+      new Realm.BSON.ObjectID(id)
+    );
+
+    if (!expense) {
+      return {
+        isSuccess: false,
+        message: 'Expense not found',
+      };
+    }
+
+    if (expense.type === 'item charge') {
+      productsRealm = await openProductsRealm();
+      const desc =
+        expense.description &&
+        (JSON.parse(expense.description) as ExpenseDescriptionJson);
+
+      if (desc) {
+        desc.items.forEach((item) => {
+          const product = productsRealm?.objectForPrimaryKey<Product>(
+            PRODUCTS,
+            new Realm.BSON.ObjectID(item.productId)
+          );
+          if (product) {
+            productsRealm?.write(() => {
+              product.quantity += item.quantity;
+            });
+          }
+        });
+      }
+    }
+    realm.write(() => {
+      realm.delete(expense);
+      expense = null;
+    });
+    realm.close();
+    productsRealm?.close();
+    return {
+      isSuccess: true,
+      message: 'Successfully delete an expense',
+    };
+  } catch (error) {
+    console.log(error);
+    realm.close();
+    productsRealm?.close();
+    return {
+      isSuccess: false,
+      message: 'Failed to delete expense',
+      error,
+    };
+  }
+};

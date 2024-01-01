@@ -189,8 +189,7 @@ const ProductsPage = () => {
                       role="button"
                       tabIndex={0}
                     />
-                    {(user?.role === 'admin' ||
-                      (user?.role === 'manager' && !d.inventory_verified)) && (
+                    {(user?.role === 'admin' || user?.role === 'manager') && (
                       <FontAwesomeIcon
                         onClick={() => handleShowSetProductModal(d)}
                         icon={faPenToSquare}
