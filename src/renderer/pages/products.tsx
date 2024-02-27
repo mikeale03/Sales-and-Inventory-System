@@ -1,6 +1,14 @@
 /* eslint-disable radix */
 import { useEffect, useState, useContext, useMemo, useCallback } from 'react';
-import { Button, Table, Card, Row, Col, FormControl } from 'react-bootstrap';
+import {
+  Button,
+  Table,
+  Card,
+  Row,
+  Col,
+  FormControl,
+  Badge,
+} from 'react-bootstrap';
 import { debounce, pesoFormat } from 'renderer/utils/helper';
 import { deleteProduct, getProducts } from 'renderer/service/products';
 import AddQuantityModal from 'renderer/components/products/addQuantityModal';
@@ -14,6 +22,9 @@ import { toast } from 'react-toastify';
 import UserContext from 'renderer/context/userContext';
 import format from 'date-fns/format';
 import { createProductDeleteActivity } from 'renderer/service/activities';
+import ProductsFilter from 'renderer/components/products/productsFilter';
+
+type Filter = { category: string; tags: string[] };
 
 const ProductsPage = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | undefined>();
@@ -25,6 +36,10 @@ const ProductsPage = () => {
   const [pageSize] = useState(50);
   const [pageNumber, setPageNumber] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [filter, setFilter] = useState<Filter>({
+    category: '',
+    tags: [],
+  });
   const { user } = useContext(UserContext);
 
   const handleGetProducts = useCallback(
@@ -33,6 +48,7 @@ const ProductsPage = () => {
         searchText,
         sortProp: 'name',
         sortAs: 'asc',
+        ...filter,
       });
       if (response.isSuccess) {
         const data = response.result;
@@ -41,7 +57,7 @@ const ProductsPage = () => {
         setProducts(prods);
       }
     },
-    [pageSize]
+    [pageSize, filter]
   );
 
   const handleUpdateProduct = async (product: Product) => {
@@ -137,20 +153,21 @@ const ProductsPage = () => {
         Add Product
       </Button>
 
-      <Row className="mb-3">
-        <Col md="6">
-          <FormControl
-            type="search"
-            placeholder="Search name or barcode"
-            // value={search}
-            onChange={(e) => searchProduct(e.target.value.trim())}
-            autoFocus
-          />
-        </Col>
-      </Row>
+      <ProductsFilter onFilter={setFilter} />
 
       <Card className="d-flex">
         <Card.Body className="flex-grow-1">
+          <Row className="mb-3">
+            <Col md="6">
+              <FormControl
+                type="search"
+                placeholder="Search name or barcode"
+                // value={search}
+                onChange={(e) => searchProduct(e.target.value.trim())}
+                autoFocus
+              />
+            </Col>
+          </Row>
           <Table responsive hover>
             <thead>
               <tr>
@@ -158,6 +175,8 @@ const ProductsPage = () => {
                 <th>Barcode</th>
                 <th>Price</th>
                 <th>Quantity</th>
+                <th>Category</th>
+                <th>Tags</th>
                 <th>Last Updated By</th>
                 <th>Last Updated Date</th>
                 <th>Verified</th>
@@ -171,6 +190,12 @@ const ProductsPage = () => {
                   <td>{d.barcode}</td>
                   <td>{pesoFormat(d.price)}</td>
                   <td>{d.quantity.toLocaleString()}</td>
+                  <td>{d.category}</td>
+                  <td>
+                    {d.tags?.map((t) => (
+                      <Badge key={t}>{t}</Badge>
+                    ))}
+                  </td>
                   <td>{d.updated_by}</td>
                   <td>
                     {d.date_updated &&

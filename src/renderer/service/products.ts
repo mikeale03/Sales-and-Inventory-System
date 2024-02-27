@@ -8,6 +8,8 @@ type ProductUpdateParam = Partial<{
   description: string;
   quantity: string | number;
   price: string | number;
+  category: string;
+  tags: string[];
 }> & { _id: string; updated_by: string; updated_by_user_id: string };
 
 type ProductCreateParam = {
@@ -56,6 +58,8 @@ export const getProducts = async (filter?: {
   sortProp?: keyof Product;
   sortAs?: 'asc' | 'desc';
   limit?: number;
+  category?: string;
+  tags?: string[];
 }) => {
   const response = await ipcRenderer.invoke<Response<Product[]>>(
     Channels.getAll,
