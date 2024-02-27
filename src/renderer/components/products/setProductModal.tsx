@@ -1,6 +1,8 @@
 import { Product } from 'main/service/productsRealm';
 import { ChangeEvent, FormEvent, useContext, useRef, useState } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
+import CreatableSelect from 'react-select/creatable';
+import { MultiValue } from 'react-select';
 import { toast } from 'react-toastify';
 import UserContext from 'renderer/context/userContext';
 import { createProduct, updateProduct } from 'renderer/service/products';
@@ -17,6 +19,8 @@ type ProductForm = {
   description?: string;
   quantity: string | number;
   price: string | number;
+  category?: string;
+  tags?: string[];
   inventory_verified?: boolean;
 };
 
@@ -26,6 +30,8 @@ const initProduct = {
   description: '',
   quantity: '',
   price: '',
+  category: '',
+  tags: [],
   inventory_verified: false,
 };
 
@@ -155,6 +161,35 @@ const SetProductModal = ({
               value={product.quantity}
               onChange={(e) => handleChange({ quantity: e.target.value })}
               required
+            />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>
+              Category <span className="text-danger">*</span>
+            </Form.Label>
+            <Form.Control
+              value={product.category ?? ''}
+              onChange={(e) => handleChange({ category: e.target.value })}
+              required
+            />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Tags</Form.Label>
+            <CreatableSelect
+              value={product.tags?.map((v) => ({
+                label: v,
+                value: v,
+                __new__: true,
+              }))}
+              isMulti
+              isClearable
+              onChange={(
+                newValue: MultiValue<{
+                  label: string;
+                  value: string;
+                  __new__: boolean;
+                }>
+              ) => handleChange({ tags: newValue.map((v) => v.value) })}
             />
           </Form.Group>
           <Form.Group className="mb-3">

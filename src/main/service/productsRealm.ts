@@ -10,6 +10,8 @@ export type Product = {
   description?: string;
   quantity: number;
   price: number;
+  category?: string;
+  tags?: string[];
   date_created: Date;
   date_updated?: Date;
   created_by: string;
@@ -31,6 +33,8 @@ export class ProductsSchema extends Realm.Object {
       description: 'string?',
       quantity: 'int',
       price: 'float',
+      category: 'string?',
+      tags: 'string[]',
       date_created: 'date',
       date_updated: 'date?',
       created_by: 'string',
@@ -49,7 +53,7 @@ export const openProductsRealm = async () => {
   const products = await Realm.open({
     path: '../realm/products',
     schema: [ProductsSchema],
-    schemaVersion: 2,
+    schemaVersion: 3,
   });
   return products;
 };
@@ -137,6 +141,8 @@ export const getAllProducts = async (filter?: {
   sortProp?: keyof Product;
   sortAs?: 'asc' | 'desc';
   limit?: number;
+  category?: string;
+  tags?: string[];
 }): Promise<Response<Product[]>> => {
   let realm: Realm | undefined;
   try {
@@ -145,6 +151,8 @@ export const getAllProducts = async (filter?: {
 
     const name = filter?.searchText ?? '';
     const barcode = filter?.searchText && +filter.searchText;
+    const category = filter?.category;
+    const tags = filter?.tags;
     const args = [];
     let query = '';
     query += `name CONTAINS[c] $${args.length}`;
@@ -154,6 +162,17 @@ export const getAllProducts = async (filter?: {
       query += ` OR barcode == $${args.length}`;
       args.push(barcode);
     }
+    if (category) {
+      query += ` AND category == $${args.length}`;
+      args.push(category);
+    }
+    if (tags) {
+      const l = args.length;
+      query += ` AND ALL { ${tags.map((v, i) => {
+        args.push(v);
+        return `$${l + i}`;
+      })} } IN tags`;
+    }
     if (filter?.sortProp) {
       const sort = filter.sortAs || 'desc';
       query += ` SORT(${filter.sortProp} ${sort})`;
@@ -161,6 +180,8 @@ export const getAllProducts = async (filter?: {
     if (filter?.limit) {
       query += ` LIMIT(${filter.limit})`;
     }
+
+    console.log({ query, args });
 
     products = args.length ? products.filtered(query, ...args) : products;
 
@@ -198,7 +219,14 @@ export const updateProduct = async (
 ) => {
   let realm: Realm | undefined;
   interface ProductRecord {
-    [key: string]: number | string | boolean | Date | undefined | null;
+    [key: string]:
+      | number
+      | string
+      | boolean
+      | Date
+      | string[]
+      | undefined
+      | null;
   }
 
   const { name, barcode } = updates;

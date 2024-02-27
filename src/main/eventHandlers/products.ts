@@ -26,6 +26,8 @@ const setProductEventHandler = (ipcMain: IpcMain) => {
         sortProp?: keyof Product;
         sortAs?: 'asc' | 'desc';
         limit?: number;
+        category?: string;
+        tags?: string[];
       }
     ) => {
       const result = await getAllProducts(filter);
