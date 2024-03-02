@@ -1,8 +1,6 @@
 import { Product } from 'main/service/productsRealm';
 import { ChangeEvent, FormEvent, useContext, useRef, useState } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
-import CreatableSelect from 'react-select/creatable';
-import { MultiValue } from 'react-select';
 import { toast } from 'react-toastify';
 import UserContext from 'renderer/context/userContext';
 import { createProduct, updateProduct } from 'renderer/service/products';
@@ -11,6 +9,7 @@ import {
   createProductEditActivity,
 } from 'renderer/service/activities';
 import FormInput from '../common/forms/formInput';
+import TagsSelect from '../common/selects/tagsSelect';
 
 type ProductForm = {
   _id?: string;
@@ -173,7 +172,7 @@ const SetProductModal = ({
               required
             />
           </Form.Group>
-          <Form.Group className="mb-3">
+          {/* <Form.Group className="mb-3">
             <Form.Label>Tags</Form.Label>
             <CreatableSelect
               value={product.tags?.map((v) => ({
@@ -191,7 +190,11 @@ const SetProductModal = ({
                 }>
               ) => handleChange({ tags: newValue.map((v) => v.value) })}
             />
-          </Form.Group>
+          </Form.Group> */}
+          <TagsSelect
+            value={product.tags ?? []}
+            onChange={(v) => handleChange({ tags: v })}
+          />
           <Form.Group className="mb-3">
             <Form.Label>Description</Form.Label>
             <Form.Control

@@ -20,6 +20,8 @@ import GcashRegisterPage from './pages/gcashRegister';
 import GcashTransactionsPage from './pages/gcashTransactions';
 import FilterContext, { Filter, GcashFilter } from './context/filterContext';
 import ExpensesPage from './pages/expenses';
+import CategoriesPage from './pages/admin/categories';
+import TagsPage from './pages/admin/tags';
 
 export default function App() {
   const [user, setUser] = useState<User | undefined>();
@@ -70,6 +72,8 @@ export default function App() {
               <Route path="activities" element={<ActivitiesPage />} />
               <Route path="admin" element={<AdminPage />} />
               <Route path="admin/users" element={<UsersPage />} />
+              <Route path="admin/categories" element={<CategoriesPage />} />
+              <Route path="admin/tags" element={<TagsPage />} />
             </Route>
           </Routes>
         </Router>

@@ -8,23 +8,22 @@ export const create = <T extends {}>(realm: Realm, name: string, value: T) => {
   return task;
 };
 
-export const updateById = <T extends {}>(
+export const updateById = <T extends Record<string, any>>(
   realm: Realm,
   name: string,
   id: BSON.ObjectId,
-  updates: T
+  updates: Partial<T>
 ) => {
-  let task: (T & Realm.Object<unknown, never>) | undefined;
+  const item = realm?.objectForPrimaryKey<T>(name, id);
+  if (!item) return item;
 
-  const item = realm?.objectForPrimaryKey<T>(name, id) as T;
-
-  type ItemKey = keyof typeof item;
+  type ItemKey = keyof T;
 
   realm.write(() => {
-    type UpdateKey = keyof typeof updates;
     Object.keys(updates).forEach((key) => {
-      if (key !== '_id') item[key as ItemKey] = updates[key as UpdateKey];
+      if (key !== '_id' && item[key as ItemKey])
+        item[key as ItemKey] = updates[key]!;
     });
   });
-  return task;
+  return item;
 };

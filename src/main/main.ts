@@ -20,6 +20,8 @@ import setSalesEventHandler from './eventHandlers/sales';
 import setGcashEventHandler from './eventHandlers/gcash';
 import setActivitiesEventHandler from './eventHandlers/activities';
 import setExpensesEventHandler from './eventHandlers/expenses';
+import setCategoriesEventHandler from './eventHandlers/categories';
+import setTagsEventHandler from './eventHandlers/tags';
 
 class AppUpdater {
   constructor() {
@@ -43,6 +45,8 @@ setSalesEventHandler(ipcMain);
 setGcashEventHandler(ipcMain);
 setActivitiesEventHandler(ipcMain);
 setExpensesEventHandler(ipcMain);
+setCategoriesEventHandler(ipcMain);
+setTagsEventHandler(ipcMain);
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
