@@ -10,6 +10,7 @@ import {
 } from 'renderer/service/activities';
 import FormInput from '../common/forms/formInput';
 import TagsSelect from '../common/selects/tagsSelect';
+import CategorySelect from '../common/selects/categorySelect';
 
 type ProductForm = {
   _id?: string;
@@ -162,35 +163,10 @@ const SetProductModal = ({
               required
             />
           </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>
-              Category <span className="text-danger">*</span>
-            </Form.Label>
-            <Form.Control
-              value={product.category ?? ''}
-              onChange={(e) => handleChange({ category: e.target.value })}
-              required
-            />
-          </Form.Group>
-          {/* <Form.Group className="mb-3">
-            <Form.Label>Tags</Form.Label>
-            <CreatableSelect
-              value={product.tags?.map((v) => ({
-                label: v,
-                value: v,
-                __new__: true,
-              }))}
-              isMulti
-              isClearable
-              onChange={(
-                newValue: MultiValue<{
-                  label: string;
-                  value: string;
-                  __new__: boolean;
-                }>
-              ) => handleChange({ tags: newValue.map((v) => v.value) })}
-            />
-          </Form.Group> */}
+          <CategorySelect
+            value={product.category ?? ''}
+            onSelect={(category) => handleChange({ category })}
+          />
           <TagsSelect
             value={product.tags ?? []}
             onChange={(v) => handleChange({ tags: v })}

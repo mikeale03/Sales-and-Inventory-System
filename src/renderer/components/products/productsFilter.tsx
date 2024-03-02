@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Col, Row } from 'react-bootstrap';
 import TagsSelect from '../common/selects/tagsSelect';
+import CategorySelect from '../common/selects/categorySelect';
 
 type Props = {
   onFilter: (filter: { category: string; tags: string[] }) => void;
@@ -19,8 +20,20 @@ const ProductsFilter = ({ onFilter }: Props) => {
 
   return (
     <Row>
-      <Col md="3">
-        <TagsSelect value={tags} onChange={setTags} isCreatable />
+      <Col sm="6" xl="3">
+        <CategorySelect
+          value={category}
+          onSelect={setCategory}
+          defaltValue="All"
+        />
+      </Col>
+      <Col sm="6" xl="3">
+        <TagsSelect
+          value={tags}
+          onChange={setTags}
+          isCreatable
+          placeholder="All"
+        />
       </Col>
     </Row>
   );

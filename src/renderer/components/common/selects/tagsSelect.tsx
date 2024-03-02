@@ -8,9 +8,10 @@ export type Props = {
   value: string[];
   onChange: (tags: string[]) => void;
   isCreatable?: boolean;
+  placeholder?: string;
 };
 
-function TagsSelect({ value, onChange, isCreatable }: Props) {
+function TagsSelect({ value, onChange, isCreatable, placeholder }: Props) {
   const [opts, setOpts] = useState<
     MultiValue<{
       label: string;
@@ -45,6 +46,7 @@ function TagsSelect({ value, onChange, isCreatable }: Props) {
           isMulti
           isClearable
           onChange={(newValue) => onChange(newValue.map((v) => v.value))}
+          placeholder={placeholder}
         />
       ) : (
         <Select
@@ -53,6 +55,7 @@ function TagsSelect({ value, onChange, isCreatable }: Props) {
           isMulti
           isClearable
           onChange={(newValue) => onChange(newValue.map((v) => v.value))}
+          placeholder={placeholder}
         />
       )}
     </Form.Group>
