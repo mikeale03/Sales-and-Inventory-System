@@ -6,6 +6,8 @@ export type Filter = {
   selectedDate: Date;
   startDate: Date;
   endDate: Date;
+  category: string;
+  tags: string[];
 };
 
 export type GcashFilter = {
@@ -28,6 +30,8 @@ const FilterContext = createContext<{
     selectedDate: new Date(),
     userOption: '',
     selectedPeriod: 'Daily',
+    category: '',
+    tags: [],
     startDate: new Date(new Date().setHours(0, 0, 0, 0)),
     endDate: new Date(new Date().setHours(23, 59, 59, 999)),
   },

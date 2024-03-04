@@ -9,6 +9,7 @@ import {
   Dropdown,
   FormControl,
   FormCheck,
+  Badge,
 } from 'react-bootstrap';
 import {
   deleteSale,
@@ -39,7 +40,7 @@ const SalesPage = () => {
   const [isGroupByProduct, setIsGroupByProduct] = useState(false);
   const { user } = useContext(UserContext);
   const {
-    salesFilter: { userOption, startDate, endDate },
+    salesFilter: { userOption, startDate, endDate, category, tags },
   } = useContext(FilterContext);
   const printRef = useRef<HTMLDivElement | null>(null);
 
@@ -51,6 +52,8 @@ const SalesPage = () => {
         startDate?: Date;
         endDate?: Date;
         productName: string;
+        productCategory?: string;
+        productTags?: string[];
       }
     ) => {
       const response = isGroupByProd
@@ -95,6 +98,8 @@ const SalesPage = () => {
         startDate,
         endDate,
         productName: searchText,
+        productCategory: category,
+        productTags: tags,
       });
   }, [
     userOption,
@@ -102,6 +107,8 @@ const SalesPage = () => {
     endDate,
     searchText,
     isGroupByProduct,
+    category,
+    tags,
     handleGetSales,
   ]);
 
@@ -204,6 +211,8 @@ const SalesPage = () => {
                   <tr>
                     <th>Product Name</th>
                     <th>Quantity</th>
+                    <th>Category</th>
+                    <th>Tags</th>
                     {!isGroupByProduct && <th>Price</th>}
                     <th>Total Price</th>
                     {isGroupByProduct && <th>Remaining Qty</th>}
@@ -220,6 +229,12 @@ const SalesPage = () => {
                     <tr key={d._id}>
                       <td>{d.product_name}</td>
                       <td>{d.quantity.toLocaleString()}</td>
+                      <td>{d.product_category}</td>
+                      <td>
+                        {d.product_tags?.map((t) => (
+                          <Badge key={t}>{t}</Badge>
+                        ))}
+                      </td>
                       {!isGroupByProduct && <td>{pesoFormat(d.price)}</td>}
                       <td>{pesoFormat(d.total_price)}</td>
                       {isGroupByProduct && (
