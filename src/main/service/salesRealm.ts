@@ -11,6 +11,8 @@ export type Sales = {
   _id: string;
   product_id: string;
   product_name: string;
+  product_category?: string;
+  product_tags: string[];
   quantity: number;
   price: number;
   total_price: number;
@@ -29,6 +31,8 @@ export class SalesSchema extends Realm.Object {
       _id: { type: 'objectId', default: () => new Realm.BSON.ObjectId() },
       product_id: { type: 'string', indexed: true },
       product_name: { type: 'string', indexed: true },
+      product_category: { type: 'string', indexed: true, default: '' },
+      product_tags: 'string[]',
       quantity: 'int',
       price: 'float',
       total_price: 'float',
@@ -46,7 +50,7 @@ export const openSalesRealm = async () => {
   const sales = await Realm.open({
     path: '../realm/sales',
     schema: [SalesSchema],
-    schemaVersion: 4,
+    schemaVersion: 5,
   });
   return sales;
 };
@@ -87,6 +91,8 @@ export const salesPurchase = async (
           salesRealm?.create<Sales>(SALES, {
             product_id: product._id.toString(),
             product_name: product.name,
+            product_category: product.category,
+            product_tags: product.tags,
             quantity: item.quantity,
             price: product.price,
             total_price,
@@ -127,6 +133,8 @@ export const getSalesByProducts = async (filter?: {
   startDate?: Date;
   endDate?: Date;
   productName?: string;
+  productCategory?: string;
+  productTags?: string[];
   verifiedOnly?: boolean;
 }): Promise<Response<Sales[]>> => {
   let realm: Realm | undefined;
@@ -141,6 +149,8 @@ export const getSalesByProducts = async (filter?: {
     const startDate = filter?.startDate;
     const endDate = filter?.endDate;
     const productName = filter?.productName;
+    const productCategory = filter?.productCategory;
+    const productTags = filter?.productTags;
 
     const query: string[] = [];
     const args = [];
@@ -148,6 +158,23 @@ export const getSalesByProducts = async (filter?: {
     if (productName) {
       query.push(`product_name CONTAINS[c] $${args.length}`);
       args.push(productName);
+    }
+    if (transactBy) {
+      query.push(`transact_by_user_id == $${args.length}`);
+      args.push(transactBy);
+    }
+    if (productCategory) {
+      query.push(`product_category == $${args.length}`);
+      args.push(transactBy);
+    }
+    if (productTags) {
+      const l = args.length;
+      query.push(
+        `ALL { ${productTags.map((v, i) => {
+          args.push(v);
+          return `$${l + i}`;
+        })} } IN product_tags`
+      );
     }
     if (transactBy) {
       query.push(`transact_by_user_id == $${args.length}`);
@@ -235,6 +262,8 @@ export const getSalesByTransactions = async (filter?: {
   startDate?: Date;
   endDate?: Date;
   productName?: string;
+  productCategory?: string;
+  productTags?: string[];
 }): Promise<Response<Sales[]>> => {
   let realm: Realm | undefined;
   try {
@@ -245,6 +274,8 @@ export const getSalesByTransactions = async (filter?: {
     const startDate = filter?.startDate;
     const endDate = filter?.endDate;
     const productName = filter?.productName;
+    const productCategory = filter?.productCategory;
+    const productTags = filter?.productTags;
 
     const query: string[] = [];
     const args = [];
@@ -253,10 +284,22 @@ export const getSalesByTransactions = async (filter?: {
       query.push(`product_name CONTAINS[c] $${args.length}`);
       args.push(productName);
     }
-
     if (transactBy) {
       query.push(`transact_by_user_id == $${args.length}`);
       args.push(transactBy);
+    }
+    if (productCategory) {
+      query.push(`product_category == $${args.length}`);
+      args.push(transactBy);
+    }
+    if (productTags) {
+      const l = args.length;
+      query.push(
+        `ALL { ${productTags.map((v, i) => {
+          args.push(v);
+          return `$${l + i}`;
+        })} } IN product_tags`
+      );
     }
     if (startDate) {
       query.push(`date_created >= $${args.length}`);
@@ -277,6 +320,7 @@ export const getSalesByTransactions = async (filter?: {
       result: salesObj.map((sale) => ({ ...sale, _id: sale._id.toString() })),
     };
   } catch (error) {
+    console.log(error);
     realm?.close();
     return {
       isSuccess: false,
@@ -498,7 +542,7 @@ export const getSalesGroupByDate = async (
     };
   } catch (error) {
     realm?.close();
-    // console.log(error);
+    console.log(error);
     return {
       isSuccess: false,
       message: 'Failed to get sales',

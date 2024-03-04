@@ -4,6 +4,8 @@ import DatePicker from 'react-datepicker';
 import FilterContext from 'renderer/context/filterContext';
 import UserContext from 'renderer/context/userContext';
 import UsersSelect from '../common/selects/usersSelect';
+import TagsSelect from '../common/selects/tagsSelect';
+import CategorySelect from '../common/selects/categorySelect';
 
 type Props = {
   className?: string;
@@ -150,6 +152,21 @@ const SalesFilter = ({ className }: Props) => {
               new Date(salesFilter.selectedDate).setHours(23, 59, 59, 999)
             ),
           ]}
+        />
+      </Col>
+      <Col sm="6" xl="3" className="mb-3">
+        <CategorySelect
+          value={salesFilter.category ?? ''}
+          onSelect={(category) => setSalesFilter({ ...salesFilter, category })}
+          defaltValue="All"
+        />
+      </Col>
+      <Col sm="6" xl="3" className="mb-3">
+        <TagsSelect
+          value={salesFilter.tags ?? []}
+          onChange={(tags) => setSalesFilter({ ...salesFilter, tags })}
+          isCreatable
+          placeholder="All"
         />
       </Col>
     </Row>
