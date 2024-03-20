@@ -9,9 +9,16 @@ export type Props = {
   onChange: (tags: string[]) => void;
   isCreatable?: boolean;
   placeholder?: string;
+  options?: string[];
 };
 
-function TagsSelect({ value, onChange, isCreatable, placeholder }: Props) {
+function TagsSelect({
+  value,
+  onChange,
+  isCreatable,
+  placeholder,
+  options,
+}: Props) {
   const [opts, setOpts] = useState<
     MultiValue<{
       label: string;
@@ -22,6 +29,16 @@ function TagsSelect({ value, onChange, isCreatable, placeholder }: Props) {
 
   useEffect(() => {
     (async () => {
+      if (options) {
+        setOpts(
+          options.map((v) => ({
+            label: v,
+            value: v,
+            __new__: false,
+          }))
+        );
+        return;
+      }
       const response = await getTags();
       if (response.isSuccess && response.result) {
         setOpts(
@@ -33,7 +50,7 @@ function TagsSelect({ value, onChange, isCreatable, placeholder }: Props) {
         );
       }
     })();
-  }, []);
+  }, [options]);
 
   return (
     <Form.Group className="mb-3">

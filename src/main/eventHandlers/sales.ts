@@ -68,8 +68,25 @@ const setSalesEventHandler = (ipcMain: IpcMain) => {
   );
   ipcMain.handle(
     Channels.getSalesByDateRange,
-    async (event: IpcMainInvokeEvent, startDate: Date, endDate: Date) => {
-      const result = await getSalesByDateRange(startDate, endDate);
+    async (
+      event: IpcMainInvokeEvent,
+      startDate: Date,
+      endDate: Date,
+      category: string,
+      tags?: string[],
+      sortByProp: 'quantity' | 'total_price' = 'quantity',
+      sort: 'asc' | 'desc' = 'desc',
+      limit: number = 10
+    ) => {
+      const result = await getSalesByDateRange(
+        startDate,
+        endDate,
+        category,
+        tags,
+        sortByProp,
+        sort,
+        limit
+      );
       return result;
     }
   );

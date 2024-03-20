@@ -59,13 +59,27 @@ export const updateByGcashDelete = async (gcash: Gcash) => {
   return response;
 };
 
-export const getSalesQtyByDateRange = async (
+export const getSalesByDateRange = async (
   startDate: Date,
-  endDate: Date
+  endDate: Date,
+  category: string,
+  tags?: string[],
+  sortByProp: 'quantity' | 'total_price' = 'quantity',
+  sort: 'asc' | 'desc' = 'desc',
+  limit: number = 10
 ) => {
   const response = await ipcRenderer.invoke<
-    Response<{ quantity: number; product_name: string }[]>
-  >(Channels.getSalesByDateRange, startDate, endDate);
+    Response<{ quantity: number; product_name: string; total_price: number }[]>
+  >(
+    Channels.getSalesByDateRange,
+    startDate,
+    endDate,
+    category,
+    tags,
+    sortByProp,
+    sort,
+    limit
+  );
   return response;
 };
 

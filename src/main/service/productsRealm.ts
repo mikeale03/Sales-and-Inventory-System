@@ -181,8 +181,6 @@ export const getAllProducts = async (filter?: {
       query += ` LIMIT(${filter.limit})`;
     }
 
-    console.log({ query, args });
-
     products = args.length ? products.filtered(query, ...args) : products;
 
     const result = products.map((item) => {
