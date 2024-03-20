@@ -6,19 +6,24 @@ type Props = {
   value: string;
   onSelect: (selected: string) => void;
   defaltValue?: string;
+  options?: string[];
 };
 
-const CategorySelect = ({ value, onSelect, defaltValue }: Props) => {
+const CategorySelect = ({ value, onSelect, defaltValue, options }: Props) => {
   const [opts, setOpts] = useState<string[]>([]);
 
   useEffect(() => {
     (async () => {
+      if (options) {
+        setOpts(options);
+        return;
+      }
       const response = await getCategories();
       if (response.isSuccess && response.result) {
         setOpts(response.result.map((v) => v.name));
       }
     })();
-  }, []);
+  }, [options]);
 
   return (
     <Form.Group className="mb-3">

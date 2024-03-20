@@ -91,7 +91,7 @@ export const salesPurchase = async (
           salesRealm?.create<Sales>(SALES, {
             product_id: product._id.toString(),
             product_name: product.name,
-            product_category: product.category,
+            product_category: product.category ?? '',
             product_tags: product.tags,
             quantity: item.quantity,
             price: product.price,
@@ -118,6 +118,7 @@ export const salesPurchase = async (
       message: 'Successfully purchased the products',
     };
   } catch (error) {
+    console.error(error);
     productsRealm?.close();
     salesRealm?.close();
     return {
@@ -432,15 +433,32 @@ export const updateSalesByGcashTransDelete = async (gcashTrans: Gcash) => {
 
 export const getSalesByDateRange = async (
   startDate: Date,
-  endDate: Date
-  // limit?: number
+  endDate: Date,
+  category: string,
+  tags?: string[],
+  sortByProp: 'quantity' | 'total_price' = 'quantity',
+  sort: 'asc' | 'desc' = 'desc',
+  limit: number = 10
 ) => {
   let realm: Realm | undefined;
   try {
     realm = await openSalesRealm();
-    const sales = realm
-      ?.objects<Sales>(SALES)
-      .filtered('date_created >= $0 && date_created <= $1', startDate, endDate);
+    let query = 'date_created >= $0 && date_created <= $1';
+    const args: any[] = [startDate, endDate];
+
+    if (category) {
+      query += ` AND product_category == $${args.length}`;
+      args.push(category);
+    }
+    if (tags && tags.length) {
+      const l = args.length;
+      query += ` AND SOME product_tags IN { ${tags.map((v, i) => {
+        args.push(v);
+        return `$${l + i}`;
+      })} }`;
+    }
+
+    const sales = realm?.objects<Sales>(SALES).filtered(query, ...args);
 
     const salesMap = new Map<
       string,
@@ -460,6 +478,7 @@ export const getSalesByDateRange = async (
       if (salesMap.has(name)) {
         const item = salesMap.get(name)!;
         item.quantity += quantity;
+        item.total_price += total_price;
       } else {
         salesMap.set(name, {
           product_name: name,
@@ -470,19 +489,22 @@ export const getSalesByDateRange = async (
       }
     });
 
-    const sortedByQty = [...salesMap.values()]
-      .sort((a, b) => b.quantity - a.quantity)
-      .slice(0, 10);
+    const ascSortFunc = (a: any, b: any) => a[sortByProp] - b[sortByProp];
+    const descSortFunc = (a: any, b: any) => b[sortByProp] - a[sortByProp];
+
+    const sortedArray = [...salesMap.values()]
+      .sort(sort === 'desc' ? descSortFunc : ascSortFunc)
+      .slice(0, limit);
     // console.debug(sortedByQty);
     realm.close();
     return {
       isSuccess: true,
-      result: sortedByQty,
+      result: sortedArray,
       message: 'Successfully get sales',
     };
   } catch (error) {
     realm?.close();
-    // console.log(error);
+    console.log(error);
     return {
       isSuccess: false,
       message: 'Failed to get sales',
