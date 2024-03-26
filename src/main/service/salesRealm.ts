@@ -291,7 +291,7 @@ export const getSalesByTransactions = async (filter?: {
     }
     if (productCategory) {
       query.push(`product_category == $${args.length}`);
-      args.push(transactBy);
+      args.push(productCategory);
     }
     if (productTags) {
       const l = args.length;
