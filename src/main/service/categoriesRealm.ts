@@ -41,6 +41,18 @@ export const createCategory = async (name: string) => {
 
   try {
     let category: CategoryRealm | undefined;
+
+    const isExist = realm
+      .objects<CategoryRealm>(CATEGORIES)
+      .filtered(`name ==[c] '${name}'`).length;
+
+    if (isExist) {
+      return {
+        isSuccess: false,
+        message: 'Category name already exist.',
+      };
+    }
+
     realm.write(() => {
       category = realm
         .create<CategoryRealm>(CATEGORIES, {
