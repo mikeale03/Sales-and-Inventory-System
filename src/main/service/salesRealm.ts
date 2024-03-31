@@ -471,17 +471,19 @@ export const getSalesByDateRange = async (
     >();
 
     sales.forEach((s) => {
-      const { product_name, quantity, date_created, total_price } = s;
+      // eslint-disable-next-line prettier/prettier
+      const { product_id, product_name, quantity, date_created, total_price } = s;
       const type = product_name.split('-');
-      const name = type[0] === 'GCash' ? `${type[0]}-${type[1]}` : product_name;
+      const name = type[0] === 'GCash' ? `${type[0]}-${type[1]}` : product_id;
 
       if (salesMap.has(name)) {
         const item = salesMap.get(name)!;
+        item.product_name = product_name;
         item.quantity += quantity;
         item.total_price += total_price;
       } else {
         salesMap.set(name, {
-          product_name: name,
+          product_name,
           quantity,
           total_price,
           date_created,
