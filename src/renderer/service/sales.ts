@@ -99,3 +99,26 @@ export const getSalesGroupByDate = async (startDate: Date, endDate: Date) => {
   >(Channels.getSalesGroupByDate, startDate, endDate);
   return response;
 };
+
+export const getVoidCode = async () => {
+  const response = await ipcRenderer.invoke<Response<string>>(
+    Channels.getVoidCode
+  );
+  return response;
+};
+
+export const createVoidCode = async (code: string) => {
+  const response = await ipcRenderer.invoke<Response<void>>(
+    Channels.createVoidCode,
+    code
+  );
+  return response;
+};
+
+export const voidSale = async (saleId: string) => {
+  const response = await ipcRenderer.invoke<Response<undefined>>(
+    Channels.void,
+    saleId
+  );
+  return response;
+};
