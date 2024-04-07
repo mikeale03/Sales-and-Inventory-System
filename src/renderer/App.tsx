@@ -22,6 +22,7 @@ import FilterContext, { Filter, GcashFilter } from './context/filterContext';
 import ExpensesPage from './pages/expenses';
 import CategoriesPage from './pages/admin/categories';
 import TagsPage from './pages/admin/tags';
+import VoidCodePage from './pages/admin/voidCode';
 
 export default function App() {
   const [user, setUser] = useState<User | undefined>();
@@ -31,6 +32,8 @@ export default function App() {
     selectedPeriod: 'Daily',
     startDate: new Date(new Date().setHours(0, 0, 0, 0)),
     endDate: new Date(new Date().setHours(23, 59, 59, 999)),
+    category: '',
+    tags: [],
   });
   const [gcashTransFilter, setGcashTransFilter] = useState<GcashFilter>({
     selectedDate: new Date(),
@@ -74,6 +77,7 @@ export default function App() {
               <Route path="admin/users" element={<UsersPage />} />
               <Route path="admin/categories" element={<CategoriesPage />} />
               <Route path="admin/tags" element={<TagsPage />} />
+              <Route path="admin/void-code" element={<VoidCodePage />} />
             </Route>
           </Routes>
         </Router>

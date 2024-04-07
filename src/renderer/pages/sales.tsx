@@ -12,9 +12,10 @@ import {
   Badge,
 } from 'react-bootstrap';
 import {
-  deleteSale,
+  voidSale,
   getSalesByProducts,
   getSalesByTransactions,
+  getVoidCode,
 } from 'renderer/service/sales';
 import { debounce, pesoFormat } from 'renderer/utils/helper';
 import format from 'date-fns/format';
@@ -27,6 +28,7 @@ import { toast } from 'react-toastify';
 import SalesFilter from 'renderer/components/sales/salesFilters';
 import FilterContext from 'renderer/context/filterContext';
 import { createSalesDeleteActivity } from 'renderer/service/activities';
+import VoidCodeModal from 'renderer/components/sales/voidCodeModal';
 
 const SalesPage = () => {
   const [sales, setSales] = useState<Sales[]>([]);
@@ -38,6 +40,8 @@ const SalesPage = () => {
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [selectedSale, setSelectedSale] = useState<Sales | undefined>();
   const [isGroupByProduct, setIsGroupByProduct] = useState(false);
+  const [voidCode, setVoidCode] = useState('');
+  const [showVoidCodeModal, setShowVoidCodeModal] = useState(false);
   const { user } = useContext(UserContext);
   const {
     salesFilter: { userOption, startDate, endDate, category, tags },
@@ -112,13 +116,20 @@ const SalesPage = () => {
     handleGetSales,
   ]);
 
+  useEffect(() => {
+    (async () => {
+      const response = await getVoidCode();
+      if (response.isSuccess && response.result) setVoidCode(response.result);
+    })();
+  }, []);
+
   const handlePrint = useReactToPrint({
     content: () => printRef.current,
   });
 
-  const handleDeleteSale = async () => {
+  const handleVoidSale = async () => {
     if (!selectedSale || !user) return;
-    const response = await deleteSale(selectedSale._id);
+    const response = await voidSale(selectedSale._id);
     if (response.isSuccess) {
       setSales(sales.filter((item) => item._id !== selectedSale._id));
       createSalesDeleteActivity({
@@ -144,7 +155,15 @@ const SalesPage = () => {
         show={showConfirmationModal}
         toggle={setShowConfirmationModal}
         message={<p className="text-center">Are you sure to delete sale</p>}
-        onConfirm={handleDeleteSale}
+        onConfirm={() => !voidCode && handleVoidSale()}
+        onExited={() => voidCode && setShowVoidCodeModal(true)}
+      />
+
+      <VoidCodeModal
+        show={showVoidCodeModal}
+        toggle={setShowVoidCodeModal}
+        voidCode={voidCode}
+        onConfirm={handleVoidSale}
       />
 
       <div ref={printRef}>

@@ -8,8 +8,10 @@ import {
   salesPurchase,
   updateSalesByGcashTransDelete,
   getSalesGroupByDate,
+  voidSale,
 } from '../service/salesRealm';
 import { Gcash } from '../../globalTypes/realm/gcash.types';
+import { createVoidCode, getVoidCode } from '../service/voidCode';
 
 export type SalesPurchaseArg = Parameters<typeof salesPurchase>;
 
@@ -60,6 +62,13 @@ const setSalesEventHandler = (ipcMain: IpcMain) => {
     }
   );
   ipcMain.handle(
+    Channels.void,
+    async (event: IpcMainInvokeEvent, saleId: string) => {
+      const result = await voidSale(saleId);
+      return result;
+    }
+  );
+  ipcMain.handle(
     Channels.updateByGcashDelete,
     async (event: IpcMainInvokeEvent, gcash: Gcash) => {
       const result = await updateSalesByGcashTransDelete(gcash);
@@ -94,6 +103,17 @@ const setSalesEventHandler = (ipcMain: IpcMain) => {
     Channels.getSalesGroupByDate,
     async (event: IpcMainInvokeEvent, startDate: Date, endDate: Date) => {
       const result = await getSalesGroupByDate(startDate, endDate);
+      return result;
+    }
+  );
+  ipcMain.handle(Channels.getVoidCode, async (event: IpcMainInvokeEvent) => {
+    const result = await getVoidCode();
+    return result;
+  });
+  ipcMain.handle(
+    Channels.createVoidCode,
+    async (event: IpcMainInvokeEvent, code) => {
+      const result = await createVoidCode(code);
       return result;
     }
   );

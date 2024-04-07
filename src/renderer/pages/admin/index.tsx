@@ -27,6 +27,14 @@ const AdminPage = () => {
                 Tags
               </Link>
             </Col>
+            <Col lg="4">
+              <p className="mb-0">
+                <strong>Manage Sales</strong>
+              </p>
+              <Link to="void-code" className="d-block">
+                Sales Void Code
+              </Link>
+            </Col>
           </Row>
         </Card.Body>
       </Card>

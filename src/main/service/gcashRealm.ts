@@ -133,6 +133,7 @@ export const createGcashTransactions = async (
           transact_by: gcashTran.transact_by,
           transact_by_user_id: gcashTran.transact_by_user_id,
           transaction_id: gcashTran.transaction_id,
+          product_tags: [],
         });
     });
     // const newGcash = task?.toJSON() as Gcash;

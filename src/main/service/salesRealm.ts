@@ -22,6 +22,7 @@ export type Sales = {
   transact_by_user_id: string;
   transaction_id: string;
   remaining_quantity?: number;
+  isVoid?: boolean;
 };
 
 export class SalesSchema extends Realm.Object {
@@ -41,6 +42,7 @@ export class SalesSchema extends Realm.Object {
       transact_by: 'string',
       transact_by_user_id: { type: 'string', indexed: true },
       transaction_id: { type: 'string', indexed: true },
+      isVoid: 'bool?',
     },
     primaryKey: '_id',
   };
@@ -50,7 +52,7 @@ export const openSalesRealm = async () => {
   const sales = await Realm.open({
     path: '../realm/sales',
     schema: [SalesSchema],
-    schemaVersion: 5,
+    schemaVersion: 6,
   });
   return sales;
 };
@@ -153,7 +155,7 @@ export const getSalesByProducts = async (filter?: {
     const productCategory = filter?.productCategory;
     const productTags = filter?.productTags;
 
-    const query: string[] = [];
+    const query: string[] = ['isVoid != true'];
     const args = [];
 
     if (productName) {
@@ -278,7 +280,7 @@ export const getSalesByTransactions = async (filter?: {
     const productCategory = filter?.productCategory;
     const productTags = filter?.productTags;
 
-    const query: string[] = [];
+    const query: string[] = ['isVoid != true'];
     const args = [];
 
     if (productName) {
@@ -383,6 +385,57 @@ export const deleteSale = async (salesId: string) => {
   }
 };
 
+export const voidSale = async (salesId: string) => {
+  let salesRealm: Realm | undefined;
+  let productsRealm: Realm | undefined;
+  try {
+    salesRealm = await openSalesRealm();
+    productsRealm = await openProductsRealm();
+    const sale = salesRealm.objectForPrimaryKey<Sales>(
+      SALES,
+      new Realm.BSON.ObjectID(salesId)
+    );
+    if (!sale) {
+      salesRealm?.close();
+      return {
+        isSuccess: false,
+        message: 'Sale id not found',
+      };
+    }
+    const product =
+      sale.product_id === 'gcash'
+        ? null
+        : productsRealm.objectForPrimaryKey<Product>(
+            PRODUCTS,
+            new Realm.BSON.ObjectID(sale.product_id)
+          );
+
+    if (product) {
+      productsRealm.write(() => {
+        product.quantity += sale?.quantity || 0;
+      });
+    }
+    salesRealm.write(() => {
+      sale.isVoid = true;
+    });
+
+    salesRealm?.close();
+    productsRealm.close();
+    return {
+      isSuccess: true,
+      message: 'Successfully void a sale',
+    };
+  } catch (error) {
+    salesRealm?.close();
+    productsRealm?.close();
+    return {
+      isSuccess: false,
+      message: 'Failed to void sale',
+      error,
+    };
+  }
+};
+
 export const updateSalesByGcashTransDelete = async (gcashTrans: Gcash) => {
   const { _id, transaction_id, type, is_product_gcash_pay, related_gcash_id } =
     gcashTrans;
@@ -443,7 +496,8 @@ export const getSalesByDateRange = async (
   let realm: Realm | undefined;
   try {
     realm = await openSalesRealm();
-    let query = 'date_created >= $0 && date_created <= $1';
+    let query = 'isVoid != true && date_created >= $0 && date_created <= $1';
+
     const args: any[] = [startDate, endDate];
 
     if (category) {
@@ -472,7 +526,8 @@ export const getSalesByDateRange = async (
 
     sales.forEach((s) => {
       // eslint-disable-next-line prettier/prettier
-      const { product_id, product_name, quantity, date_created, total_price } = s;
+      const { product_id, product_name, quantity, date_created, total_price } =
+        s;
       const type = product_name.split('-');
       const name = type[0] === 'GCash' ? `${type[0]}-${type[1]}` : product_id;
 
@@ -526,7 +581,7 @@ export const getSalesGroupByDate = async (
     const sales = realm
       ?.objects<Sales>(SALES)
       .filtered(
-        'date_created >= $0 && date_created <= $1 SORT(date_created ASC)',
+        'isVoid != true && date_created >= $0 && date_created <= $1 SORT(date_created ASC)',
         startDate,
         endDate
       );
