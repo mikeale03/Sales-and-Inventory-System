@@ -29,6 +29,7 @@ import SalesFilter from 'renderer/components/sales/salesFilters';
 import FilterContext from 'renderer/context/filterContext';
 import { createSalesDeleteActivity } from 'renderer/service/activities';
 import VoidCodeModal from 'renderer/components/sales/voidCodeModal';
+import { User } from 'globalTypes/realm/user.types';
 
 const SalesPage = () => {
   const [sales, setSales] = useState<Sales[]>([]);
@@ -127,15 +128,16 @@ const SalesPage = () => {
     content: () => printRef.current,
   });
 
-  const handleVoidSale = async () => {
+  const handleVoidSale = async (accessCodeUser: User) => {
     if (!selectedSale || !user) return;
+
     const response = await voidSale(selectedSale._id);
     if (response.isSuccess) {
       setSales(sales.filter((item) => item._id !== selectedSale._id));
       createSalesDeleteActivity({
         sales: selectedSale,
-        transact_by: user.username,
-        transact_by_user_id: user._id,
+        transact_by: accessCodeUser.username,
+        transact_by_user_id: accessCodeUser._id,
       });
     } else toast.error(response.message);
   };
@@ -155,8 +157,14 @@ const SalesPage = () => {
         show={showConfirmationModal}
         toggle={setShowConfirmationModal}
         message={<p className="text-center">Are you sure to delete sale</p>}
-        onConfirm={() => !voidCode && handleVoidSale()}
-        onExited={() => voidCode && setShowVoidCodeModal(true)}
+        onConfirm={() =>
+          (user?.role === 'admin' || user?.accessCode) && handleVoidSale(user!)
+        }
+        onExited={() =>
+          user?.role !== 'admin' &&
+          !user?.accessCode &&
+          setShowVoidCodeModal(true)
+        }
       />
 
       <VoidCodeModal
@@ -274,19 +282,18 @@ const SalesPage = () => {
                         </td>
                       )}
                       {!isGroupByProduct && <td>{d.transact_by}</td>}
-                      {user?.role === 'admin' && (
-                        <td className="print-hide">
-                          <FontAwesomeIcon
-                            onClick={() => handleShowConfirmationModal(d)}
-                            icon={faTrashCan}
-                            title="Delete"
-                            size="xl"
-                            className="me-2 cursor-pointer"
-                            role="button"
-                            tabIndex={0}
-                          />
-                        </td>
-                      )}
+
+                      <td className="print-hide">
+                        <FontAwesomeIcon
+                          onClick={() => handleShowConfirmationModal(d)}
+                          icon={faTrashCan}
+                          title="Delete"
+                          size="xl"
+                          className="me-2 cursor-pointer"
+                          role="button"
+                          tabIndex={0}
+                        />
+                      </td>
                     </tr>
                   ))}
                 </tbody>

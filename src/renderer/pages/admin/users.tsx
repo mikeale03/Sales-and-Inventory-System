@@ -8,21 +8,23 @@ import { useNavigate } from 'react-router-dom';
 import SetUserModal from 'renderer/components/user/setUserModal';
 import ConfirmationModal from 'renderer/components/common/modals/confirmation';
 import UserContext from 'renderer/context/userContext';
+import UsersContext from 'renderer/context/usersContext';
 
 const UsersPage = () => {
-  const [users, setUsers] = useState<User[]>([]);
+  // const [users, setUsers] = useState<User[]>([]);
   const [showSetUserModal, setShowSetUserModal] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | undefined>();
   const navigate = useNavigate();
   const { user, setUser } = useContext(UserContext);
+  const { users, setUsers } = useContext(UsersContext);
 
-  useEffect(() => {
-    (async () => {
-      const response = await getUsers();
-      if (response.isSuccess && response.result) setUsers(response.result);
-    })();
-  }, []);
+  // useEffect(() => {
+  //   (async () => {
+  //     const response = await getUsers();
+  //     if (response.isSuccess && response.result) setUsers(response.result);
+  //   })();
+  // }, []);
 
   const handleShowSetUserModal = (userSelect: User | undefined) => {
     setSelectedUser(userSelect);

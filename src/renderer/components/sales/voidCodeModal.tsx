@@ -1,12 +1,14 @@
-import { FormEvent, useRef, useState } from 'react';
+import { User } from 'globalTypes/realm/user.types';
+import { FormEvent, useContext, useRef, useState } from 'react';
 import { Button, Form, FormControl, Modal } from 'react-bootstrap';
 import { toast } from 'react-toastify';
+import UsersContext from 'renderer/context/usersContext';
 
 export type Props = {
   show: boolean;
   toggle: (show: boolean) => void;
   voidCode?: string;
-  onConfirm?: () => void;
+  onConfirm?: (user: User) => void;
   onCancel?: () => void;
 };
 
@@ -18,6 +20,7 @@ const VoidCodeModal = ({
   onCancel,
 }: Props) => {
   const [code, setCode] = useState('');
+  const { users } = useContext(UsersContext);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const handleCancel = () => {
@@ -28,10 +31,13 @@ const VoidCodeModal = ({
 
   const handleConfirm = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (voidCode === code) {
+
+    const accessCodeUser = users.find((u) => u.accessCode === code);
+
+    if (accessCodeUser) {
       setCode('');
       toggle(false);
-      return onConfirm?.();
+      return onConfirm?.(accessCodeUser);
     }
     setCode('');
     return toast.error('Code is invalid!');

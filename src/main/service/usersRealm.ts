@@ -14,6 +14,7 @@ export class UsersSchema extends Realm.Object {
       password: 'string',
       salt: 'string',
       role: 'string',
+      accessCode: 'string?',
       date_created: 'date',
     },
     primaryKey: '_id',
@@ -25,6 +26,7 @@ export const openUsersRealm = async () => {
     const realm = await Realm.open({
       path: '../realm/users',
       schema: [UsersSchema],
+      schemaVersion: 2,
     });
     return realm;
   } catch (error) {
@@ -147,8 +149,8 @@ export const getUsers = async () => {
   return {
     isSuccess: true,
     result: users.map((user) => {
-      const { _id, username, role, date_created } = user;
-      return { _id: _id.toString(), username, role, date_created };
+      const { _id, username, role, accessCode, date_created } = user;
+      return { _id: _id.toString(), username, role, accessCode, date_created };
     }),
     message: 'Successfully get users',
   };
@@ -182,7 +184,7 @@ export const updateUser = async (updates: UserUpdate) => {
   }
   try {
     realm.write(() => {
-      const { username, password, role } = updates;
+      const { username, password, role, accessCode } = updates;
       if (username) user.username = username;
       if (role) user.role = role;
       if (password) {
@@ -190,13 +192,19 @@ export const updateUser = async (updates: UserUpdate) => {
         user.password = hash;
         user.salt = salt;
       }
+      if (accessCode !== undefined) {
+        user.accessCode = accessCode;
+      }
     });
-    const { _id, username, role, date_created } = user.toJSON() as User;
+
+    const { _id, username, role, date_created, accessCode } =
+      user.toJSON() as User;
+
     realm.close();
     return {
       isSuccess: true,
       message: 'Successfully updated user',
-      result: { _id: _id.toString(), username, role, date_created },
+      result: { _id: _id.toString(), username, role, accessCode, date_created },
     };
   } catch (error) {
     realm.close();

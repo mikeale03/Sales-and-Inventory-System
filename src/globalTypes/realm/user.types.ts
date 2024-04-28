@@ -6,6 +6,7 @@ export type User = {
   password?: string;
   salt?: string;
   role: Role;
+  accessCode?: string;
   date_created: Date;
 };
 
@@ -19,5 +20,6 @@ export type UserUpdate = {
   _id: string;
   username?: string;
   password?: string;
-  role: Role;
+  accessCode?: string;
+  role?: Role;
 };

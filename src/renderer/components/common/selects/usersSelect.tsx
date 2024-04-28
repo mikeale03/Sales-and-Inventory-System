@@ -7,9 +7,10 @@ import { getUsers } from 'renderer/service/users';
 export type Props = {
   value: string;
   onSelect: (userId: string) => void;
+  noAllOption?: boolean;
 };
 
-function UsersSelect({ value, onSelect }: Props) {
+function UsersSelect({ value, onSelect, noAllOption }: Props) {
   const [users, setUsers] = useState<User[]>([]);
 
   const { user } = useContext(UserContext);
@@ -28,7 +29,7 @@ function UsersSelect({ value, onSelect }: Props) {
     <FormGroup>
       <FormLabel>User</FormLabel>
       <FormSelect value={value} onChange={(e) => onSelect(e.target.value)}>
-        <option value="all">All</option>
+        {!noAllOption && <option value="all">All</option>}
         {users.map((opt) => (
           <option key={opt._id} value={opt._id}>
             {opt.username}
