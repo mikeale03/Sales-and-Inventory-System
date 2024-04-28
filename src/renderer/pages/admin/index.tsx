@@ -15,6 +15,9 @@ const AdminPage = () => {
               <Link to="users" className="d-block">
                 Users
               </Link>
+              <Link to="access-codes" className="d-block">
+                Access Codes
+              </Link>
             </Col>
             <Col lg="4">
               <p className="mb-0">
@@ -25,14 +28,6 @@ const AdminPage = () => {
               </Link>
               <Link to="tags" className="d-block">
                 Tags
-              </Link>
-            </Col>
-            <Col lg="4">
-              <p className="mb-0">
-                <strong>Manage Sales</strong>
-              </p>
-              <Link to="void-code" className="d-block">
-                Sales Void Code
               </Link>
             </Col>
           </Row>
