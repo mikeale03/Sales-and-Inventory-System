@@ -2,7 +2,7 @@ import { KeyboardEvent, forwardRef, useEffect, useState } from 'react';
 import { Product } from 'main/service/productsRealm';
 import Select, { SelectInstance } from 'react-select';
 import { getProducts } from 'renderer/service/products';
-import { debounce, pesoFormat } from 'renderer/utils/helper';
+import { debounce, pesoFormat, toPascalCase } from 'renderer/utils/helper';
 
 type Opt = {
   value: string;
@@ -36,7 +36,7 @@ const ProductsSelect = forwardRef<SelectInstance<Opt> | null, Props>(
         const data = response.result;
         const opts: Opt[] = data.map((item) => ({
           value: item._id,
-          label: `${item.name} - ${pesoFormat(item.price)} ${
+          label: `${toPascalCase(item.name)} - ${pesoFormat(item.price)} ${
             item.barcode ? `-    #${item.barcode}` : ''
           }`,
           product: item,

@@ -93,3 +93,18 @@ export const createDateLabels = (startDate: Date, endDate: Date) => {
   }
   return dateLabels;
 };
+
+export const toPascalCase = (str: string): string => {
+  // Split the string into words
+  const words = str.split(/\s+/);
+
+  // Transform each word to PascalCase
+  const pascalCaseWords = words.map((word) => {
+    // Capitalize the first letter of each word
+    // and convert the rest of the letters to lowercase
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  });
+
+  // Join the PascalCase words with the original spacing
+  return pascalCaseWords.join(' ');
+};
