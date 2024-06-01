@@ -158,13 +158,15 @@ const SalesPage = () => {
         toggle={setShowConfirmationModal}
         message={<p className="text-center">Are you sure to delete sale</p>}
         onConfirm={() =>
-          (user?.role === 'admin' || user?.accessCode) && handleVoidSale(user!)
+          user?.role === 'admin'
+            ? handleVoidSale(user!)
+            : setShowVoidCodeModal(true)
         }
-        onExited={() =>
-          user?.role !== 'admin' &&
-          !user?.accessCode &&
-          setShowVoidCodeModal(true)
-        }
+        // onExited={() =>
+        //   user?.role !== 'admin' &&
+        //   !user?.accessCode &&
+        //   setShowVoidCodeModal(true)
+        // }
       />
 
       <VoidCodeModal
@@ -249,6 +251,7 @@ const SalesPage = () => {
                     {user?.role === 'admin' && (
                       <th className="print-hide"> </th>
                     )}
+                    <th> </th>
                   </tr>
                 </thead>
                 <tbody>
