@@ -122,6 +122,21 @@ const GcashTransactionsPage = () => {
     });
   };
 
+  const isPossibleDoubleEntry = (index: number) => {
+    if (index === 0) return false;
+    const prevTransaction = transactions[index - 1];
+    const transaction = transactions[index];
+
+    if (
+      prevTransaction.amount === transaction.amount &&
+      prevTransaction.number === transaction.number &&
+      prevTransaction.type === transaction.type
+    ) {
+      return true;
+    }
+    return false;
+  };
+
   return (
     <div>
       <ConfirmationModal
@@ -181,8 +196,14 @@ const GcashTransactionsPage = () => {
               </tr>
             </thead>
             <tbody>
-              {transactions.map((item) => (
-                <tr key={`${item._id}`}>
+              {transactions.map((item, index) => (
+                <tr
+                  key={`${item._id}`}
+                  title={
+                    isPossibleDoubleEntry(index) ? 'possible double entry' : ''
+                  }
+                  className={isPossibleDoubleEntry(index) ? 'text-danger' : ''}
+                >
                   <td
                     className={`text-capitalize ${
                       item.type === 'cash in' && 'text-primary'
