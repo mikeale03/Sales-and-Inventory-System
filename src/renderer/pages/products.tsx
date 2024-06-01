@@ -186,7 +186,7 @@ const ProductsPage = () => {
             <tbody>
               {displayProducts.map((d) => (
                 <tr key={d._id}>
-                  <td>{d.name}</td>
+                  <td className="text-capitalize">{d.name}</td>
                   <td>{d.barcode}</td>
                   <td>{pesoFormat(d.price)}</td>
                   <td>{d.quantity.toLocaleString()}</td>

@@ -174,7 +174,9 @@ function CashRegisterPage() {
                           lastUpdatedId === items[key]._id ? 'fw-bold' : ''
                         }
                       >
-                        <td className="align-middle">{items[key].name}</td>
+                        <td className="align-middle text-capitalize">
+                          {items[key].name}
+                        </td>
                         <td className="align-middle text-center">
                           {items[key].quantity}
                         </td>

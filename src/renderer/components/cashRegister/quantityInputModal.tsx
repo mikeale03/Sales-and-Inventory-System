@@ -1,6 +1,7 @@
 import { Product } from 'main/service/productsRealm';
 import { FormEvent, useState } from 'react';
 import { Button, Form, Modal, Col, Row } from 'react-bootstrap';
+import { toPascalCase } from 'renderer/utils/helper';
 
 export type Props = {
   show: boolean;
@@ -55,7 +56,7 @@ const QuantityInputModal = ({
     >
       <Form onSubmit={handleConfirm}>
         <Modal.Header>
-          <Modal.Title className="w-100 text-center fw-bold">
+          <Modal.Title className="w-100 text-center fw-bold text-capitalize">
             {product?.name}
           </Modal.Title>
         </Modal.Header>

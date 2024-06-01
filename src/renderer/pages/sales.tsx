@@ -254,7 +254,7 @@ const SalesPage = () => {
                 <tbody>
                   {sales.map((d) => (
                     <tr key={d._id}>
-                      <td>{d.product_name}</td>
+                      <td className="text-capitalize">{d.product_name}</td>
                       <td>{d.quantity.toLocaleString()}</td>
                       <td>{d.product_category}</td>
                       <td>
