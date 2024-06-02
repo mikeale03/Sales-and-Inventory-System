@@ -9,10 +9,10 @@ import { updateUser } from 'renderer/service/users';
 export type Props = {
   show: boolean;
   toggle: (show: boolean) => void;
-  selectedUserId?: string;
+  selectedUser?: User;
 };
 
-const SetAccessCodeModal = ({ show, toggle, selectedUserId }: Props) => {
+const SetAccessCodeModal = ({ show, toggle, selectedUser }: Props) => {
   const [codeUser, setCodeUser] = useState<User | undefined>();
   const [accessCode, setAccessCode] = useState('');
   const [showAccessCode, setShowAccessCode] = useState(false);
@@ -37,7 +37,7 @@ const SetAccessCodeModal = ({ show, toggle, selectedUserId }: Props) => {
     const exist = users.find((u) => u.accessCode === accessCode);
 
     if (exist) {
-      exist._id !== selectedUserId
+      exist._id !== selectedUser?._id
         ? toast.error('Access code already exist')
         : handleCancel();
 
@@ -51,7 +51,7 @@ const SetAccessCodeModal = ({ show, toggle, selectedUserId }: Props) => {
 
     if (response.isSuccess && response.result) {
       toast.success(
-        `Access code successfully ${selectedUserId ? 'updated' : 'created'}`
+        `Access code successfully ${selectedUser ? 'updated' : 'created'}`
       );
       setUsers(
         users.map((u) => (u._id === response.result?._id ? response.result : u))
@@ -62,16 +62,15 @@ const SetAccessCodeModal = ({ show, toggle, selectedUserId }: Props) => {
       handleCancel();
     } else {
       toast.error(
-        `Failed to ${selectedUserId ? 'updated' : 'created'} access code`
+        `Failed to ${selectedUser ? 'updated' : 'created'} access code`
       );
     }
   };
 
   const onShow = () => {
-    if (selectedUserId) {
-      const selectedUser = users.find((u) => u._id === selectedUserId);
+    if (selectedUser) {
       setCodeUser(selectedUser);
-      setAccessCode(selectedUser?.accessCode ?? '');
+      setAccessCode(selectedUser.accessCode ?? '');
     } else {
       setAccessCode('');
     }
@@ -82,7 +81,7 @@ const SetAccessCodeModal = ({ show, toggle, selectedUserId }: Props) => {
       <Form onSubmit={handleConfirm}>
         <Modal.Header>
           <Modal.Title>
-            {selectedUserId ? 'Edit' : 'Create'} Access Code
+            {selectedUser ? 'Edit' : 'Create'} Access Code
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -90,7 +89,7 @@ const SetAccessCodeModal = ({ show, toggle, selectedUserId }: Props) => {
             <Form.Label>User</Form.Label>
             <Form.Select
               required
-              disabled={!!selectedUserId}
+              disabled={!!selectedUser?._id}
               value={codeUser?._id ?? ''}
               onChange={(e) =>
                 setCodeUser(users.find((u) => u._id === e.target.value))
@@ -99,6 +98,11 @@ const SetAccessCodeModal = ({ show, toggle, selectedUserId }: Props) => {
               <option value="" disabled>
                 Select User
               </option>
+              {selectedUser && (
+                <option value={selectedUser._id}>
+                  {selectedUser.username}
+                </option>
+              )}
               {usersWithoutAccessCode.map((opt) => (
                 <option key={opt._id} value={opt._id}>
                   {opt.username}

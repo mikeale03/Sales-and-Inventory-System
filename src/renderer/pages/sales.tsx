@@ -15,7 +15,6 @@ import {
   voidSale,
   getSalesByProducts,
   getSalesByTransactions,
-  getVoidCode,
 } from 'renderer/service/sales';
 import { debounce, pesoFormat } from 'renderer/utils/helper';
 import format from 'date-fns/format';
@@ -28,7 +27,7 @@ import { toast } from 'react-toastify';
 import SalesFilter from 'renderer/components/sales/salesFilters';
 import FilterContext from 'renderer/context/filterContext';
 import { createSalesDeleteActivity } from 'renderer/service/activities';
-import VoidCodeModal from 'renderer/components/sales/voidCodeModal';
+import AccessCodeModal from 'renderer/components/sales/accessCodeModal';
 import { User } from 'globalTypes/realm/user.types';
 
 const SalesPage = () => {
@@ -39,9 +38,9 @@ const SalesPage = () => {
   const [totalGcash, setTotalGcash] = useState(0);
   const [searchText, setSearchText] = useState('');
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [accessCodeUser, setAccessCodeUser] = useState<User | undefined>();
   const [selectedSale, setSelectedSale] = useState<Sales | undefined>();
   const [isGroupByProduct, setIsGroupByProduct] = useState(false);
-  const [voidCode, setVoidCode] = useState('');
   const [showVoidCodeModal, setShowVoidCodeModal] = useState(false);
   const { user } = useContext(UserContext);
   const {
@@ -117,18 +116,11 @@ const SalesPage = () => {
     handleGetSales,
   ]);
 
-  useEffect(() => {
-    (async () => {
-      const response = await getVoidCode();
-      if (response.isSuccess && response.result) setVoidCode(response.result);
-    })();
-  }, []);
-
   const handlePrint = useReactToPrint({
     content: () => printRef.current,
   });
 
-  const handleVoidSale = async (accessCodeUser: User) => {
+  const handleVoidSale = async () => {
     if (!selectedSale || !user) return;
 
     const response = await voidSale(selectedSale._id);
@@ -136,15 +128,18 @@ const SalesPage = () => {
       setSales(sales.filter((item) => item._id !== selectedSale._id));
       createSalesDeleteActivity({
         sales: selectedSale,
-        transact_by: accessCodeUser.username,
-        transact_by_user_id: accessCodeUser._id,
+        transact_by: accessCodeUser?.username ?? user.username,
+        transact_by_user_id: accessCodeUser?._id ?? user._id,
       });
     } else toast.error(response.message);
   };
 
   const handleShowConfirmationModal = (sale: Sales) => {
+    console.log(user);
     setSelectedSale(sale);
-    setShowConfirmationModal(true);
+    user?.role === 'admin' || user?.accessCode
+      ? setShowConfirmationModal(true)
+      : setShowVoidCodeModal(true);
   };
 
   const handleSearch = debounce((e) => {
@@ -157,21 +152,21 @@ const SalesPage = () => {
         show={showConfirmationModal}
         toggle={setShowConfirmationModal}
         message={<p className="text-center">Are you sure to delete sale</p>}
-        onConfirm={() =>
-          (user?.role === 'admin' || user?.accessCode) && handleVoidSale(user!)
-        }
-        onExited={() =>
-          user?.role !== 'admin' &&
-          !user?.accessCode &&
-          setShowVoidCodeModal(true)
-        }
+        onConfirm={handleVoidSale}
+        // onExited={() =>
+        //   user?.role !== 'admin' &&
+        //   !user?.accessCode &&
+        //   setShowVoidCodeModal(true)
+        // }
       />
 
-      <VoidCodeModal
+      <AccessCodeModal
         show={showVoidCodeModal}
         toggle={setShowVoidCodeModal}
-        voidCode={voidCode}
-        onConfirm={handleVoidSale}
+        onConfirm={(codeUser) => {
+          setAccessCodeUser(codeUser);
+          setShowConfirmationModal(true);
+        }}
       />
 
       <div ref={printRef}>

@@ -1,7 +1,8 @@
 import { faPenToSquare, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { FormEvent, useContext, useEffect, useState } from 'react';
-import { Button, Card, Col, Form, Row, Table } from 'react-bootstrap';
+import { User } from 'globalTypes/realm/user.types';
+import { useContext, useState } from 'react';
+import { Button, Card, Col, Row, Table } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import SetAccessCodeModal from 'renderer/components/accessCodes/setAccessCodeModal';
@@ -10,7 +11,7 @@ import { updateUser } from 'renderer/service/users';
 
 const AccessCodesPage = () => {
   const [showSetAccessCodeModal, setShowSetAccessCodeModal] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState('');
+  const [selectedUser, setSelectedUser] = useState<User | undefined>();
   const { users, setUsers } = useContext(UsersContext);
   const navigate = useNavigate();
 
@@ -32,8 +33,8 @@ const AccessCodesPage = () => {
     }
   };
 
-  const handleShowSetAccessCodeModal = (id: string = '') => {
-    setSelectedUserId(id);
+  const handleShowSetAccessCodeModal = (user?: User) => {
+    setSelectedUser(user);
     setShowSetAccessCodeModal(true);
   };
 
@@ -42,7 +43,7 @@ const AccessCodesPage = () => {
       <SetAccessCodeModal
         show={showSetAccessCodeModal}
         toggle={setShowSetAccessCodeModal}
-        selectedUserId={selectedUserId}
+        selectedUser={selectedUser}
       />
 
       <h3>Access Codes</h3>
@@ -71,7 +72,7 @@ const AccessCodesPage = () => {
                       <td>{d.role}</td>
                       <td>
                         <FontAwesomeIcon
-                          onClick={() => handleShowSetAccessCodeModal(d._id)}
+                          onClick={() => handleShowSetAccessCodeModal(d)}
                           icon={faPenToSquare}
                           title="Edit"
                           size="xl"

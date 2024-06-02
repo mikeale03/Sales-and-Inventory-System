@@ -7,18 +7,11 @@ import UsersContext from 'renderer/context/usersContext';
 export type Props = {
   show: boolean;
   toggle: (show: boolean) => void;
-  voidCode?: string;
   onConfirm?: (user: User) => void;
   onCancel?: () => void;
 };
 
-const VoidCodeModal = ({
-  show,
-  toggle,
-  voidCode,
-  onConfirm,
-  onCancel,
-}: Props) => {
+const AccessCodeModal = ({ show, toggle, onConfirm, onCancel }: Props) => {
   const [code, setCode] = useState('');
   const { users } = useContext(UsersContext);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -59,7 +52,7 @@ const VoidCodeModal = ({
       <Form onSubmit={handleConfirm}>
         <Modal.Header>
           <Modal.Title className="fw-bold text-center d-block w-100">
-            Enter Void Code
+            Enter Access Code
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -85,4 +78,4 @@ const VoidCodeModal = ({
   );
 };
 
-export default VoidCodeModal;
+export default AccessCodeModal;
