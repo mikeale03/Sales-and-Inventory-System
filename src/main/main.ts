@@ -99,6 +99,9 @@ const createWindow = async () => {
     },
   });
 
+  // hide the system window menu bar
+  mainWindow.setMenuBarVisibility(false);
+
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
   mainWindow.on('ready-to-show', () => {
