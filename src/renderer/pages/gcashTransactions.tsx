@@ -5,13 +5,14 @@ import {
   Gcash,
   GcashTransFilter as TransFilter,
 } from 'globalTypes/realm/gcash.types';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Card, Col, FormCheck, FormControl, Row, Table } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import ConfirmationModal from 'renderer/components/common/modals/confirmation';
 import GcashTransFilter from 'renderer/components/gcashTransactions/gcashTransFilter';
 import FilterContext from 'renderer/context/filterContext';
 import UserContext from 'renderer/context/userContext';
+import { createGcashTransDeleteActivity } from 'renderer/service/activities';
 import {
   deleteGcashTransaction,
   getGcashTransactions,
@@ -34,6 +35,8 @@ const GcashTransactionsPage = () => {
   const [endingBalance, setEndingBalance] = useState(0);
   const [selectedTrans, setSelectedTrans] = useState<Gcash | undefined>();
   const [confirmationModal, setConfirmationModal] = useState(false);
+  const [deleteReason, setDeleteReason] = useState('');
+  const reasonInputRef = useRef<HTMLInputElement | null>(null);
   const { user } = useContext(UserContext);
   const {
     gcashTransFilter: {
@@ -96,22 +99,33 @@ const GcashTransactionsPage = () => {
   const handleShowConfirmationModal = (trans: Gcash) => {
     setSelectedTrans(trans);
     setConfirmationModal(true);
+    setDeleteReason('');
   };
 
   const handleDeleteTrans = async () => {
-    if (!selectedTrans) return;
+    if (!selectedTrans || !user) return;
+    if (!deleteReason) {
+      toast.error('Reason is required');
+      setConfirmationModal(true);
+      reasonInputRef.current?.focus();
+      return;
+    }
+
     const [response1, response2] = await Promise.all([
       deleteGcashTransaction(selectedTrans._id),
       updateByGcashDelete(selectedTrans),
+      createGcashTransDeleteActivity({
+        gcash: selectedTrans,
+        reason: deleteReason,
+        transact_by: user.username,
+        transact_by_user_id: user._id,
+      }),
     ]);
     if (!response1?.isSuccess) {
       toast.error(response1.message);
       return;
     }
     window.console.log(response2);
-    // setTransactions(
-    //   transactions.filter((item) => item._id !== selectedTrans._id)
-    // );
     await handleGetGcashTransactions({
       transactBy: userOption === 'all' ? undefined : userOption,
       type: selectedType,
@@ -143,9 +157,16 @@ const GcashTransactionsPage = () => {
         show={confirmationModal}
         toggle={setConfirmationModal}
         message={
-          <p className="text-center">
-            Are you sure to delete GCash Transaction?
-          </p>
+          <>
+            <p className="text-center">
+              Are you sure to delete GCash Transaction? Enter your reason.
+            </p>
+            <FormControl
+              ref={reasonInputRef}
+              value={deleteReason}
+              onChange={(e) => setDeleteReason(e.target.value)}
+            />
+          </>
         }
         onConfirm={handleDeleteTrans}
       />

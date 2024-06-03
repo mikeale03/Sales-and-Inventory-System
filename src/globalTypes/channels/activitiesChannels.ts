@@ -5,6 +5,7 @@ export const Channels = {
   createProductDeleteActivity: 'activity:delete-product',
   createSalesDeleteActivity: 'activity:delete-sales',
   createSalesVoidActivity: 'activity:void-sales',
+  createGcashDeleteActivity: 'activity:delete-gcash',
   getActivities: 'activity:get-activities',
 } as const;
 

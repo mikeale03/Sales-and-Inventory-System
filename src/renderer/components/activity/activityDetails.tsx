@@ -1,5 +1,6 @@
 import format from 'date-fns/format';
 import { Activity } from 'globalTypes/realm/activities.types';
+import { Gcash } from 'globalTypes/realm/gcash.types';
 import { ProductForm } from 'globalTypes/realm/products.types';
 import { Sales } from 'globalTypes/realm/sales.types';
 
@@ -7,13 +8,41 @@ export type Props = {
   activity: Activity;
 };
 
+function GcashDetails({ details }: { details: Gcash & { reason: string } }) {
+  return (
+    <div>
+      <p className="m-0">Type: {details.type}</p>
+      <p className="m-0">Amount: {details.amount.toLocaleString()}</p>
+      <p className="m-0">Charge: {details.charge}</p>
+      <p className="m-0">Number: {details.number}</p>
+      {details.date_transacted && (
+        <p className="m-0">
+          Date Transacted:{' '}
+          {format(new Date(details.date_transacted), 'MM/dd/yyyy hh:mm aaa')}
+        </p>
+      )}
+      {details.date_created && (
+        <p className="m-0">
+          Date Created:{' '}
+          {format(new Date(details.date_created), 'MM/dd/yyyy hh:mm aaa')}
+        </p>
+      )}
+      <p className="m-0">
+        Gcash Balance: {details.gcash_balance.toLocaleString()}
+      </p>
+      <p className="m-0">User: {details.transact_by}</p>
+      <p className="m-0">Reason: {details.reason}</p>
+    </div>
+  );
+}
+
 function ProductDetails({ product }: { product: ProductForm }) {
   return (
     <div>
       <p className="m-0">Product Name: {product.name}</p>
       {product.barcode && <p className="m-0">Barcode: {product.barcode}</p>}
-      <p className="m-0">Price: {product.price}</p>
-      <p className="m-0">Quantity: {product.quantity}</p>
+      <p className="m-0">Price: {product.price.toLocaleString()}</p>
+      <p className="m-0">Quantity: {product.quantity.toLocaleString()}</p>
       {product.inventory_verified && (
         <p className="m-0">Verified: {String(product.inventory_verified)}</p>
       )}
@@ -77,15 +106,15 @@ function SalesDetails({ details }: { details: Sales & { void_by: string } }) {
   return (
     <div>
       <p className="m-0">Product Name: {details.product_name}</p>
-      <p className="m-0">Quantity: {details.quantity}</p>
-      <p className="m-0">Total Price: {details.total_price}</p>
+      <p className="m-0">Quantity: {details.quantity.toLocaleString()}</p>
+      <p className="m-0">Total Price: {details.total_price.toLocaleString()}</p>
       <p className="m-0">Payment: {details.payment}</p>
       <p className="m-0">
         Sales Date:{' '}
         {format(new Date(details.date_created), 'MM/dd/yyyy hh:mm aaa')}
       </p>
       <p className="m-0">User: {details.transact_by}</p>
-      {details.void_by && <p className="m-0">Void by: {details.void_by}</p>}
+      {details.void_by && <p className="m-0">Voided by: {details.void_by}</p>}
     </div>
   );
 }
@@ -106,6 +135,8 @@ function ActivityDetails({ activity }: Props) {
     activity.activity === 'void sales'
   )
     return <SalesDetails details={details} />;
+  if (activity.activity === 'delete gcash')
+    return <GcashDetails details={details} />;
   return <p> </p>;
 }
 

@@ -1,6 +1,7 @@
 import Realm, { ObjectSchema } from 'realm';
 import {
   Activity,
+  CreateGcashTransDeleteActivityParams,
   CreateProductAddActivityParams,
   CreateProductAddQtyActivityParams,
   CreateProductEditActivityParams,
@@ -274,6 +275,46 @@ export const createSalesVoidActivity = async (
           void_by_user_id,
         }),
         activity: 'void sales',
+        transact_by,
+        transact_by_user_id,
+        date_created: new Date(),
+      });
+    });
+    realm.close();
+    return {
+      isSuccess: true,
+      message: 'Successfully created an activity',
+    };
+  } catch (error) {
+    realm.close();
+    console.log(error);
+    return {
+      isSuccess: false,
+      message: 'Failed to create an activity',
+      error,
+    };
+  }
+};
+
+export const createGcashTransDeleteActivity = async (
+  params: CreateGcashTransDeleteActivityParams
+) => {
+  const { gcash, transact_by, transact_by_user_id, reason } = params;
+  const realm = await openActivitiesRealm();
+  if (!realm)
+    return {
+      isSuccess: false,
+      message: 'Failed to open Activities Realm DB',
+    };
+
+  try {
+    realm.write(() => {
+      realm.create(ACTIVITIES, {
+        details: JSON.stringify({
+          ...gcash,
+          reason,
+        }),
+        activity: 'delete gcash',
         transact_by,
         transact_by_user_id,
         date_created: new Date(),
