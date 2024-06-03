@@ -1,5 +1,6 @@
 import { IpcMain, IpcMainInvokeEvent } from 'electron';
 import {
+  createGcashTransDeleteActivity,
   createProductAddActivity,
   createProductAddQtyActivity,
   createProductDeleteActivity,
@@ -9,6 +10,7 @@ import {
   getActivities,
 } from '../service/activitiesRealm';
 import {
+  CreateGcashTransDeleteActivityParams,
   CreateProductAddActivityParams,
   CreateProductAddQtyActivityParams,
   CreateProductEditActivityParams,
@@ -76,6 +78,16 @@ const setActivitiesEventHandler = (ipcMain: IpcMain) => {
       params: CreateSalesVoidActivityParams
     ) => {
       const result = await createSalesVoidActivity(params);
+      return result;
+    }
+  );
+  ipcMain.handle(
+    Channels.createGcashDeleteActivity,
+    async (
+      event: IpcMainInvokeEvent,
+      params: CreateGcashTransDeleteActivityParams
+    ) => {
+      const result = await createGcashTransDeleteActivity(params);
       return result;
     }
   );
