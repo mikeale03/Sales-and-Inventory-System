@@ -5,6 +5,7 @@ import {
   CreateProductAddQtyActivityParams,
   CreateProductEditActivityParams,
   CreateSalesDeleteActivityParams,
+  CreateSalesVoidActivityParams,
   GetActivitiesFilter,
   ProductEditDetails,
 } from '../../globalTypes/realm/activities.types';
@@ -233,6 +234,48 @@ export const createSalesDeleteActivity = async (
         transact_by,
         transact_by_user_id,
         activity: 'delete sales',
+        date_created: new Date(),
+      });
+    });
+    realm.close();
+    return {
+      isSuccess: true,
+      message: 'Successfully created an activity',
+    };
+  } catch (error) {
+    realm.close();
+    console.log(error);
+    return {
+      isSuccess: false,
+      message: 'Failed to create an activity',
+      error,
+    };
+  }
+};
+
+export const createSalesVoidActivity = async (
+  params: CreateSalesVoidActivityParams
+) => {
+  const { sales, transact_by, transact_by_user_id, void_by, void_by_user_id } =
+    params;
+  const realm = await openActivitiesRealm();
+  if (!realm)
+    return {
+      isSuccess: false,
+      message: 'Failed to open Activities Realm DB',
+    };
+
+  try {
+    realm.write(() => {
+      realm.create(ACTIVITIES, {
+        details: JSON.stringify({
+          ...sales,
+          void_by,
+          void_by_user_id,
+        }),
+        activity: 'void sales',
+        transact_by,
+        transact_by_user_id,
         date_created: new Date(),
       });
     });

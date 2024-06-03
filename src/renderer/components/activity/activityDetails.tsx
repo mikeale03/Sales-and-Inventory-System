@@ -73,7 +73,7 @@ function ProductAddQtyDetails({
   );
 }
 
-function SalesDetails({ details }: { details: Sales }) {
+function SalesDetails({ details }: { details: Sales & { void_by: string } }) {
   return (
     <div>
       <p className="m-0">Product Name: {details.product_name}</p>
@@ -85,6 +85,7 @@ function SalesDetails({ details }: { details: Sales }) {
         {format(new Date(details.date_created), 'MM/dd/yyyy hh:mm aaa')}
       </p>
       <p className="m-0">User: {details.transact_by}</p>
+      {details.void_by && <p className="m-0">Void by: {details.void_by}</p>}
     </div>
   );
 }
@@ -100,7 +101,10 @@ function ActivityDetails({ activity }: Props) {
     return <ProductEditDetails details={details} />;
   if (activity.activity === 'add product quantity')
     return <ProductAddQtyDetails details={details} />;
-  if (activity.activity === 'delete sales')
+  if (
+    activity.activity === 'delete sales' ||
+    activity.activity === 'void sales'
+  )
     return <SalesDetails details={details} />;
   return <p> </p>;
 }

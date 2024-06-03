@@ -5,6 +5,7 @@ import {
   createProductDeleteActivity,
   createProductEditActivity,
   createSalesDeleteActivity,
+  createSalesVoidActivity,
   getActivities,
 } from '../service/activitiesRealm';
 import {
@@ -12,6 +13,7 @@ import {
   CreateProductAddQtyActivityParams,
   CreateProductEditActivityParams,
   CreateSalesDeleteActivityParams,
+  CreateSalesVoidActivityParams,
   GetActivitiesFilter,
 } from '../../globalTypes/realm/activities.types';
 import { Channels } from '../../globalTypes/channels/activitiesChannels';
@@ -64,6 +66,16 @@ const setActivitiesEventHandler = (ipcMain: IpcMain) => {
       params: CreateSalesDeleteActivityParams
     ) => {
       const result = await createSalesDeleteActivity(params);
+      return result;
+    }
+  );
+  ipcMain.handle(
+    Channels.createSalesVoidActivity,
+    async (
+      event: IpcMainInvokeEvent,
+      params: CreateSalesVoidActivityParams
+    ) => {
+      const result = await createSalesVoidActivity(params);
       return result;
     }
   );

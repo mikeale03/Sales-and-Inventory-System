@@ -46,6 +46,14 @@ export type CreateSalesDeleteActivityParams = {
   transact_by_user_id: string;
 };
 
+export type CreateSalesVoidActivityParams = {
+  sales: Sales;
+  transact_by: string;
+  transact_by_user_id: string;
+  void_by: string;
+  void_by_user_id: string;
+};
+
 export type GetActivitiesFilter = {
   transactBy?: string;
   startDate?: Date;

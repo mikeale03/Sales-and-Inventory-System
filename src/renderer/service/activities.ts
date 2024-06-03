@@ -5,6 +5,7 @@ import {
   CreateProductAddQtyActivityParams,
   CreateProductEditActivityParams,
   CreateSalesDeleteActivityParams,
+  CreateSalesVoidActivityParams,
   GetActivitiesFilter,
 } from 'globalTypes/realm/activities.types';
 import { Response } from 'globalTypes/realm/response.types';
@@ -58,6 +59,16 @@ export const createSalesDeleteActivity = async (
 ) => {
   const response = await ipcRenderer.invoke<Response<void>>(
     Channels.createSalesDeleteActivity,
+    params
+  );
+  return response;
+};
+
+export const createSalesVoidActivity = async (
+  params: CreateSalesVoidActivityParams
+) => {
+  const response = await ipcRenderer.invoke<Response<void>>(
+    Channels.createSalesVoidActivity,
     params
   );
   return response;

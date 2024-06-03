@@ -112,12 +112,12 @@ export const userLogin = async (
   const user = users.filtered(`username == '${username}'`)[0];
 
   if (user && isValidPassword(password, user.password, user.salt)) {
-    const { _id, role, date_created } = user.toJSON() as User;
+    const { _id, role, accessCode, date_created } = user.toJSON() as User;
     realm.close();
     return {
       isSuccess: true,
       message: 'Successfully login!',
-      result: { _id: _id.toString(), username, role, date_created },
+      result: { _id: _id.toString(), username, role, accessCode, date_created },
     };
   }
   realm.close();
