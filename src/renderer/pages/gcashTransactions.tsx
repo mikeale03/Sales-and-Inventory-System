@@ -239,17 +239,15 @@ const GcashTransactionsPage = () => {
                   <td>
                     <div className="d-flex justify-content-around">
                       <FormCheck className="me-2" type="checkbox" />
-                      {user?.role === 'admin' && (
-                        <FontAwesomeIcon
-                          onClick={() => handleShowConfirmationModal(item)}
-                          icon={faTrashCan}
-                          title="Delete"
-                          size="xl"
-                          className="me-2 cursor-pointer"
-                          role="button"
-                          tabIndex={0}
-                        />
-                      )}
+                      <FontAwesomeIcon
+                        onClick={() => handleShowConfirmationModal(item)}
+                        icon={faTrashCan}
+                        title="Delete"
+                        size="xl"
+                        className="me-2 cursor-pointer"
+                        role="button"
+                        tabIndex={0}
+                      />
                     </div>
                   </td>
                 </tr>
