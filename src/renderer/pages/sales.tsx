@@ -15,18 +15,22 @@ import {
   voidSale,
   getSalesByProducts,
   getSalesByTransactions,
+  deleteSale,
 } from 'renderer/service/sales';
 import { debounce, pesoFormat } from 'renderer/utils/helper';
 import format from 'date-fns/format';
 import UserContext from 'renderer/context/userContext';
 import { useReactToPrint } from 'react-to-print';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import { faTrashCan, faXmark } from '@fortawesome/free-solid-svg-icons';
 import ConfirmationModal from 'renderer/components/common/modals/confirmation';
 import { toast } from 'react-toastify';
 import SalesFilter from 'renderer/components/sales/salesFilters';
 import FilterContext from 'renderer/context/filterContext';
-import { createSalesDeleteActivity } from 'renderer/service/activities';
+import {
+  createSalesDeleteActivity,
+  createSalesVoidActivity,
+} from 'renderer/service/activities';
 import AccessCodeModal from 'renderer/components/sales/accessCodeModal';
 import { User } from 'globalTypes/realm/user.types';
 
@@ -42,6 +46,7 @@ const SalesPage = () => {
   const [selectedSale, setSelectedSale] = useState<Sales | undefined>();
   const [isGroupByProduct, setIsGroupByProduct] = useState(false);
   const [showVoidCodeModal, setShowVoidCodeModal] = useState(false);
+  const [isVoid, setIsVoid] = useState(false);
   const { user } = useContext(UserContext);
   const {
     salesFilter: { userOption, startDate, endDate, category, tags },
@@ -122,24 +127,56 @@ const SalesPage = () => {
 
   const handleVoidSale = async () => {
     if (!selectedSale || !user) return;
-
+    let void_by = '';
+    let void_by_user_id = '';
+    if (user.role === 'admin') {
+      void_by = user.username;
+      void_by_user_id = user._id;
+    } else if (accessCodeUser) {
+      void_by = accessCodeUser.username;
+      void_by_user_id = accessCodeUser._id;
+    }
     const response = await voidSale(selectedSale._id);
     if (response.isSuccess) {
       setSales(sales.filter((item) => item._id !== selectedSale._id));
-      createSalesDeleteActivity({
+      createSalesVoidActivity({
         sales: selectedSale,
-        transact_by: accessCodeUser?.username ?? user.username,
-        transact_by_user_id: accessCodeUser?._id ?? user._id,
+        transact_by: user.username,
+        transact_by_user_id: user._id,
+        void_by,
+        void_by_user_id,
       });
     } else toast.error(response.message);
   };
 
-  const handleShowConfirmationModal = (sale: Sales) => {
-    console.log(user);
+  const handleDeleteSale = async () => {
+    if (!selectedSale || !user) return;
+    const response = await deleteSale(selectedSale._id);
+    if (response.isSuccess) {
+      setSales(sales.filter((item) => item._id !== selectedSale._id));
+      createSalesDeleteActivity({
+        sales: selectedSale,
+        transact_by: user.username,
+        transact_by_user_id: user._id,
+      });
+    } else toast.error(response.message);
+  };
+
+  const handleShowConfirmationModal = (
+    sale: Sales,
+    // eslint-disable-next-line no-shadow
+    isVoid: boolean
+  ) => {
+    setIsVoid(isVoid);
     setSelectedSale(sale);
-    user?.role === 'admin' || user?.accessCode
-      ? setShowConfirmationModal(true)
-      : setShowVoidCodeModal(true);
+
+    if (user?.role === 'admin') {
+      setShowConfirmationModal(true);
+    } else if (isVoid) {
+      setShowVoidCodeModal(true);
+    } else {
+      setShowConfirmationModal(true);
+    }
   };
 
   const handleSearch = debounce((e) => {
@@ -151,8 +188,12 @@ const SalesPage = () => {
       <ConfirmationModal
         show={showConfirmationModal}
         toggle={setShowConfirmationModal}
-        message={<p className="text-center">Are you sure to delete sale</p>}
-        onConfirm={handleVoidSale}
+        message={
+          <p className="text-center">
+            Are you sure to {isVoid ? 'void' : 'delete'} sale?
+          </p>
+        }
+        onConfirm={isVoid ? handleVoidSale : handleDeleteSale}
         // onExited={() =>
         //   user?.role !== 'admin' &&
         //   !user?.accessCode &&
@@ -281,14 +322,27 @@ const SalesPage = () => {
 
                       <td className="print-hide">
                         <FontAwesomeIcon
-                          onClick={() => handleShowConfirmationModal(d)}
-                          icon={faTrashCan}
-                          title="Delete"
+                          onClick={() => handleShowConfirmationModal(d, true)}
+                          icon={faXmark}
+                          title="Void Sale"
                           size="xl"
                           className="me-2 cursor-pointer"
                           role="button"
                           tabIndex={0}
                         />
+                        {user?.role === 'admin' && (
+                          <FontAwesomeIcon
+                            onClick={() =>
+                              handleShowConfirmationModal(d, false)
+                            }
+                            icon={faTrashCan}
+                            title="Delete"
+                            size="xl"
+                            className="me-2 cursor-pointer"
+                            role="button"
+                            tabIndex={0}
+                          />
+                        )}
                       </td>
                     </tr>
                   ))}
