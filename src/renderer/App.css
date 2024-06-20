@@ -1,9 +1,27 @@
-body, html {
-  font-size: .95rem;
-  font-family: Arial, Helvetica, sans-serif;
+/** Theme */
+:root {
+  --color-primary: #418ffe;
+  --color-secondary: #93a6c5;
 }
+
+/** Color */
+.color-primary {
+  color: var(--color-primary);
+}
+
+body,
+html {
+  font-size: 0.95rem;
+  /* font-family: Arial, Helvetica, sans-serif; */
+  font-family: 'Roboto', sans-serif;
+}
+
 a {
   text-decoration: none;
+}
+
+input[type='checkbox'] {
+  cursor: pointer;
 }
 
 .scroll-sm::-webkit-scrollbar {
@@ -15,8 +33,16 @@ a {
 }
 
 .nav-link.active {
-  box-shadow: 5px 5px 5px gray !important;
-  outline: thin solid gray;
+  /* box-shadow: 3px 3px 5px rgba(0,0,0,0.2) !important; */
+  color: #fff !important;
+  background-color: var(--color-primary) !important;
+}
+.nav-link.active svg {
+  color: #fff;
+}
+
+nav .nav-link {
+  color: #363636;
 }
 
 .transition-all {
@@ -31,6 +57,53 @@ a {
   display: none;
 }
 
+/** Card */
+.card {
+  border: 0;
+}
+
+/** Button */
+.btn.btn-primary {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.btn.btn-outline-primary {
+  background-color: transparent !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-primary) !important;
+}
+.btn.btn-secondary {
+  background-color: var(--color-secondary);
+  border-color: var(--color-secondary);
+}
+.btn.btn-outline-secondary {
+  background-color: transparent;
+  border-color: var(--color-secondary);
+  color: var(--color-secondary);
+}
+/* .btn.btn-success {
+  background-color: var(--color-success);
+  border-color: var(--color-success);
+} */
+.btn.active {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.btn-check:checked + .btn,
+.btn.active,
+.btn.show,
+.btn:first-child:active,
+:not(.btn-check) + .btn:active {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+/** Bootstrap Override */
+.nav-link:focus,
+.nav-link:hover {
+  color: var(--color-primary);
+}
+
 @media print {
   .print-show {
     display: block;
@@ -38,8 +111,14 @@ a {
   .print-hide {
     display: none;
   }
+  .print-invisible {
+    visibility: hidden;
+  }
   .print-m1 {
     margin: 10px;
+  }
+  .print-m2 {
+    margin: 20px;
   }
   .print-mr1 {
     margin-right: 10px;

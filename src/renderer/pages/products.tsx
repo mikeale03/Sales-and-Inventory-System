@@ -251,14 +251,14 @@ const ProductsPage = () => {
       </Card>
       <div className="d-flex justify-content-between align-items-center">
         <Button
-          variant="secondary"
+          variant="outline-primary"
           onClick={() => pageNumber > 1 && setPageNumber(pageNumber - 1)}
         >
           Previous
         </Button>
         <p className="pt-3 fw-bold">{pageNumber}</p>
         <Button
-          variant="secondary"
+          variant="outline-primary"
           onClick={() =>
             pageNumber < totalPages && setPageNumber(pageNumber + 1)
           }

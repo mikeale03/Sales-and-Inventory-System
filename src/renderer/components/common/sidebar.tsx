@@ -4,6 +4,7 @@ import {
   faCartShopping,
   faCashRegister,
   faChartLine,
+  faCog,
   faMobileRetro,
   faMoneyBillTransfer,
   faPersonDigging,
@@ -19,7 +20,7 @@ const Sidebar = () => {
     <nav
       className="px-0 h-100 position-fixed bg-light shadow d-flex flex-column"
       style={{
-        width: '120px',
+        width: '130px',
         left: 0,
         top: 0,
         paddingTop: '50px',
@@ -33,11 +34,15 @@ const Sidebar = () => {
           <NavLink to="cash-register" className="mb-3">
             {({ isActive }) => (
               <li
-                className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 shadow-sm transition-all
+                className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 transition-all
               ${isActive && 'active'}`}
                 style={{ fontSize: '0.8em' }}
               >
-                <FontAwesomeIcon icon={faCashRegister} size="xl" />
+                <FontAwesomeIcon
+                  icon={faCashRegister}
+                  size="lg"
+                  className="color-primary"
+                />
                 <p className="m-0 text-center">Cash Register</p>
               </li>
             )}
@@ -45,11 +50,15 @@ const Sidebar = () => {
           <NavLink to="gcash-register" className="mb-3">
             {({ isActive }) => (
               <li
-                className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 shadow-sm transition-all
+                className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 transition-all
             ${isActive && 'active'}`}
                 style={{ fontSize: '0.8em' }}
               >
-                <FontAwesomeIcon icon={faMobileRetro} size="xl" />
+                <FontAwesomeIcon
+                  icon={faMobileRetro}
+                  size="lg"
+                  className="color-primary"
+                />
                 <p className="m-0 text-center">GCash Register</p>
               </li>
             )}
@@ -57,11 +66,15 @@ const Sidebar = () => {
           <NavLink to="products" className="mb-3">
             {({ isActive }) => (
               <li
-                className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 shadow-sm transition-all
+                className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 transition-all
             ${isActive && 'active'}`}
                 style={{ fontSize: '0.8em' }}
               >
-                <FontAwesomeIcon icon={faCartShopping} size="xl" />
+                <FontAwesomeIcon
+                  icon={faCartShopping}
+                  size="lg"
+                  className="color-primary"
+                />
                 <p className="m-0 text-center">Products</p>
               </li>
             )}
@@ -69,11 +82,15 @@ const Sidebar = () => {
           <NavLink to="sales" className="mb-3">
             {({ isActive }) => (
               <li
-                className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 shadow-sm transition-all
+                className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 transition-all
             ${isActive && 'active'}`}
                 style={{ fontSize: '0.8em' }}
               >
-                <FontAwesomeIcon icon={faPesoSign} size="xl" />
+                <FontAwesomeIcon
+                  icon={faPesoSign}
+                  size="lg"
+                  className="color-primary"
+                />
                 <p className="m-0 text-center">Sales</p>
               </li>
             )}
@@ -81,11 +98,15 @@ const Sidebar = () => {
           <NavLink to="gcash-transactions" className="mb-3">
             {({ isActive }) => (
               <li
-                className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 shadow-sm transition-all
+                className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 transition-all
             ${isActive && 'active'}`}
                 style={{ fontSize: '0.8em' }}
               >
-                <FontAwesomeIcon icon={faMoneyBillTransfer} size="xl" />
+                <FontAwesomeIcon
+                  icon={faMoneyBillTransfer}
+                  size="lg"
+                  className="color-primary"
+                />
                 <p className="m-0 text-center">GCash Trans.</p>
               </li>
             )}
@@ -93,11 +114,15 @@ const Sidebar = () => {
           <NavLink to="expenses" className="mb-3">
             {({ isActive }) => (
               <li
-                className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 shadow-sm transition-all
+                className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 transition-all
             ${isActive && 'active'}`}
                 style={{ fontSize: '0.8em' }}
               >
-                <FontAwesomeIcon icon={faCartArrowDown} size="xl" />
+                <FontAwesomeIcon
+                  icon={faCartArrowDown}
+                  size="lg"
+                  className="color-primary"
+                />
                 <p className="m-0 text-center">Expenses</p>
               </li>
             )}
@@ -105,11 +130,15 @@ const Sidebar = () => {
           <NavLink to="reports" className="mb-3">
             {({ isActive }) => (
               <li
-                className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 shadow-sm transition-all
+                className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 transition-all
             ${isActive && 'active'}`}
                 style={{ fontSize: '0.8em' }}
               >
-                <FontAwesomeIcon icon={faChartLine} size="xl" />
+                <FontAwesomeIcon
+                  icon={faChartLine}
+                  size="lg"
+                  className="color-primary"
+                />
                 <p className="m-0 text-center">Reports</p>
               </li>
             )}
@@ -117,11 +146,15 @@ const Sidebar = () => {
           <NavLink to="activities" className="mb-3">
             {({ isActive }) => (
               <li
-                className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 shadow-sm transition-all
+                className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 transition-all
             ${isActive && 'active'}`}
                 style={{ fontSize: '0.8em' }}
               >
-                <FontAwesomeIcon icon={faPersonDigging} size="xl" />
+                <FontAwesomeIcon
+                  icon={faPersonDigging}
+                  size="lg"
+                  className="color-primary"
+                />
                 <p className="m-0 text-center">Activities</p>
               </li>
             )}
@@ -133,8 +166,9 @@ const Sidebar = () => {
           <ul className="nav flex-column">
             <NavLink to="admin" className="mb-0">
               <li>
-                <span className="nav-link cursor-pointer">
-                  <strong>Admin</strong>
+                <span className="nav-link cursor-pointer text-center">
+                  <FontAwesomeIcon icon={faCog} className="color-primary" />
+                  <strong className="color-primary"> Admin</strong>
                 </span>
               </li>
             </NavLink>

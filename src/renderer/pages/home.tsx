@@ -42,7 +42,7 @@ function HomePage() {
         role="menu"
         tabIndex={-1}
       >
-        <div className="pe-0 h-100" style={{ paddingLeft: '120px' }}>
+        <div className="pe-0 h-100" style={{ paddingLeft: '130px' }}>
           <Sidebar />
           <Header />
           <main
