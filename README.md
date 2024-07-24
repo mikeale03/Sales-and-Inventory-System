@@ -23,7 +23,7 @@ To clone and run this repository you'll [Node.js](https://nodejs.org/en/download
 # Clone this repository
 git clone https://github.com/mikeale03/Sales-and-Inventory-System.git
 ```
-The app will look for 'realm' folder to store database files. Create an empty 'realm' folder outside of the cloned 'Sales-and-Inventory-System' folder. After that, open the 'Sales-and-Inventory-System' folder.
+The app will look for 'realm' folder to store database files. Create an empty 'realm' folder outside of the cloned 'Sales-and-Inventory-System' folder. After that, open the 'Sales-and-Inventory-System' folder with your code editor.
 
 ![for-github](https://github.com/user-attachments/assets/301ccd12-4daa-4571-81ff-9e88e55a13f9)
 
