@@ -8,6 +8,7 @@ module.exports = {
     'react/react-in-jsx-scope': 'off',
     'no-underscore-dangle': 'off',
     'no-unused-expressions': 'off',
+    'no-redeclare': 'off',
     '@typescript-eslint/no-unused-expressions': 'off',
     'react/require-default-props': 'off',
     '@typescript-eslint/naming-convention': 'off',

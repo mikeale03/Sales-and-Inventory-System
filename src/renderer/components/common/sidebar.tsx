@@ -63,6 +63,18 @@ const Sidebar = () => {
               </li>
             )}
           </NavLink>
+          <NavLink to="mobile-load" className="mb-3">
+            {({ isActive }) => (
+              <li
+                className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 shadow-sm transition-all
+            ${isActive && 'active'}`}
+                style={{ fontSize: '0.8em' }}
+              >
+                <FontAwesomeIcon icon={faMobileRetro} size="xl" />
+                <p className="m-0 text-center">Mobile Load</p>
+              </li>
+            )}
+          </NavLink>
           <NavLink to="products" className="mb-3">
             {({ isActive }) => (
               <li
