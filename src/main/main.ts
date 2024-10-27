@@ -22,6 +22,7 @@ import setActivitiesEventHandler from './eventHandlers/activities';
 import setExpensesEventHandler from './eventHandlers/expenses';
 import setCategoriesEventHandler from './eventHandlers/categories';
 import setTagsEventHandler from './eventHandlers/tags';
+import setMobileLoadEventHandler from './eventHandlers/mobileLoads';
 
 class AppUpdater {
   constructor() {
@@ -47,6 +48,7 @@ setActivitiesEventHandler(ipcMain);
 setExpensesEventHandler(ipcMain);
 setCategoriesEventHandler(ipcMain);
 setTagsEventHandler(ipcMain);
+setMobileLoadEventHandler(ipcMain);
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');

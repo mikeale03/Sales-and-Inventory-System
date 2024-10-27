@@ -23,6 +23,7 @@ import ExpensesPage from './pages/expenses';
 import CategoriesPage from './pages/admin/categories';
 import TagsPage from './pages/admin/tags';
 import AccessCodesPage from './pages/admin/accessCodes';
+import MobileLoadPage from './pages/mobileLoad';
 
 export default function App() {
   const [user, setUser] = useState<User | undefined>();
@@ -64,6 +65,7 @@ export default function App() {
             <Route path="/home" element={<HomePage />}>
               <Route path="cash-register" element={<CashRegisterPage />} />
               <Route path="gcash-register" element={<GcashRegisterPage />} />
+              <Route path="mobile-load" element={<MobileLoadPage />} />
               <Route path="products" element={<ProductsPage />} />
               <Route path="sales" element={<SalesPage />} />
               <Route
