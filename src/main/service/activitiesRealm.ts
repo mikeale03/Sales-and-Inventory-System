@@ -24,6 +24,7 @@ export class ActivitiesSchema extends Realm.Object {
       details: 'string',
       transact_by: 'string',
       transact_by_user_id: 'string',
+      product_id: 'string?',
     },
     primaryKey: '_id',
   };
@@ -34,7 +35,7 @@ export const openActivitiesRealm = async () => {
     const realm = await Realm.open({
       path: '../realm/activities',
       schema: [ActivitiesSchema],
-      schemaVersion: 1,
+      schemaVersion: 2,
     });
     return realm;
   } catch (error) {
@@ -46,7 +47,13 @@ export const openActivitiesRealm = async () => {
 export const createProductEditActivity = async (
   params: CreateProductEditActivityParams
 ) => {
-  const { oldProduct, newProduct, transact_by, transact_by_user_id } = params;
+  const {
+    oldProduct,
+    newProduct,
+    transact_by,
+    transact_by_user_id,
+    product_id,
+  } = params;
   const productUpdates: ProductEditDetails = {
     product_name: oldProduct.name,
     updates: [],
@@ -80,6 +87,7 @@ export const createProductEditActivity = async (
           transact_by_user_id,
           activity: 'edit product',
           date_created: new Date(),
+          product_id,
         });
       });
       realm.close();
@@ -105,7 +113,7 @@ export const createProductEditActivity = async (
 export const createProductAddActivity = async (
   params: CreateProductAddActivityParams
 ) => {
-  const { product, transact_by, transact_by_user_id } = params;
+  const { product, transact_by, transact_by_user_id, product_id } = params;
   const realm = await openActivitiesRealm();
   if (!realm)
     return {
@@ -121,6 +129,7 @@ export const createProductAddActivity = async (
         transact_by_user_id,
         activity: 'create product',
         date_created: new Date(),
+        product_id,
       });
     });
     realm.close();
@@ -141,6 +150,7 @@ export const createProductAddActivity = async (
 
 export const createProductAddQtyActivity = async ({
   product_name,
+  product_id,
   quantity,
   transact_by,
   transact_by_user_id,
@@ -162,6 +172,7 @@ export const createProductAddQtyActivity = async ({
         transact_by_user_id,
         activity: 'add product quantity',
         date_created: new Date(),
+        product_id,
       });
     });
     realm.close();
@@ -199,6 +210,7 @@ export const createProductDeleteActivity = async (
         transact_by_user_id,
         activity: 'delete product',
         date_created: new Date(),
+        product_id: product._id,
       });
     });
     realm.close();
@@ -236,6 +248,7 @@ export const createSalesDeleteActivity = async (
         transact_by_user_id,
         activity: 'delete sales',
         date_created: new Date(),
+        product_id: sales.product_id,
       });
     });
     realm.close();
@@ -278,6 +291,7 @@ export const createSalesVoidActivity = async (
         transact_by,
         transact_by_user_id,
         date_created: new Date(),
+        product_id: sales.product_id,
       });
     });
     realm.close();
@@ -350,6 +364,7 @@ export const getActivities = async (filter?: GetActivitiesFilter) => {
     const transactBy = filter?.transactBy;
     const startDate = filter?.startDate;
     const endDate = filter?.endDate;
+    const productId = filter?.productId;
 
     const query: string[] = [];
     const args = [];
@@ -365,6 +380,10 @@ export const getActivities = async (filter?: GetActivitiesFilter) => {
     if (endDate) {
       query.push(`date_created <= $${args.length}`);
       args.push(endDate);
+    }
+    if (productId) {
+      query.push(`product_id == $${args.length}`);
+      args.push(productId);
     }
     activities = args.length
       ? activities.filtered(query.join(' && '), ...args)

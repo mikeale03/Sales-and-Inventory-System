@@ -10,6 +10,7 @@ export type Activity = {
   details: string;
   transact_by: string;
   transact_by_user_id: string;
+  product_id?: string;
 };
 
 export type ProductEditDetails = {
@@ -26,12 +27,14 @@ export type CreateProductEditActivityParams = {
   newProduct: ProductForm;
   transact_by: string;
   transact_by_user_id: string;
+  product_id: string;
 };
 
 export type CreateProductAddActivityParams = {
   product: ProductForm;
   transact_by: string;
   transact_by_user_id: string;
+  product_id: string;
 };
 
 export type CreateProductAddQtyActivityParams = {
@@ -39,6 +42,7 @@ export type CreateProductAddQtyActivityParams = {
   quantity: number;
   transact_by: string;
   transact_by_user_id: string;
+  product_id: string;
 };
 
 export type CreateSalesDeleteActivityParams = {
@@ -66,4 +70,5 @@ export type GetActivitiesFilter = {
   transactBy?: string;
   startDate?: Date;
   endDate?: Date;
+  productId?: string;
 };

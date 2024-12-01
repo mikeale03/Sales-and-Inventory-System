@@ -47,6 +47,7 @@ const AddQuantityModal = ({
           quantity: numQuantity,
           transact_by: user.username,
           transact_by_user_id: user._id,
+          product_id: selectedProduct._id,
         });
       } else toast(response.message);
 

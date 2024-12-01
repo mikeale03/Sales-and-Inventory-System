@@ -4,8 +4,13 @@ import {
   MobileLoad,
   MobileLoadFilterParams,
 } from 'globalTypes/realm/mobileLoad.types';
+import { Gcash } from 'globalTypes/realm/gcash.types';
+import { Sales } from 'globalTypes/realm/sales.types';
 import Realm, { ObjectSchema } from 'realm';
 import { create } from './realm';
+import { createSales, openSalesRealm } from './salesRealm';
+import { openGcashRealm } from './gcashRealm';
+import { adjustBalanceOnDelete } from './utils/gcashRealmHelper';
 
 const MOBILELOAD = 'MobileLoad';
 
@@ -25,6 +30,7 @@ export class MobileLoadSchema extends Realm.Object<MobileLoad> {
       transact_by_user_id: 'string',
       updated_by: 'string?',
       updated_by_user_id: 'string?',
+      transaction_id: 'string',
     },
     primaryKey: '_id',
   };
@@ -35,7 +41,7 @@ export const openMobileLoadRealm = async () => {
     const realm = await Realm.open({
       path: '../realm/mobile-load',
       schema: [MobileLoadSchema],
-      schemaVersion: 1,
+      schemaVersion: 2,
     });
     return realm;
   } catch (error) {
@@ -45,6 +51,7 @@ export const openMobileLoadRealm = async () => {
 
 export const createMobileLoad = async (data: CreateMobileLoadParams) => {
   const realm = await openMobileLoadRealm();
+  let salesRealm: Realm | undefined;
   if (!realm) {
     return {
       isSuccess: false,
@@ -58,14 +65,37 @@ export const createMobileLoad = async (data: CreateMobileLoadParams) => {
       date_created: new Date(),
     });
 
+    salesRealm = await openSalesRealm();
+    await createSales(
+      [
+        {
+          product_id: 'mobile-load',
+          product_name: `MobileLoad - ${data.amount}`,
+          quantity: 1,
+          price: data.charge,
+          total_price: data.charge,
+          payment: 'cash',
+          date_created: new Date(),
+          transact_by: data.transact_by,
+          transact_by_user_id: data.transact_by_user_id,
+          transaction_id: data.transaction_id,
+          product_tags: [],
+        },
+      ],
+      salesRealm
+    );
+
     const result = task?.toJSON() as MobileLoad;
+    salesRealm?.close();
     realm.close();
+
     return {
       isSuccess: true,
       message: 'Successfully created Mobile Load data',
       result,
     };
   } catch (error) {
+    salesRealm?.close();
     realm.close();
     console.log(error);
     return {
@@ -143,7 +173,8 @@ export const getMobileLoads = async (params: MobileLoadFilterParams) => {
 
 export const deleteMobileLoad = async (id: string) => {
   const realm = await openMobileLoadRealm();
-  if (!realm) {
+  const salesRealm = await openSalesRealm();
+  if (!realm || !salesRealm) {
     return {
       isSuccess: false,
       message: 'Error opening realm db',
@@ -158,21 +189,54 @@ export const deleteMobileLoad = async (id: string) => {
       realm.close();
       return {
         isSuccess: false,
-        message: 'GCash transaction not found',
+        message: 'Mobile load transaction not found',
       };
     }
+
+    if (mobileLoad.source === 'gcash') {
+      const gcashRealm = await openGcashRealm();
+      if (!gcashRealm) {
+        return {
+          isSuccess: false,
+          message: 'Error opening realm db',
+        };
+      }
+      const gcashObjects = gcashRealm.objects<Gcash>('Gcash');
+
+      const gcash = gcashObjects.filtered(
+        `transaction_id == $0`,
+        mobileLoad.transaction_id
+      )[0];
+
+      adjustBalanceOnDelete(gcashRealm, gcashObjects, gcash);
+
+      gcashRealm?.write(() => {
+        gcashRealm.delete(gcash);
+      });
+      gcashRealm.close();
+    }
+
+    salesRealm.write(() => {
+      const sales = salesRealm
+        .objects<Sales>('Sales')
+        .filtered(`transaction_id == $0`, mobileLoad?.transaction_id);
+      salesRealm.delete(sales);
+    });
 
     realm.write(() => {
       realm.delete(mobileLoad);
       mobileLoad = null;
     });
+
     realm?.close();
+    salesRealm.close();
     return {
       isSuccess: true,
       message: 'Successfully deleted a Mobile Load transaction',
     };
   } catch (error) {
     realm?.close();
+    salesRealm.close();
     return {
       isSuccess: false,
       message: 'Failed to delete a Mobile Load transaction',

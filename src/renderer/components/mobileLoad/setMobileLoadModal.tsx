@@ -36,7 +36,7 @@ const initMobileLoad = {
   number: '',
   amount: '',
   charge: '',
-  source: 'Other',
+  source: 'other',
   date_transacted: null,
 };
 
@@ -99,7 +99,7 @@ const SetMobileLoadModal = ({
         <Modal.Body>
           <Form.Group className="mb-3">
             <Form.Label>
-              GCash Number <span className="text-danger">*</span>
+              Mobile Number <span className="text-danger">*</span>
             </Form.Label>
             <Form.Control
               value={mobileLoad.number}
