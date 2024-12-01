@@ -2,34 +2,53 @@ import { useEffect, useState, ChangeEvent } from 'react';
 import { Col, FormLabel, FormSelect, Row } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import UsersSelect from '../common/selects/usersSelect';
+import ProductSelect, { Opt } from './productSelect';
 
-export type OnFilterParams = { user: string; startDate: Date; endDate: Date };
+export type OnFilterParams = {
+  user: string;
+  startDate: Date;
+  endDate: Date;
+  productId: string | null;
+};
 
 export type Props = {
   onFilter: (filter: OnFilterParams) => void;
 };
 
+export type Filter = {
+  selectedDate: Date;
+  userOption: string;
+  selectedPeriod: string;
+  startDate: Date;
+  endDate: Date;
+  productId: string | null;
+};
+
 const ActivitiesFilter = ({ onFilter }: Props) => {
-  const [activitiesFilter, setActivitiesFilter] = useState({
+  const [activitiesFilter, setActivitiesFilter] = useState<Filter>({
     selectedDate: new Date(),
     userOption: '',
     selectedPeriod: 'Daily',
     startDate: new Date(new Date().setHours(0, 0, 0, 0)),
     endDate: new Date(new Date().setHours(23, 59, 59, 999)),
+    productId: null,
   });
   const isDaily = activitiesFilter.selectedPeriod === 'Daily';
   const [minDate, setMinDate] = useState<Date>(activitiesFilter.startDate);
   const [maxDate, setMaxDate] = useState<Date>(activitiesFilter.endDate);
+  const [productInputVal, setProductInputVal] = useState('');
+  const [productSelectVal, setProductSelectVal] = useState<Opt | null>(null);
 
-  const { userOption, startDate, endDate } = activitiesFilter;
+  const { userOption, startDate, endDate, productId } = activitiesFilter;
 
   useEffect(() => {
     onFilter({
       user: userOption === 'all' ? '' : userOption,
       startDate,
       endDate,
+      productId,
     });
-  }, [userOption, startDate, endDate, onFilter]);
+  }, [userOption, startDate, endDate, onFilter, productId]);
 
   const setDateRange = (period: string, selectedDate: Date) => {
     let sDate: Date;
@@ -77,6 +96,14 @@ const ActivitiesFilter = ({ onFilter }: Props) => {
   const handleDateSelect = (date: Date | null) => {
     if (!date) return;
     setDateRange(activitiesFilter.selectedPeriod, date);
+  };
+
+  const handleProductSelect = (opt: Opt | null) => {
+    setActivitiesFilter({
+      ...activitiesFilter,
+      productId: opt && opt.product._id,
+    });
+    setProductSelectVal(opt);
   };
 
   return (
@@ -157,6 +184,17 @@ const ActivitiesFilter = ({ onFilter }: Props) => {
           ]}
         />
       </Col>
+      <Row className="mb-3">
+        <Col lg="6">
+          <FormLabel>Product</FormLabel>
+          <ProductSelect
+            inputValue={productInputVal}
+            onInputChange={setProductInputVal}
+            onSelect={handleProductSelect}
+            value={productSelectVal}
+          />
+        </Col>
+      </Row>
     </Row>
   );
 };

@@ -74,6 +74,7 @@ const SetProductModal = ({
           newProduct: product,
           transact_by: user.username,
           transact_by_user_id: user._id,
+          product_id: product._id,
         });
         return;
       }
@@ -93,6 +94,7 @@ const SetProductModal = ({
           product,
           transact_by: user.username,
           transact_by_user_id: user._id,
+          product_id: response.result._id,
         });
         return;
       }
