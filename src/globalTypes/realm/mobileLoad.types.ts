@@ -1,4 +1,4 @@
-export type Source = 'GCash' | 'Other';
+export type Source = 'gcash' | 'other';
 
 export type MobileLoad = {
   _id: string;
@@ -14,6 +14,7 @@ export type MobileLoad = {
   transact_by_user_id: string;
   updated_by?: string;
   updated_by_id?: string;
+  transaction_id: string;
 };
 
 export type CreateMobileLoadParams = {
@@ -25,6 +26,7 @@ export type CreateMobileLoadParams = {
   source: Source;
   transact_by: string;
   transact_by_user_id: string;
+  transaction_id: string;
 };
 
 export type CreateMobileLoadData = {
@@ -37,6 +39,7 @@ export type CreateMobileLoadData = {
   date_created: Date;
   transact_by: string;
   transact_by_user_id: string;
+  transaction_id: string;
 };
 
 export type MobileLoadFilterParams = {

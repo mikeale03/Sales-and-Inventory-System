@@ -1,6 +1,7 @@
 import { faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { format } from 'date-fns';
+import { v4 as uuid } from 'uuid';
 import {
   MobileLoad,
   MobileLoadFilterParams,
@@ -14,6 +15,7 @@ import SetMobileLoadModal, {
   MobileLoadResponse,
 } from 'renderer/components/mobileLoad/setMobileLoadModal';
 import UserContext from 'renderer/context/userContext';
+import { createGcashTransactions } from 'renderer/service/gcash';
 import {
   createMobileLoad,
   deleteMobileLoad,
@@ -36,19 +38,45 @@ const MobileLoadPage = () => {
     const response = await getMobileLoads(filter);
     if (response.isSuccess && response.result) {
       setMobileLoads(response.result);
+      console.log(response.result);
     }
   }, [filter]);
 
   const handleSetMobileLoad = async (mobileLoad: MobileLoadResponse) => {
     if (!user) return;
 
+    const transaction_id = uuid();
+
     const response = await createMobileLoad({
       ...mobileLoad,
       transact_by: user.username,
       transact_by_user_id: user._id,
+      transaction_id,
     });
     if (response.isSuccess) {
       handleGetMobileLoads();
+    } else {
+      toast.error(response.message);
+      return;
+    }
+
+    if (mobileLoad.source === 'gcash') {
+      const response2 = await createGcashTransactions([
+        {
+          type: 'mobile load',
+          amount: mobileLoad.amount,
+          charge: mobileLoad.charge,
+          number: mobileLoad.number,
+          date_transacted: mobileLoad.date_transacted,
+          transact_by: user.username,
+          transact_by_user_id: user._id,
+          charge_payment: 'cash',
+          transaction_id,
+        },
+      ]);
+      if (!response2.isSuccess) {
+        toast.error(response2.message);
+      }
     }
   };
 

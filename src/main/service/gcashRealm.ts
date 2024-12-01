@@ -80,7 +80,11 @@ export const createGcashTransactions = async (
 
       let balance = gcash_balance;
 
-      if (type === 'cash in' || type === 'deduct balance') {
+      if (
+        type === 'cash in' ||
+        type === 'deduct balance' ||
+        type === 'mobile load'
+      ) {
         balance = +(gcash_balance - amount).toFixed(2);
         deductBalanceFromDate(realm, gcashObjects, date_transacted, amount);
       } else if (type === 'cash out' || type === 'add balance') {

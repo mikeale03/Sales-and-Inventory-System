@@ -3,7 +3,8 @@ export type GcashType =
   | 'cash out'
   | 'gcash pay'
   | 'add balance'
-  | 'deduct balance';
+  | 'deduct balance'
+  | 'mobile load';
 
 export type Gcash = {
   _id: string;

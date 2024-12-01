@@ -321,28 +321,31 @@ const SalesPage = () => {
                       {!isGroupByProduct && <td>{d.transact_by}</td>}
 
                       <td className="print-hide">
-                        <FontAwesomeIcon
-                          onClick={() => handleShowConfirmationModal(d, true)}
-                          icon={faXmark}
-                          title="Void Sale"
-                          size="xl"
-                          className="me-2 cursor-pointer"
-                          role="button"
-                          tabIndex={0}
-                        />
-                        {user?.role === 'admin' && (
+                        {d.product_id !== 'mobile-load' && (
                           <FontAwesomeIcon
-                            onClick={() =>
-                              handleShowConfirmationModal(d, false)
-                            }
-                            icon={faTrashCan}
-                            title="Delete"
+                            onClick={() => handleShowConfirmationModal(d, true)}
+                            icon={faXmark}
+                            title="Void Sale"
                             size="xl"
                             className="me-2 cursor-pointer"
                             role="button"
                             tabIndex={0}
                           />
                         )}
+                        {user?.role === 'admin' &&
+                          d.product_id !== 'mobile-load' && (
+                            <FontAwesomeIcon
+                              onClick={() =>
+                                handleShowConfirmationModal(d, false)
+                              }
+                              icon={faTrashCan}
+                              title="Delete"
+                              size="xl"
+                              className="me-2 cursor-pointer"
+                              role="button"
+                              tabIndex={0}
+                            />
+                          )}
                       </td>
                     </tr>
                   ))}
