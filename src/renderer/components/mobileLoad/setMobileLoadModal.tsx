@@ -36,7 +36,7 @@ const initMobileLoad = {
   number: '',
   amount: '',
   charge: '',
-  source: 'other',
+  source: 'gcash',
   date_transacted: null,
 };
 
@@ -159,8 +159,8 @@ const SetMobileLoadModal = ({
               value={mobileLoad.source}
               onChange={(e) => handleOnChange({ source: e.target.value })}
             >
-              <option value="other">Other</option>
               <option value="gcash">GCash</option>
+              <option value="other">Other</option>
             </Form.Control>
           </Form.Group>
           <p>
