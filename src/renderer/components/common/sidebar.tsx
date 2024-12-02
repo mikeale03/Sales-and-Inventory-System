@@ -70,7 +70,11 @@ const Sidebar = () => {
             ${isActive && 'active'}`}
                 style={{ fontSize: '0.8em' }}
               >
-                <FontAwesomeIcon icon={faMobileRetro} size="xl" />
+                <FontAwesomeIcon
+                  icon={faMobileRetro}
+                  size="xl"
+                  className="color-primary"
+                />
                 <p className="m-0 text-center">Mobile Load</p>
               </li>
             )}
