@@ -8,7 +8,7 @@ export type MobileLoadForm = {
   _id?: string;
   number: string;
   amount: string | number;
-  charge: string | number;
+  total_amount: string | number;
   source: string;
   date_transacted: Date | null;
 };
@@ -35,8 +35,8 @@ export type Props = {
 const initMobileLoad = {
   number: '',
   amount: '',
-  charge: '',
-  source: 'gcash',
+  total_amount: '',
+  source: 'other',
   date_transacted: null,
 };
 
@@ -50,7 +50,7 @@ const SetMobileLoadModal = ({
 }: Props) => {
   const [mobileLoad, setMobileLoad] = useState<MobileLoadForm>(initMobileLoad);
 
-  const totalAmount = (+mobileLoad.amount + +mobileLoad.charge).toFixed(2);
+  const charge = (+mobileLoad.total_amount - +mobileLoad.amount).toFixed(2);
 
   const handleOnChange = async (update: Partial<MobileLoadForm>) => {
     setMobileLoad({ ...mobileLoad, ...update });
@@ -64,7 +64,7 @@ const SetMobileLoadModal = ({
   const handleConfirm = (e: FormEvent<HTMLFormElement>) => {
     e.stopPropagation();
     e.preventDefault();
-    const { amount, charge, source, date_transacted } = mobileLoad;
+    const { amount, total_amount, source, date_transacted } = mobileLoad;
     if (!date_transacted) return;
 
     onConfirm({
@@ -72,7 +72,7 @@ const SetMobileLoadModal = ({
       amount: +amount,
       charge: +charge,
       source: source as Source,
-      total_amount: +totalAmount,
+      total_amount: +total_amount,
       date_transacted,
     });
     toggle(false);
@@ -123,15 +123,15 @@ const SetMobileLoadModal = ({
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>
-              Charge <span className="text-danger">*</span>
+              Total Amount <span className="text-danger">*</span>
             </Form.Label>
             <Form.Control
               type="number"
               step={0.01}
-              min={0}
+              min={mobileLoad.amount}
               required
-              value={mobileLoad.charge}
-              onChange={(e) => handleOnChange({ charge: e.target.value })}
+              value={mobileLoad.total_amount}
+              onChange={(e) => handleOnChange({ total_amount: e.target.value })}
             />
           </Form.Group>
           <Form.Group className="mb-3">
@@ -159,13 +159,13 @@ const SetMobileLoadModal = ({
               value={mobileLoad.source}
               onChange={(e) => handleOnChange({ source: e.target.value })}
             >
-              <option value="gcash">GCash</option>
               <option value="other">Other</option>
+              <option value="gcash">GCash</option>
             </Form.Control>
           </Form.Group>
           <p>
-            <strong>Total Amount:</strong>{' '}
-            <span>{pesoFormat(+totalAmount)}</span>
+            <strong>Charge Amount:</strong>{' '}
+            <span>{charge ? pesoFormat(+charge) : 0}</span>
           </p>
         </Modal.Body>
         <Modal.Footer>
