@@ -117,7 +117,7 @@ const MobileLoadPage = () => {
         onConfirm={handleSetMobileLoad}
       />
       <h3>Mobile Load</h3>
-      <Button onClick={() => setShowMobileLoadModal(true)}>
+      <Button className="mt-1" onClick={() => setShowMobileLoadModal(true)}>
         Add Mobile Load
       </Button>
 
