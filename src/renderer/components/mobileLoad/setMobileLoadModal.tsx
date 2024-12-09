@@ -36,7 +36,7 @@ const initMobileLoad = {
   number: '',
   amount: '',
   total_amount: '',
-  source: 'other',
+  source: 'gcash',
   date_transacted: null,
 };
 
