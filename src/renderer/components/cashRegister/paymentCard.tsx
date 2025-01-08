@@ -18,12 +18,14 @@ type Props = {
   paymentAmount: string;
   setPaymentAmount: Dispatch<SetStateAction<string>>;
   onPayment: () => void;
+  onReset: () => void;
 };
 
 const PaymentCard = ({
   items,
   paymentAmount,
   setPaymentAmount,
+  onReset,
   onPayment,
 }: Props) => {
   const [lines, setLines] = useState(1);
@@ -65,12 +67,12 @@ const PaymentCard = ({
             <Col xs="6">
               <p className="m-0  mb-1 text-end">{pesoFormat(+paymentAmount)}</p>
             </Col>
-            <Col xs="6">change:</Col>
+            {/* <Col xs="6">change:</Col>
             <Col xs="6">
               <p className="m-0  mb-1 text-end">
                 <strong>{pesoFormat(change < 0 ? 0 : change)}</strong>
               </p>
-            </Col>
+            </Col> */}
           </Row>
 
           <Form.Group className="mb-3">
@@ -84,16 +86,29 @@ const PaymentCard = ({
               placeholder="Enter amount"
               value={paymentAmount}
               onChange={(e) => setPaymentAmount(e.target.value)}
+              tabIndex={0}
               required
             />
           </Form.Group>
 
-          <div className="mt-2">
+          <div className="mt-2 d-flex">
+            <Button
+              variant="light"
+              className="me-2"
+              type="button"
+              onClick={onReset}
+              // eslint-disable-next-line jsx-a11y/tabindex-no-positive
+              tabIndex={-1}
+            >
+              Reset
+            </Button>
             <Button
               className="w-100"
               variant="primary"
               type="submit"
               disabled={!lines}
+              // eslint-disable-next-line jsx-a11y/tabindex-no-positive
+              tabIndex={1}
             >
               Submit Payment
             </Button>

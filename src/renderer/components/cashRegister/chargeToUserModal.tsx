@@ -14,9 +14,10 @@ export type Props = {
   show: boolean;
   toggle: (show: boolean) => void;
   onConfirm?: (selectedUser: User) => void;
+  onCancel?: () => void;
 };
 
-const ChargeToUserModal = ({ show, toggle, onConfirm }: Props) => {
+const ChargeToUserModal = ({ show, toggle, onConfirm, onCancel }: Props) => {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | undefined>();
   const { user } = useContext(UserContext);
@@ -34,6 +35,7 @@ const ChargeToUserModal = ({ show, toggle, onConfirm }: Props) => {
 
   const handleCancel = () => {
     toggle(false);
+    onCancel?.();
   };
 
   const handleConfirm = () => {
@@ -43,7 +45,13 @@ const ChargeToUserModal = ({ show, toggle, onConfirm }: Props) => {
   };
 
   return (
-    <Modal show={show} onHide={() => toggle(false)} size="sm" centered>
+    <Modal
+      show={show}
+      onHide={() => toggle(false)}
+      size="sm"
+      backdrop="static"
+      centered
+    >
       <Modal.Header>
         <Modal.Title className="fw-bold text-center d-block w-100">
           Charge to User

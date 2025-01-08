@@ -134,6 +134,10 @@ function CashRegisterPage() {
         show={showPaymentConfirmationModal}
         toggle={setShowPaymentConfirmationModal}
         items={items}
+        onCancel={() => {
+          setPaymentAmount('');
+          setItems({});
+        }}
         paymentAmount={+paymentAmount}
         onSuccess={useCallback(async () => {
           setPaymentAmount('');
@@ -197,12 +201,12 @@ function CashRegisterPage() {
                             title="Edit"
                             className="me-2 cursor-pointer"
                           />
-                          <FontAwesomeIcon
+                          {/* <FontAwesomeIcon
                             title="remove"
                             icon={faXmark}
                             className="btn"
                             onClick={() => handleDeleteItem(key)}
-                          />
+                          /> */}
                         </td>
                       </tr>
                     ))}
@@ -221,6 +225,10 @@ function CashRegisterPage() {
               items={items}
               paymentAmount={paymentAmount}
               setPaymentAmount={setPaymentAmount}
+              onReset={useCallback(() => {
+                setPaymentAmount('');
+                setItems({});
+              }, [])}
               onPayment={useCallback(() => {
                 setShowPaymentConfirmationModal(true);
               }, [])}
