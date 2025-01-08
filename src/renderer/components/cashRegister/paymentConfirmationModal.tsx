@@ -19,6 +19,7 @@ import { createExpense } from 'renderer/service/expenses';
 import ChargeToUserModal from 'renderer/components/cashRegister/chargeToUserModal';
 import ConfirmationModal from 'renderer/components/common/modals/confirmation';
 import { ExpenseDescriptionJson } from 'globalTypes/realm/expenses.type';
+import CancelCodeModal from './cancelCodeModal';
 
 type Props = {
   show: boolean;
@@ -34,6 +35,7 @@ type Props = {
     }
   >;
   paymentAmount: number;
+  onCancel: () => void;
   onSuccess: () => void;
   onExited: () => void;
   onError?: () => void;
@@ -43,6 +45,7 @@ const PaymentConfirmationModal = ({
   show,
   toggle,
   items,
+  onCancel,
   paymentAmount,
   onSuccess,
   onExited,
@@ -52,6 +55,7 @@ const PaymentConfirmationModal = ({
   const [total, setTotal] = useState(0);
   const [showGcashConfirmation, setShowGcashConfirmation] = useState(false);
   const [showChargeToModal, setShowChargeToModal] = useState(false);
+  const [cancelCodeModal, setCancelCodeModal] = useState(false);
   const [isChargeToUser, setIsChargeToUser] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | undefined>();
   const { user } = useContext(UserContext);
@@ -185,12 +189,29 @@ const PaymentConfirmationModal = ({
     setIsChargeToUser(false);
   };
 
+  const handleCancelCodeConfirm = () => {
+    onCancel();
+    toggle(false);
+  };
+
+  const handleCancel = () => {
+    setCancelCodeModal(true);
+    toggle(false);
+  };
+
   return (
     <>
+      <CancelCodeModal
+        show={cancelCodeModal}
+        toggle={setCancelCodeModal}
+        onConfirm={handleCancelCodeConfirm}
+        onCancel={() => toggle(true)}
+      />
       <ChargeToUserModal
         show={showChargeToModal}
         toggle={setShowChargeToModal}
         onConfirm={handleShowChargeToUserConfirmation}
+        onCancel={() => toggle(true)}
       />
       <ConfirmationModal
         show={showGcashConfirmation}
@@ -203,8 +224,8 @@ const PaymentConfirmationModal = ({
         show={show}
         onHide={() => toggle(false)}
         onShow={() => cancelRef.current?.focus()}
-        size="md"
         onExited={onExited}
+        backdrop="static"
         centered
       >
         <Modal.Header>
@@ -242,7 +263,7 @@ const PaymentConfirmationModal = ({
               change:
             </Col>
             <Col xs="6">
-              <p className="m-0 mb-1 fs-5 text-end">
+              <p className="m-0 mb-1 fs-3 text-end">
                 <strong>{pesoFormat(change < 0 ? 0 : change)}</strong>
               </p>
             </Col>
@@ -272,9 +293,8 @@ const PaymentConfirmationModal = ({
           <div>
             <Button
               variant="secondary"
-              onClick={() => toggle(false)}
+              onClick={() => handleCancel()}
               className="me-2"
-              ref={cancelRef}
             >
               Cancel
             </Button>

@@ -8,7 +8,7 @@ export type Props = {
   onConfirm?: () => void;
   onCancel?: () => void;
   onExited?: () => void;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'lg' | 'xl';
 };
 
 const ConfirmationModal = ({
@@ -36,6 +36,7 @@ const ConfirmationModal = ({
       onHide={() => toggle(false)}
       size={size}
       onExited={onExited}
+      backdrop="static"
       centered
     >
       <Modal.Header>
