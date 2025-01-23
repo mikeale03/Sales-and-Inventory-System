@@ -1,3 +1,4 @@
+/* eslint-disable guard-for-in */
 import { Response } from 'globalTypes/realm/response.types';
 import Realm, { ObjectSchema } from 'realm';
 
@@ -7,6 +8,7 @@ export type Product = {
   _id: string;
   name: string;
   barcode?: number;
+  barcodeStr?: string;
   description?: string;
   quantity: number;
   price: number;
@@ -30,6 +32,7 @@ export class ProductsSchema extends Realm.Object {
       _id: { type: 'objectId', default: () => new Realm.BSON.ObjectId() },
       name: { type: 'string', indexed: true },
       barcode: { type: 'int?', indexed: true },
+      barcodeStr: { type: 'string?', indexed: true },
       description: 'string?',
       quantity: 'int',
       price: 'float',
@@ -53,7 +56,19 @@ export const openProductsRealm = async () => {
   const products = await Realm.open({
     path: '../realm/products',
     schema: [ProductsSchema],
-    schemaVersion: 3,
+    schemaVersion: 4,
+    onMigration: (oldRealm, newRealm) => {
+      if (oldRealm.schemaVersion < 4) {
+        const oldObjects = oldRealm.objects<Product>(PRODUCTS);
+        const newObjects = newRealm.objects<Product>(PRODUCTS);
+        // loop through all objects and set the _id property in the new schema
+        for (const objectIndex in oldObjects) {
+          const oldObject = oldObjects[objectIndex];
+          const newObject = newObjects[objectIndex];
+          newObject.barcodeStr = oldObject.barcode?.toString();
+        }
+      }
+    },
   });
   return products;
 };
@@ -105,6 +120,7 @@ export const createProduct = async (
     realm.write(() => {
       task = realm?.create(PRODUCTS, {
         ...product,
+        barcodeStr: product.barcode?.toString(),
         date_created: new Date(),
       });
     });
@@ -149,19 +165,23 @@ export const getAllProducts = async (filter?: {
     realm = await openProductsRealm();
     let products = realm?.objects(PRODUCTS);
 
-    const name = filter?.searchText ?? '';
+    const searchText = filter?.searchText ?? '';
     const barcode = filter?.searchText && +filter.searchText;
     const category = filter?.category;
     const tags = filter?.tags;
     const args = [];
     let query = '';
-    query += `name CONTAINS[c] $${args.length}`;
-    args.push(name);
 
     if (barcode) {
-      query += ` OR barcode == $${args.length}`;
+      query += `barcode == $${args.length}`;
       args.push(barcode);
     }
+
+    query += `${barcode ? ' OR ' : ''}name CONTAINS[c] $${args.length}`;
+    args.push(searchText);
+    query += ` OR barcodeStr CONTAINS[c] $${args.length}`;
+    args.push(searchText);
+
     if (category) {
       query += ` AND category == $${args.length}`;
       args.push(category);
@@ -266,6 +286,8 @@ export const updateProduct = async (
         type UpdateKey = keyof typeof updates;
         Object.keys(updates).forEach((key) => {
           if (key !== '_id') product[key] = updates[key as UpdateKey];
+          if (key === 'barcode')
+            product.barcodeStr = String(updates[key as UpdateKey]);
         });
         product.date_updated = new Date();
       }
@@ -287,6 +309,7 @@ export const updateProduct = async (
     };
   } catch (error) {
     realm?.close();
+    console.error(error);
     return {
       isSuccess: false,
       message: 'Failed to update product',
