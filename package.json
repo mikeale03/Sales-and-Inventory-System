@@ -134,7 +134,8 @@
     "reactstrap-sortable-table": "^1.1.1",
     "realm": "^11.4.0",
     "uuid": "^9.0.0",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.19.2/xlsx-0.19.2.tgz"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.19.2/xlsx-0.19.2.tgz",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@babel/core": "^7.19.1",

@@ -13,9 +13,11 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { NavLink } from 'react-router-dom';
 import UserContext from 'renderer/context/userContext';
+import useCashRegisterStore from 'renderer/store/cashRegisterStore';
 
 const Sidebar = () => {
   const { user } = useContext(UserContext);
+  const { hasItems } = useCashRegisterStore((state) => state);
   return (
     <nav
       className="px-0 h-100 position-fixed bg-light shadow d-flex flex-column"
@@ -47,7 +49,11 @@ const Sidebar = () => {
               </li>
             )}
           </NavLink>
-          <NavLink to="gcash-register" className="mb-3">
+          <NavLink
+            to="gcash-register"
+            className="mb-3"
+            style={hasItems ? { pointerEvents: 'none' } : {}}
+          >
             {({ isActive }) => (
               <li
                 className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 transition-all
@@ -63,7 +69,11 @@ const Sidebar = () => {
               </li>
             )}
           </NavLink>
-          <NavLink to="mobile-load" className="mb-3">
+          <NavLink
+            to="mobile-load"
+            className="mb-3"
+            style={hasItems ? { pointerEvents: 'none' } : {}}
+          >
             {({ isActive }) => (
               <li
                 className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 shadow-sm transition-all
@@ -79,7 +89,11 @@ const Sidebar = () => {
               </li>
             )}
           </NavLink>
-          <NavLink to="products" className="mb-3">
+          <NavLink
+            to="products"
+            className="mb-3"
+            style={hasItems ? { pointerEvents: 'none' } : {}}
+          >
             {({ isActive }) => (
               <li
                 className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 transition-all
@@ -95,7 +109,11 @@ const Sidebar = () => {
               </li>
             )}
           </NavLink>
-          <NavLink to="sales" className="mb-3">
+          <NavLink
+            to="sales"
+            className="mb-3"
+            style={hasItems ? { pointerEvents: 'none' } : {}}
+          >
             {({ isActive }) => (
               <li
                 className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 transition-all
@@ -111,7 +129,11 @@ const Sidebar = () => {
               </li>
             )}
           </NavLink>
-          <NavLink to="gcash-transactions" className="mb-3">
+          <NavLink
+            to="gcash-transactions"
+            className="mb-3"
+            style={hasItems ? { pointerEvents: 'none' } : {}}
+          >
             {({ isActive }) => (
               <li
                 className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 transition-all
@@ -127,7 +149,11 @@ const Sidebar = () => {
               </li>
             )}
           </NavLink>
-          <NavLink to="expenses" className="mb-3">
+          <NavLink
+            to="expenses"
+            className="mb-3"
+            style={hasItems ? { pointerEvents: 'none' } : {}}
+          >
             {({ isActive }) => (
               <li
                 className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 transition-all
@@ -143,7 +169,11 @@ const Sidebar = () => {
               </li>
             )}
           </NavLink>
-          <NavLink to="reports" className="mb-3">
+          <NavLink
+            to="reports"
+            className="mb-3"
+            style={hasItems ? { pointerEvents: 'none' } : {}}
+          >
             {({ isActive }) => (
               <li
                 className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 transition-all
@@ -159,7 +189,11 @@ const Sidebar = () => {
               </li>
             )}
           </NavLink>
-          <NavLink to="activities" className="mb-3">
+          <NavLink
+            to="activities"
+            className="mb-3"
+            style={hasItems ? { pointerEvents: 'none' } : {}}
+          >
             {({ isActive }) => (
               <li
                 className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 transition-all
@@ -180,7 +214,11 @@ const Sidebar = () => {
       {user?.role === 'admin' && (
         <div className="container bg-white position-absolute bottom-0 start-0 p-2">
           <ul className="nav flex-column">
-            <NavLink to="admin" className="mb-0">
+            <NavLink
+              to="admin"
+              className="mb-0"
+              style={hasItems ? { pointerEvents: 'none' } : {}}
+            >
               <li>
                 <span className="nav-link cursor-pointer text-center">
                   <FontAwesomeIcon icon={faCog} className="color-primary" />

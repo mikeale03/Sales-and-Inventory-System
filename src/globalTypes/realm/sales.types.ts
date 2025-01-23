@@ -15,3 +15,14 @@ export type Sales = {
   remaining_quantity?: number;
   isVoid?: boolean;
 };
+
+export type Items = Record<
+  string,
+  {
+    _id: string;
+    quantity: number;
+    price: number;
+    totalPrice: number;
+    name: string;
+  }
+>;

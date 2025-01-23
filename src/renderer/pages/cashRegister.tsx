@@ -12,6 +12,7 @@ import QuantityInputModal from 'renderer/components/cashRegister/quantityInputMo
 import { getProducts } from 'renderer/service/products';
 import { debounce, pesoFormat } from 'renderer/utils/helper';
 import ProductsSelect from 'renderer/components/cashRegister/productsSelect';
+import useCashRegisterStore from 'renderer/store/cashRegisterStore';
 import { BarcodeContext } from './home';
 
 type Opt = {
@@ -44,6 +45,7 @@ function CashRegisterPage() {
   const itemKeys = useMemo(() => Object.keys(items), [items]);
   const { barcode, setBarcode } = useOutletContext<BarcodeContext>();
   const [lastUpdatedId, setLastUpdatedId] = useState('');
+  const { setHasItems } = useCashRegisterStore((state) => state);
 
   const handleSelect = (product: Product) => {
     const prod = { ...product };
@@ -76,10 +78,12 @@ function CashRegisterPage() {
       }
       const product = { ...item, totalPrice: item.price * quantity };
       product.quantity = quantity;
-      setItems({ ...items, [item._id]: product });
+      const newItems = { ...items, [item._id]: product };
+      setItems(newItems);
       setProductsSrc({ ...productsSrc, [item._id]: item });
+      setHasItems(true);
     },
-    [items, productsSrc]
+    [items, productsSrc, setHasItems]
   );
 
   const handleConfirmQuantity = useCallback(
@@ -228,7 +232,8 @@ function CashRegisterPage() {
               onReset={useCallback(() => {
                 setPaymentAmount('');
                 setItems({});
-              }, [])}
+                setHasItems(false);
+              }, [setHasItems])}
               onPayment={useCallback(() => {
                 setShowPaymentConfirmationModal(true);
               }, [])}

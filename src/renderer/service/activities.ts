@@ -1,6 +1,7 @@
 import { Channels } from 'globalTypes/channels/activitiesChannels';
 import {
   Activity,
+  CreateCashRegisterCancelActivityParams,
   CreateGcashTransDeleteActivityParams,
   CreateProductAddActivityParams,
   CreateProductAddQtyActivityParams,
@@ -89,6 +90,16 @@ export const getActivities = async (filter?: GetActivitiesFilter) => {
   const response = await ipcRenderer.invoke<Response<Activity[]>>(
     Channels.getActivities,
     filter
+  );
+  return response;
+};
+
+export const createCashRegisterCancelActivity = async (
+  params: CreateCashRegisterCancelActivityParams
+) => {
+  const response = await ipcRenderer.invoke<Response<Activity[]>>(
+    Channels.createCashRegisterCancelActivity,
+    params
   );
   return response;
 };

@@ -1,6 +1,7 @@
 import Realm, { ObjectSchema } from 'realm';
 import {
   Activity,
+  CreateCashRegisterCancelActivityParams,
   CreateGcashTransDeleteActivityParams,
   CreateProductAddActivityParams,
   CreateProductAddQtyActivityParams,
@@ -401,6 +402,43 @@ export const getActivities = async (filter?: GetActivitiesFilter) => {
     return {
       isSuccess: false,
       message: 'Failed to get activities',
+      error,
+    };
+  }
+};
+
+export const createCashRegisterCancelActivity = async (
+  params: CreateCashRegisterCancelActivityParams
+) => {
+  const { items, transact_by, transact_by_user_id } = params;
+  const realm = await openActivitiesRealm();
+  if (!realm)
+    return {
+      isSuccess: false,
+      message: 'Failed to open Activities Realm DB',
+    };
+
+  try {
+    realm.write(() => {
+      realm.create(ACTIVITIES, {
+        details: JSON.stringify(items),
+        activity: 'cancel cash register',
+        transact_by,
+        transact_by_user_id,
+        date_created: new Date(),
+      });
+    });
+    realm.close();
+    return {
+      isSuccess: true,
+      message: 'Successfully created an activity',
+    };
+  } catch (error) {
+    realm.close();
+    console.log(error);
+    return {
+      isSuccess: false,
+      message: 'Failed to create an activity',
       error,
     };
   }

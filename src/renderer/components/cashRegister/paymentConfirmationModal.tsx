@@ -19,21 +19,14 @@ import { createExpense } from 'renderer/service/expenses';
 import ChargeToUserModal from 'renderer/components/cashRegister/chargeToUserModal';
 import ConfirmationModal from 'renderer/components/common/modals/confirmation';
 import { ExpenseDescriptionJson } from 'globalTypes/realm/expenses.type';
+import { Items } from 'globalTypes/realm/sales.types';
+import { createCashRegisterCancelActivity } from 'renderer/service/activities';
 import CancelCodeModal from './cancelCodeModal';
 
 type Props = {
   show: boolean;
   toggle: (show: boolean) => void;
-  items: Record<
-    string,
-    {
-      _id: string;
-      quantity: number;
-      price: number;
-      totalPrice: number;
-      name: string;
-    }
-  >;
+  items: Items;
   paymentAmount: number;
   onCancel: () => void;
   onSuccess: () => void;
@@ -199,6 +192,16 @@ const PaymentConfirmationModal = ({
     toggle(false);
   };
 
+  const onHide = () => {
+    if (!user) return;
+    createCashRegisterCancelActivity({
+      items,
+      transact_by: user.username,
+      transact_by_user_id: user._id,
+    });
+    toggle(false);
+  };
+
   return (
     <>
       <CancelCodeModal
@@ -222,7 +225,7 @@ const PaymentConfirmationModal = ({
       />
       <Modal
         show={show}
-        onHide={() => toggle(false)}
+        onHide={onHide}
         onShow={() => cancelRef.current?.focus()}
         onExited={onExited}
         backdrop="static"
@@ -291,11 +294,7 @@ const PaymentConfirmationModal = ({
           </div>
 
           <div>
-            <Button
-              variant="secondary"
-              onClick={() => handleCancel()}
-              className="me-2"
-            >
+            <Button variant="secondary" onClick={onHide} className="me-2">
               Cancel
             </Button>
             <Button

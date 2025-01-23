@@ -2,7 +2,8 @@ import format from 'date-fns/format';
 import { Activity } from 'globalTypes/realm/activities.types';
 import { Gcash } from 'globalTypes/realm/gcash.types';
 import { ProductForm } from 'globalTypes/realm/products.types';
-import { Sales } from 'globalTypes/realm/sales.types';
+import { Items, Sales } from 'globalTypes/realm/sales.types';
+import { pesoFormat } from 'renderer/utils/helper';
 
 export type Props = {
   activity: Activity;
@@ -119,6 +120,21 @@ function SalesDetails({ details }: { details: Sales & { void_by: string } }) {
   );
 }
 
+function CancelCashRegisterDetails({ details }: { details: Items }) {
+  const items = Object.values(details);
+  const totalAmount = items.reduce((total, item) => total + item.totalPrice, 0);
+  return (
+    <div>
+      {items.map((item) => (
+        <p className="m-0">
+          {item.name} - {item.quantity} qty - {pesoFormat(item.totalPrice)}
+        </p>
+      ))}
+      <p className="fw-bold">Total Amount: {pesoFormat(totalAmount)}</p>
+    </div>
+  );
+}
+
 function ActivityDetails({ activity }: Props) {
   const details = JSON.parse(activity.details);
   if (
@@ -137,6 +153,8 @@ function ActivityDetails({ activity }: Props) {
     return <SalesDetails details={details} />;
   if (activity.activity === 'delete gcash')
     return <GcashDetails details={details} />;
+  if (activity.activity === 'cancel cash register')
+    return <CancelCashRegisterDetails details={details} />;
   return <p> </p>;
 }
 
