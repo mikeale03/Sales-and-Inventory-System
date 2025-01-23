@@ -1,5 +1,6 @@
 import { IpcMain, IpcMainInvokeEvent } from 'electron';
 import {
+  createCashRegisterCancelActivity,
   createGcashTransDeleteActivity,
   createProductAddActivity,
   createProductAddQtyActivity,
@@ -10,6 +11,7 @@ import {
   getActivities,
 } from '../service/activitiesRealm';
 import {
+  CreateCashRegisterCancelActivityParams,
   CreateGcashTransDeleteActivityParams,
   CreateProductAddActivityParams,
   CreateProductAddQtyActivityParams,
@@ -95,6 +97,16 @@ const setActivitiesEventHandler = (ipcMain: IpcMain) => {
     Channels.getActivities,
     async (event: IpcMainInvokeEvent, filter?: GetActivitiesFilter) => {
       const result = await getActivities(filter);
+      return result;
+    }
+  );
+  ipcMain.handle(
+    Channels.createCashRegisterCancelActivity,
+    async (
+      event: IpcMainInvokeEvent,
+      params: CreateCashRegisterCancelActivityParams
+    ) => {
+      const result = await createCashRegisterCancelActivity(params);
       return result;
     }
   );

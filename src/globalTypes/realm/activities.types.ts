@@ -1,6 +1,6 @@
 import { Gcash } from './gcash.types';
 import { ProductForm } from './products.types';
-import { Sales } from './sales.types';
+import { Items, Sales } from './sales.types';
 
 export type Activity = {
   _id: string;
@@ -64,6 +64,12 @@ export type CreateGcashTransDeleteActivityParams = {
   transact_by: string;
   transact_by_user_id: string;
   reason: string;
+};
+
+export type CreateCashRegisterCancelActivityParams = {
+  items: Items;
+  transact_by: string;
+  transact_by_user_id: string;
 };
 
 export type GetActivitiesFilter = {
