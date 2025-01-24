@@ -1,11 +1,12 @@
 import { useContext, useEffect, useState, ChangeEvent } from 'react';
 import { Col, FormLabel, FormSelect, Row } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
-import FilterContext from 'renderer/context/filterContext';
 import UserContext from 'renderer/context/userContext';
+import useSalesFilterStore from 'renderer/store/salesFilterStore';
 import UsersSelect from '../common/selects/usersSelect';
 import TagsSelect from '../common/selects/tagsSelect';
 import CategorySelect from '../common/selects/categorySelect';
+import TimeSelect from '../common/selects/timeSelect';
 
 type Props = {
   className?: string;
@@ -13,7 +14,9 @@ type Props = {
 
 const SalesFilter = ({ className }: Props) => {
   const { user } = useContext(UserContext);
-  const { salesFilter, setSalesFilter } = useContext(FilterContext);
+  const { state: salesFilter, setState: setSalesFilter } = useSalesFilterStore(
+    (filterState) => filterState
+  );
   const isDaily = salesFilter.selectedPeriod === 'Daily';
   const [minDate, setMinDate] = useState<Date>(salesFilter.startDate);
   const [maxDate, setMaxDate] = useState<Date>(salesFilter.endDate);
@@ -21,9 +24,10 @@ const SalesFilter = ({ className }: Props) => {
   useEffect(() => {
     if (!user) return;
     if (!salesFilter.userOption) {
+      const newFilter = { ...salesFilter };
+      newFilter.userOption = user._id;
       setSalesFilter({
-        ...salesFilter,
-        userOption: user._id,
+        ...newFilter,
       });
       setMinDate(salesFilter.startDate);
       setMaxDate(salesFilter.endDate);
@@ -78,6 +82,24 @@ const SalesFilter = ({ className }: Props) => {
     setDateRange(salesFilter.selectedPeriod, date);
   };
 
+  const handleStartTimeSelect = (hour: string) => {
+    const { startDate } = salesFilter;
+    const [h] = hour.split(':');
+    hour && startDate.setHours(+h, 0, 0, 0);
+    setSalesFilter({ ...salesFilter, startDate });
+  };
+
+  const handleEndTimeSelect = (hour: string) => {
+    const { endDate } = salesFilter;
+    if (hour === '23:59') {
+      endDate.setHours(23, 59, 59, 999);
+    } else if (hour) {
+      const [h] = hour.split(':');
+      endDate.setHours(+h, 0, 0, 0);
+    }
+    setSalesFilter({ ...salesFilter, endDate });
+  };
+
   return (
     <Row className={className}>
       <Col md="2" className="mb-3">
@@ -123,11 +145,12 @@ const SalesFilter = ({ className }: Props) => {
           }
           minDate={minDate}
           maxDate={salesFilter?.endDate}
-          showTimeSelect
           showTimeSelectOnly={isDaily}
-          timeIntervals={30}
-          timeCaption="Time"
           dateFormat={isDaily ? 'h:mm aa' : 'MM/dd/yyyy h:mm aa'}
+          showTimeInput
+          customTimeInput={
+            <TimeSelect onSelect={handleStartTimeSelect} type="start-date" />
+          }
         />
       </Col>
       <Col md="3" className="mb-3">
@@ -142,16 +165,12 @@ const SalesFilter = ({ className }: Props) => {
           }
           minDate={salesFilter?.startDate}
           maxDate={maxDate}
-          showTimeSelect
           showTimeSelectOnly={isDaily}
-          timeIntervals={30}
-          timeCaption="Time"
           dateFormat={isDaily ? 'h:mm aa' : 'MM/dd/yyyy h:mm aa'}
-          injectTimes={[
-            new Date(
-              new Date(salesFilter.selectedDate).setHours(23, 59, 59, 999)
-            ),
-          ]}
+          showTimeInput
+          customTimeInput={
+            <TimeSelect onSelect={handleEndTimeSelect} type="end-date" />
+          }
         />
       </Col>
       <Col sm="6" xl="3" className="mb-3">
