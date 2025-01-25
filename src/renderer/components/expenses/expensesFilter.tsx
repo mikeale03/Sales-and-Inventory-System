@@ -3,7 +3,9 @@ import { Col, FormLabel, FormSelect, Row } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import { GetExpensesFilter } from 'globalTypes/realm/expenses.type';
 import UsersSelect from 'renderer/components/common/selects/usersSelect';
+import useExpensesFilterStore from 'renderer/store/filtersStore/expensesFilterStore';
 import ExpenseTypeSelect from './expenseTypeSelect';
+import TimeSelect from '../common/selects/timeSelect';
 
 export type OnFilterParams = { user: string; startDate: Date; endDate: Date };
 
@@ -12,21 +14,24 @@ export type Props = {
 };
 
 const ExpensesFilter = ({ onFilter }: Props) => {
-  const [filter, setFilter] = useState({
-    selectedDate: new Date(),
-    userOption: '',
-    selectedPeriod: 'Daily',
-    startDate: new Date(new Date().setHours(0, 0, 0, 0)),
-    endDate: new Date(new Date().setHours(23, 59, 59, 999)),
-  });
+  // const [filter, setFilter] = useState({
+  //   selectedDate: new Date(),
+  //   userOption: '',
+  //   selectedPeriod: 'Daily',
+  //   startDate: new Date(new Date().setHours(0, 0, 0, 0)),
+  //   endDate: new Date(new Date().setHours(23, 59, 59, 999)),
+  // });
+  const { state: filter, setState: setFilter } = useExpensesFilterStore(
+    (filterState) => filterState
+  );
   const isDaily = filter.selectedPeriod === 'Daily';
   const [minDate, setMinDate] = useState<Date>(filter.startDate);
   const [maxDate, setMaxDate] = useState<Date>(filter.endDate);
   const [type, setType] = useState('all');
 
-  const { userOption, startDate, endDate } = filter;
-
   useEffect(() => {
+    const { userOption, startDate, endDate } = filter;
+
     let excludeItemCharge = false;
     let chargeToUser;
     if (type === 'all') {
@@ -49,7 +54,7 @@ const ExpensesFilter = ({ onFilter }: Props) => {
       excludeItemCharge,
       chargeToUser,
     });
-  }, [userOption, startDate, endDate, onFilter, type]);
+  }, [filter, onFilter, type]);
 
   const setDateRange = (period: string, selectedDate: Date) => {
     let sDate: Date;
@@ -99,6 +104,24 @@ const ExpensesFilter = ({ onFilter }: Props) => {
     setDateRange(filter.selectedPeriod, date);
   };
 
+  const handleStartTimeSelect = (hour: string) => {
+    const { startDate } = filter;
+    const [h] = hour.split(':');
+    hour && startDate.setHours(+h, 0, 0, 0);
+    setFilter({ ...filter, startDate });
+  };
+
+  const handleEndTimeSelect = (hour: string) => {
+    const { endDate } = filter;
+    if (hour === '23:59') {
+      endDate.setHours(23, 59, 59, 999);
+    } else if (hour) {
+      const [h] = hour.split(':');
+      endDate.setHours(+h, 0, 0, 0);
+    }
+    setFilter({ ...filter, endDate });
+  };
+
   return (
     <Row>
       <Col lg="2" className="mb-3">
@@ -140,11 +163,12 @@ const ExpensesFilter = ({ onFilter }: Props) => {
           }
           minDate={minDate}
           maxDate={filter?.endDate}
-          showTimeSelect
           showTimeSelectOnly={isDaily}
-          timeIntervals={30}
-          timeCaption="Time"
           dateFormat={isDaily ? 'h:mm aa' : 'MM/dd/yyyy h:mm aa'}
+          showTimeInput
+          customTimeInput={
+            <TimeSelect onSelect={handleStartTimeSelect} type="start-date" />
+          }
         />
       </Col>
       <Col lg="2" className="mb-3">
@@ -157,14 +181,12 @@ const ExpensesFilter = ({ onFilter }: Props) => {
           }
           minDate={filter?.startDate}
           maxDate={maxDate}
-          showTimeSelect
           showTimeSelectOnly={isDaily}
-          timeIntervals={30}
-          timeCaption="Time"
           dateFormat={isDaily ? 'h:mm aa' : 'MM/dd/yyyy h:mm aa'}
-          injectTimes={[
-            new Date(new Date(filter.selectedDate).setHours(23, 59, 59, 999)),
-          ]}
+          showTimeInput
+          customTimeInput={
+            <TimeSelect onSelect={handleEndTimeSelect} type="end-date" />
+          }
         />
       </Col>
     </Row>

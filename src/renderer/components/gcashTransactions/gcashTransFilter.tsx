@@ -6,13 +6,15 @@ import { User } from 'globalTypes/realm/user.types';
 import { useContext, useEffect, useState, ChangeEvent } from 'react';
 import { Col, FormLabel, FormSelect, Row } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
-import FilterContext from 'renderer/context/filterContext';
 import UserContext from 'renderer/context/userContext';
 import { getUsers } from 'renderer/service/users';
+import useGcashFilterStore from 'renderer/store/filtersStore/gcashFilterStore';
+import TimeSelect from '../common/selects/timeSelect';
 
 const GcashTransFilter = () => {
   const { user } = useContext(UserContext);
-  const { gcashTransFilter, setGcashTransFilter } = useContext(FilterContext);
+  const { state: gcashTransFilter, setState: setGcashTransFilter } =
+    useGcashFilterStore((filterState) => filterState);
   const isDaily = gcashTransFilter.selectedPeriod === 'Daily';
   const [users, setUsers] = useState<User[]>([]);
   const [minDate, setMinDate] = useState<Date>(gcashTransFilter.startDate);
@@ -103,6 +105,24 @@ const GcashTransFilter = () => {
     });
   };
 
+  const handleStartTimeSelect = (hour: string) => {
+    const { startDate } = gcashTransFilter;
+    const [h] = hour.split(':');
+    hour && startDate.setHours(+h, 0, 0, 0);
+    setGcashTransFilter({ ...gcashTransFilter, startDate });
+  };
+
+  const handleEndTimeSelect = (hour: string) => {
+    const { endDate } = gcashTransFilter;
+    if (hour === '23:59') {
+      endDate.setHours(23, 59, 59, 999);
+    } else if (hour) {
+      const [h] = hour.split(':');
+      endDate.setHours(+h, 0, 0, 0);
+    }
+    setGcashTransFilter({ ...gcashTransFilter, endDate });
+  };
+
   return (
     <Row>
       <Col md="4" xl="2" className="mb-3">
@@ -182,11 +202,12 @@ const GcashTransFilter = () => {
           }
           minDate={minDate}
           maxDate={gcashTransFilter?.endDate}
-          showTimeSelect
           showTimeSelectOnly={isDaily}
-          timeIntervals={30}
-          timeCaption="Time"
           dateFormat={isDaily ? 'h:mm aa' : 'MM/dd/yyyy h:mm aa'}
+          showTimeInput
+          customTimeInput={
+            <TimeSelect onSelect={handleStartTimeSelect} type="start-date" />
+          }
         />
       </Col>
       <Col md="3" xl="2" className="mb-3">
@@ -201,16 +222,12 @@ const GcashTransFilter = () => {
           }
           minDate={gcashTransFilter?.startDate}
           maxDate={maxDate}
-          showTimeSelect
           showTimeSelectOnly={isDaily}
-          timeIntervals={30}
-          timeCaption="Time"
           dateFormat={isDaily ? 'h:mm aa' : 'MM/dd/yyyy h:mm aa'}
-          injectTimes={[
-            new Date(
-              new Date(gcashTransFilter.selectedDate).setHours(23, 59, 59, 999)
-            ),
-          ]}
+          showTimeInput
+          customTimeInput={
+            <TimeSelect onSelect={handleEndTimeSelect} type="end-date" />
+          }
         />
       </Col>
     </Row>

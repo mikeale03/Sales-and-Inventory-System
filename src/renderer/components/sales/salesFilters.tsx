@@ -2,7 +2,7 @@ import { useContext, useEffect, useState, ChangeEvent } from 'react';
 import { Col, FormLabel, FormSelect, Row } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import UserContext from 'renderer/context/userContext';
-import useSalesFilterStore from 'renderer/store/salesFilterStore';
+import useSalesFilterStore from 'renderer/store/filtersStore/salesFilterStore';
 import UsersSelect from '../common/selects/usersSelect';
 import TagsSelect from '../common/selects/tagsSelect';
 import CategorySelect from '../common/selects/categorySelect';

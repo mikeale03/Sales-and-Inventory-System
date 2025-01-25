@@ -26,13 +26,13 @@ import { faTrashCan, faXmark } from '@fortawesome/free-solid-svg-icons';
 import ConfirmationModal from 'renderer/components/common/modals/confirmation';
 import { toast } from 'react-toastify';
 import SalesFilter from 'renderer/components/sales/salesFilters';
-import FilterContext from 'renderer/context/filterContext';
 import {
   createSalesDeleteActivity,
   createSalesVoidActivity,
 } from 'renderer/service/activities';
 import AccessCodeModal from 'renderer/components/sales/accessCodeModal';
 import { User } from 'globalTypes/realm/user.types';
+import useSalesFilterStore from 'renderer/store/filtersStore/salesFilterStore';
 
 const SalesPage = () => {
   const [sales, setSales] = useState<Sales[]>([]);
@@ -48,9 +48,8 @@ const SalesPage = () => {
   const [showVoidCodeModal, setShowVoidCodeModal] = useState(false);
   const [isVoid, setIsVoid] = useState(false);
   const { user } = useContext(UserContext);
-  const {
-    salesFilter: { userOption, startDate, endDate, category, tags },
-  } = useContext(FilterContext);
+  const salesFilter = useSalesFilterStore((filterState) => filterState.state);
+
   const printRef = useRef<HTMLDivElement | null>(null);
 
   const handleGetSales = useCallback(
@@ -101,7 +100,8 @@ const SalesPage = () => {
   }, [sales]);
 
   useEffect(() => {
-    if (userOption)
+    if (salesFilter.userOption) {
+      const { userOption, startDate, endDate, category, tags } = salesFilter;
       handleGetSales(isGroupByProduct, {
         transactByUserId: userOption === 'all' ? undefined : userOption,
         startDate,
@@ -110,16 +110,8 @@ const SalesPage = () => {
         productCategory: category,
         productTags: tags,
       });
-  }, [
-    userOption,
-    startDate,
-    endDate,
-    searchText,
-    isGroupByProduct,
-    category,
-    tags,
-    handleGetSales,
-  ]);
+    }
+  }, [salesFilter, searchText, isGroupByProduct, handleGetSales]);
 
   const handlePrint = useReactToPrint({
     content: () => printRef.current,
