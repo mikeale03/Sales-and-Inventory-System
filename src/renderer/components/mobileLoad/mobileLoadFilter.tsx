@@ -3,6 +3,8 @@ import { Col, FormLabel, FormSelect, Row } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import UsersSelect from 'renderer/components/common/selects/usersSelect';
 import { MobileLoadFilterParams } from 'globalTypes/realm/mobileLoad.types';
+import useMobileLoadFilterStore from 'renderer/store/filtersStore/mobileLoadFilterStore';
+import TimeSelect from '../common/selects/timeSelect';
 
 export type OnFilterParams = { user: string; startDate: Date; endDate: Date };
 
@@ -10,31 +12,34 @@ export type Props = {
   onFilter: (filter: MobileLoadFilterParams) => void;
 };
 
-export const initFilter = {
-  selectedDate: new Date(),
-  userOption: '',
-  source: '',
-  selectedPeriod: 'Daily',
-  startDate: new Date(new Date().setHours(0, 0, 0, 0)),
-  endDate: new Date(new Date().setHours(23, 59, 59, 999)),
-};
+// export const initFilter = {
+//   selectedDate: new Date(),
+//   userOption: '',
+//   source: '',
+//   selectedPeriod: 'Daily',
+//   startDate: new Date(new Date().setHours(0, 0, 0, 0)),
+//   endDate: new Date(new Date().setHours(23, 59, 59, 999)),
+// };
 
 const MobileLoadFilter = ({ onFilter }: Props) => {
-  const [filter, setFilter] = useState(initFilter);
+  // const [filter, setFilter] = useState(initFilter);
+  const { state: filter, setState: setFilter } = useMobileLoadFilterStore(
+    (filterState) => filterState
+  );
   const isDaily = filter.selectedPeriod === 'Daily';
   const [minDate, setMinDate] = useState<Date>(filter.startDate);
   const [maxDate, setMaxDate] = useState<Date>(filter.endDate);
 
-  const { userOption, startDate, endDate, source } = filter;
+  const { startDate, endDate } = filter;
 
   useEffect(() => {
     onFilter({
-      transactBy: userOption === 'all' ? '' : userOption,
-      startDate,
-      endDate,
-      source,
+      transactBy: filter.userOption === 'all' ? '' : filter.userOption,
+      startDate: filter.startDate,
+      endDate: filter.endDate,
+      source: filter.source,
     });
-  }, [userOption, startDate, endDate, onFilter, source]);
+  }, [filter, onFilter]);
 
   const setDateRange = (period: string, selectedDate: Date) => {
     let sDate: Date;
@@ -90,6 +95,22 @@ const MobileLoadFilter = ({ onFilter }: Props) => {
     setDateRange(filter.selectedPeriod, date);
   };
 
+  const handleStartTimeSelect = (hour: string) => {
+    const [h] = hour.split(':');
+    hour && startDate.setHours(+h, 0, 0, 0);
+    setFilter({ ...filter, startDate });
+  };
+
+  const handleEndTimeSelect = (hour: string) => {
+    if (hour === '23:59') {
+      endDate.setHours(23, 59, 59, 999);
+    } else if (hour) {
+      const [h] = hour.split(':');
+      endDate.setHours(+h, 0, 0, 0);
+    }
+    setFilter({ ...filter, endDate });
+  };
+
   return (
     <Row>
       <Col lg="2" className="mb-3">
@@ -136,11 +157,12 @@ const MobileLoadFilter = ({ onFilter }: Props) => {
           }
           minDate={minDate}
           maxDate={filter?.endDate}
-          showTimeSelect
           showTimeSelectOnly={isDaily}
-          timeIntervals={30}
-          timeCaption="Time"
           dateFormat={isDaily ? 'h:mm aa' : 'MM/dd/yyyy h:mm aa'}
+          showTimeInput
+          customTimeInput={
+            <TimeSelect onSelect={handleStartTimeSelect} type="start-date" />
+          }
         />
       </Col>
       <Col lg="2" className="mb-3">
@@ -153,14 +175,12 @@ const MobileLoadFilter = ({ onFilter }: Props) => {
           }
           minDate={filter?.startDate}
           maxDate={maxDate}
-          showTimeSelect
           showTimeSelectOnly={isDaily}
-          timeIntervals={30}
-          timeCaption="Time"
           dateFormat={isDaily ? 'h:mm aa' : 'MM/dd/yyyy h:mm aa'}
-          injectTimes={[
-            new Date(new Date(filter.selectedDate).setHours(23, 59, 59, 999)),
-          ]}
+          showTimeInput
+          customTimeInput={
+            <TimeSelect onSelect={handleEndTimeSelect} type="end-date" />
+          }
         />
       </Col>
     </Row>

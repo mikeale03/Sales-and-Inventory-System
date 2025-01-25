@@ -5,8 +5,8 @@ interface State {
     selectedDate: Date;
     userOption: string;
     selectedPeriod: string;
-    category: string;
-    tags: string[];
+    selectedType?: 'cash in' | 'cash out';
+    selectedDateFilter: 'Date Transacted' | 'Date Created';
     startDate: Date;
     endDate: Date;
   };
@@ -26,16 +26,16 @@ if (hours >= 0 && hours <= 7) {
   endDate.setHours(16, 0, 0, 0);
 } else if (hours >= 16) {
   startDate.setHours(16, 0, 0, 0);
-  endDate.setHours(24, 0, 0, 0);
+  endDate.setHours(23, 59, 59, 999);
 }
 
-const useSalesFilterStore = create<State>((set) => ({
+const useGcashFilterStore = create<State>((set) => ({
   state: {
     selectedDate: new Date(),
     userOption: '',
     selectedPeriod: 'Daily',
-    category: '',
-    tags: [],
+    selectedDateFilter: 'Date Transacted',
+    selectedType: undefined,
     startDate,
     endDate,
   },
@@ -43,4 +43,4 @@ const useSalesFilterStore = create<State>((set) => ({
     set((state) => ({ state: { ...state.state, ...update } })),
 }));
 
-export default useSalesFilterStore;
+export default useGcashFilterStore;

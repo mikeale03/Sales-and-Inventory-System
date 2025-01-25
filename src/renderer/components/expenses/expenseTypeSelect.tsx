@@ -1,5 +1,5 @@
 import { User } from 'globalTypes/realm/user.types';
-import { ChangeEventHandler, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { FormLabel, FormSelect } from 'react-bootstrap';
 import UserContext from 'renderer/context/userContext';
 import { getUsers } from 'renderer/service/users';

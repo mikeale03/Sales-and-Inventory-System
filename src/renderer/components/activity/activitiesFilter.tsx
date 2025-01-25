@@ -3,6 +3,7 @@ import { Col, FormLabel, FormSelect, Row } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import UsersSelect from '../common/selects/usersSelect';
 import ProductSelect, { Opt } from './productSelect';
+import TimeSelect from '../common/selects/timeSelect';
 
 export type OnFilterParams = {
   user: string;
@@ -39,16 +40,15 @@ const ActivitiesFilter = ({ onFilter }: Props) => {
   const [productInputVal, setProductInputVal] = useState('');
   const [productSelectVal, setProductSelectVal] = useState<Opt | null>(null);
 
-  const { userOption, startDate, endDate, productId } = activitiesFilter;
-
   useEffect(() => {
+    const { userOption, startDate, endDate, productId } = activitiesFilter;
     onFilter({
       user: userOption === 'all' ? '' : userOption,
       startDate,
       endDate,
       productId,
     });
-  }, [userOption, startDate, endDate, onFilter, productId]);
+  }, [activitiesFilter, onFilter]);
 
   const setDateRange = (period: string, selectedDate: Date) => {
     let sDate: Date;
@@ -106,6 +106,24 @@ const ActivitiesFilter = ({ onFilter }: Props) => {
     setProductSelectVal(opt);
   };
 
+  const handleStartTimeSelect = (hour: string) => {
+    const { startDate } = activitiesFilter;
+    const [h] = hour.split(':');
+    hour && startDate.setHours(+h, 0, 0, 0);
+    setActivitiesFilter({ ...activitiesFilter, startDate });
+  };
+
+  const handleEndTimeSelect = (hour: string) => {
+    const { endDate } = activitiesFilter;
+    if (hour === '23:59') {
+      endDate.setHours(23, 59, 59, 999);
+    } else if (hour) {
+      const [h] = hour.split(':');
+      endDate.setHours(+h, 0, 0, 0);
+    }
+    setActivitiesFilter({ ...activitiesFilter, endDate });
+  };
+
   return (
     <Row>
       <Col md="2" className="mb-3">
@@ -153,11 +171,12 @@ const ActivitiesFilter = ({ onFilter }: Props) => {
           }
           minDate={minDate}
           maxDate={activitiesFilter?.endDate}
-          showTimeSelect
           showTimeSelectOnly={isDaily}
-          timeIntervals={30}
-          timeCaption="Time"
           dateFormat={isDaily ? 'h:mm aa' : 'MM/dd/yyyy h:mm aa'}
+          showTimeInput
+          customTimeInput={
+            <TimeSelect onSelect={handleStartTimeSelect} type="start-date" />
+          }
         />
       </Col>
       <Col md="3" className="mb-3">
@@ -172,16 +191,12 @@ const ActivitiesFilter = ({ onFilter }: Props) => {
           }
           minDate={activitiesFilter?.startDate}
           maxDate={maxDate}
-          showTimeSelect
           showTimeSelectOnly={isDaily}
-          timeIntervals={30}
-          timeCaption="Time"
           dateFormat={isDaily ? 'h:mm aa' : 'MM/dd/yyyy h:mm aa'}
-          injectTimes={[
-            new Date(
-              new Date(activitiesFilter.selectedDate).setHours(23, 59, 59, 999)
-            ),
-          ]}
+          showTimeInput
+          customTimeInput={
+            <TimeSelect onSelect={handleEndTimeSelect} type="end-date" />
+          }
         />
       </Col>
       <Row className="mb-3">

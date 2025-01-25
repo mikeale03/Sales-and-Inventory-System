@@ -10,7 +10,6 @@ import { Card, Col, FormCheck, FormControl, Row, Table } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import ConfirmationModal from 'renderer/components/common/modals/confirmation';
 import GcashTransFilter from 'renderer/components/gcashTransactions/gcashTransFilter';
-import FilterContext from 'renderer/context/filterContext';
 import UserContext from 'renderer/context/userContext';
 import { createGcashTransDeleteActivity } from 'renderer/service/activities';
 import {
@@ -18,6 +17,7 @@ import {
   getGcashTransactions,
 } from 'renderer/service/gcash';
 import { updateByGcashDelete } from 'renderer/service/sales';
+import useGcashFilterStore from 'renderer/store/filtersStore/gcashFilterStore';
 import { debounce, pesoFormat } from 'renderer/utils/helper';
 
 const isEdited = (item: Gcash) => {
@@ -30,7 +30,6 @@ const GcashTransactionsPage = () => {
   const [search, setSearch] = useState('');
   const [totalCashIn, setTotalCashIn] = useState(0);
   const [totalCashOut, setTotalCashOut] = useState(0);
-  // const [totalGcashPay, setTotalGcashPay] = useState(0);
   const [totalCharge, setTotalCharge] = useState(0);
   const [endingBalance, setEndingBalance] = useState(0);
   const [selectedTrans, setSelectedTrans] = useState<Gcash | undefined>();
@@ -38,15 +37,9 @@ const GcashTransactionsPage = () => {
   const [deleteReason, setDeleteReason] = useState('');
   const reasonInputRef = useRef<HTMLInputElement | null>(null);
   const { user } = useContext(UserContext);
-  const {
-    gcashTransFilter: {
-      userOption,
-      selectedDateFilter,
-      selectedType,
-      startDate,
-      endDate,
-    },
-  } = useContext(FilterContext);
+  const gcashTransFilter = useGcashFilterStore(
+    (filterState) => filterState.state
+  );
 
   const handleGetGcashTransactions = async (filter?: TransFilter) => {
     const response = await getGcashTransactions(filter);
@@ -74,6 +67,8 @@ const GcashTransactionsPage = () => {
   }, [transactions]);
 
   useEffect(() => {
+    const { userOption, selectedType, selectedDateFilter, startDate, endDate } =
+      gcashTransFilter;
     userOption &&
       handleGetGcashTransactions({
         transactBy: userOption === 'all' ? undefined : userOption,
@@ -83,14 +78,7 @@ const GcashTransactionsPage = () => {
         startDate,
         endDate,
       });
-  }, [
-    userOption,
-    selectedType,
-    startDate,
-    selectedDateFilter,
-    endDate,
-    search,
-  ]);
+  }, [gcashTransFilter, search]);
 
   const handleSearch = debounce((e) => {
     setSearch(e.target.value);
@@ -103,6 +91,8 @@ const GcashTransactionsPage = () => {
   };
 
   const handleDeleteTrans = async () => {
+    const { userOption, selectedType, selectedDateFilter, startDate, endDate } =
+      gcashTransFilter;
     if (!selectedTrans || !user) return;
     if (!deleteReason) {
       toast.error('Reason is required');
@@ -185,15 +175,15 @@ const GcashTransactionsPage = () => {
             </Col>
           </Row>
           <div className="d-xl-flex justify-content-between">
-            {selectedType !== 'cash out' && (
+            {gcashTransFilter.selectedType !== 'cash out' && (
               <p className="m-0">Total Cash In: {pesoFormat(totalCashIn)}</p>
             )}
-            {selectedType !== 'cash in' && (
+            {gcashTransFilter.selectedType !== 'cash in' && (
               <p className="m-0">Total Cash Out: {pesoFormat(totalCashOut)}</p>
             )}
             {/* <p className="m-0">Total GCash Pay: {pesoFormat(totalGcashPay)}</p> */}
             <p className="m-0">Total Charge: {pesoFormat(totalCharge)}</p>
-            {!selectedType && (
+            {!gcashTransFilter.selectedType && (
               <p className="m-0">Ending Balance: {pesoFormat(endingBalance)}</p>
             )}
             <p className="m-0">
