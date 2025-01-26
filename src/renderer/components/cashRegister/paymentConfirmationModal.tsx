@@ -21,7 +21,6 @@ import ConfirmationModal from 'renderer/components/common/modals/confirmation';
 import { ExpenseDescriptionJson } from 'globalTypes/realm/expenses.type';
 import { Items } from 'globalTypes/realm/sales.types';
 import { createCashRegisterCancelActivity } from 'renderer/service/activities';
-import CancelCodeModal from './cancelCodeModal';
 
 type Props = {
   show: boolean;
@@ -48,7 +47,7 @@ const PaymentConfirmationModal = ({
   const [total, setTotal] = useState(0);
   const [showGcashConfirmation, setShowGcashConfirmation] = useState(false);
   const [showChargeToModal, setShowChargeToModal] = useState(false);
-  const [cancelCodeModal, setCancelCodeModal] = useState(false);
+  const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
   const [isChargeToUser, setIsChargeToUser] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | undefined>();
   const { user } = useContext(UserContext);
@@ -182,17 +181,7 @@ const PaymentConfirmationModal = ({
     setIsChargeToUser(false);
   };
 
-  const handleCancelCodeConfirm = () => {
-    onCancel();
-    toggle(false);
-  };
-
   const handleCancel = () => {
-    setCancelCodeModal(true);
-    toggle(false);
-  };
-
-  const onHide = () => {
     if (!user) return;
     createCashRegisterCancelActivity({
       items,
@@ -203,14 +192,13 @@ const PaymentConfirmationModal = ({
     toggle(false);
   };
 
+  const onHide = () => {
+    setShowCancelConfirmation(true);
+    toggle(false);
+  };
+
   return (
     <>
-      <CancelCodeModal
-        show={cancelCodeModal}
-        toggle={setCancelCodeModal}
-        onConfirm={handleCancelCodeConfirm}
-        onCancel={() => toggle(true)}
-      />
       <ChargeToUserModal
         show={showChargeToModal}
         toggle={setShowChargeToModal}
@@ -223,6 +211,15 @@ const PaymentConfirmationModal = ({
         onConfirm={handleConfirm}
         onCancel={() => toggle(true)}
         message={message}
+      />
+      <ConfirmationModal
+        show={showCancelConfirmation}
+        toggle={setShowCancelConfirmation}
+        onConfirm={handleCancel}
+        onCancel={() => toggle(true)}
+        message="All items will be cleared! Are you sure you want to cancel?"
+        cancelLabel="No"
+        confirmLabel="Yes"
       />
       <Modal
         show={show}

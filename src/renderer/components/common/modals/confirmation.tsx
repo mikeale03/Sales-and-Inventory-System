@@ -9,6 +9,8 @@ export type Props = {
   onCancel?: () => void;
   onExited?: () => void;
   size?: 'sm' | 'lg' | 'xl';
+  cancelLabel?: string;
+  confirmLabel?: string;
 };
 
 const ConfirmationModal = ({
@@ -18,6 +20,8 @@ const ConfirmationModal = ({
   onConfirm,
   onCancel,
   onExited,
+  cancelLabel,
+  confirmLabel,
   size = 'sm',
 }: Props) => {
   const handleCancel = () => {
@@ -47,10 +51,10 @@ const ConfirmationModal = ({
       <Modal.Body>{message}</Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={handleCancel}>
-          Cancel
+          {cancelLabel ?? 'Cancel'}
         </Button>
         <Button variant="primary" onClick={handleConfirm}>
-          Confirm
+          {confirmLabel ?? 'Confirm'}
         </Button>
       </Modal.Footer>
     </Modal>
