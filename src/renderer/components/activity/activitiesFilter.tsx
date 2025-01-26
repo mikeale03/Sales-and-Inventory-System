@@ -3,7 +3,8 @@ import { Col, FormLabel, FormSelect, Row } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import UsersSelect from '../common/selects/usersSelect';
 import ProductSelect, { Opt } from './productSelect';
-import TimeSelect from '../common/selects/timeSelect';
+import StartEndDatePicker from '../common/startEndDatePicker';
+import ShiftSelect from '../common/selects/shiftSelect';
 
 export type OnFilterParams = {
   user: string;
@@ -159,43 +160,39 @@ const ActivitiesFilter = ({ onFilter }: Props) => {
           todayButton="Today"
         />
       </Col>
-      <Col md="3" className="mb-3">
+      <Col md="2" className="mb-3">
         <FormLabel>Start {isDaily ? 'Time' : 'Date'}</FormLabel>
-        <DatePicker
-          className="form-control"
-          selected={activitiesFilter?.startDate}
-          onChange={(date) =>
-            date &&
-            activitiesFilter &&
-            setActivitiesFilter({ ...activitiesFilter, startDate: date })
+        <StartEndDatePicker
+          selected={activitiesFilter.startDate}
+          onChange={(update) =>
+            setActivitiesFilter({ ...activitiesFilter, ...update })
           }
-          minDate={minDate}
-          maxDate={activitiesFilter?.endDate}
-          showTimeSelectOnly={isDaily}
-          dateFormat={isDaily ? 'h:mm aa' : 'MM/dd/yyyy h:mm aa'}
-          showTimeInput
-          customTimeInput={
-            <TimeSelect onSelect={handleStartTimeSelect} type="start-date" />
-          }
+          isDaily={isDaily}
+          startDate={activitiesFilter.startDate}
+          endDate={activitiesFilter.endDate}
+          type="start-date"
         />
       </Col>
-      <Col md="3" className="mb-3">
+      <Col md="2" className="mb-3">
         <FormLabel>End {isDaily ? 'Time' : 'Date'}</FormLabel>
-        <DatePicker
-          className="form-control"
-          selected={activitiesFilter?.endDate}
-          onChange={(date) =>
-            date &&
-            activitiesFilter &&
-            setActivitiesFilter({ ...activitiesFilter, endDate: date })
+        <StartEndDatePicker
+          selected={activitiesFilter.endDate}
+          onChange={(update) =>
+            setActivitiesFilter({ ...activitiesFilter, ...update })
           }
-          minDate={activitiesFilter?.startDate}
-          maxDate={maxDate}
-          showTimeSelectOnly={isDaily}
-          dateFormat={isDaily ? 'h:mm aa' : 'MM/dd/yyyy h:mm aa'}
-          showTimeInput
-          customTimeInput={
-            <TimeSelect onSelect={handleEndTimeSelect} type="end-date" />
+          isDaily={isDaily}
+          startDate={activitiesFilter.startDate}
+          endDate={activitiesFilter.endDate}
+          type="end-date"
+        />
+      </Col>
+      <Col lg="2" className="mb-3">
+        <FormLabel>Shift</FormLabel>
+        <ShiftSelect
+          startDate={activitiesFilter.startDate}
+          endDate={activitiesFilter.endDate}
+          onSelect={(update) =>
+            setActivitiesFilter({ ...activitiesFilter, ...update })
           }
         />
       </Col>

@@ -9,7 +9,8 @@ import DatePicker from 'react-datepicker';
 import UserContext from 'renderer/context/userContext';
 import { getUsers } from 'renderer/service/users';
 import useGcashFilterStore from 'renderer/store/filtersStore/gcashFilterStore';
-import TimeSelect from '../common/selects/timeSelect';
+import StartEndDatePicker from '../common/startEndDatePicker';
+import ShiftSelect from '../common/selects/shiftSelect';
 
 const GcashTransFilter = () => {
   const { user } = useContext(UserContext);
@@ -17,8 +18,6 @@ const GcashTransFilter = () => {
     useGcashFilterStore((filterState) => filterState);
   const isDaily = gcashTransFilter.selectedPeriod === 'Daily';
   const [users, setUsers] = useState<User[]>([]);
-  const [minDate, setMinDate] = useState<Date>(gcashTransFilter.startDate);
-  const [maxDate, setMaxDate] = useState<Date>(gcashTransFilter.endDate);
 
   useEffect(() => {
     if (!user) return;
@@ -33,8 +32,6 @@ const GcashTransFilter = () => {
         ...gcashTransFilter,
         userOption: user._id,
       });
-      setMinDate(gcashTransFilter.startDate);
-      setMaxDate(gcashTransFilter.endDate);
     }
   }, [user, gcashTransFilter, setGcashTransFilter]);
 
@@ -64,8 +61,6 @@ const GcashTransFilter = () => {
         999
       );
     }
-    setMinDate(sDate);
-    setMaxDate(eDate);
     setGcashTransFilter({
       ...gcashTransFilter,
       selectedDate,
@@ -105,27 +100,9 @@ const GcashTransFilter = () => {
     });
   };
 
-  const handleStartTimeSelect = (hour: string) => {
-    const { startDate } = gcashTransFilter;
-    const [h] = hour.split(':');
-    hour && startDate.setHours(+h, 0, 0, 0);
-    setGcashTransFilter({ ...gcashTransFilter, startDate });
-  };
-
-  const handleEndTimeSelect = (hour: string) => {
-    const { endDate } = gcashTransFilter;
-    if (hour === '23:59') {
-      endDate.setHours(23, 59, 59, 999);
-    } else if (hour) {
-      const [h] = hour.split(':');
-      endDate.setHours(+h, 0, 0, 0);
-    }
-    setGcashTransFilter({ ...gcashTransFilter, endDate });
-  };
-
   return (
     <Row>
-      <Col md="4" xl="2" className="mb-3">
+      <Col md="3" className="mb-3">
         <FormLabel>User</FormLabel>
         <FormSelect
           value={gcashTransFilter.userOption}
@@ -144,7 +121,7 @@ const GcashTransFilter = () => {
           ))}
         </FormSelect>
       </Col>
-      <Col md="4" xl="1" className="mb-3">
+      <Col md="3" className="mb-3">
         <FormLabel>Period</FormLabel>
         <FormSelect
           value={gcashTransFilter.selectedPeriod}
@@ -154,7 +131,7 @@ const GcashTransFilter = () => {
           <option>Monthly</option>
         </FormSelect>
       </Col>
-      <Col md="4" xl="1" className="mb-3">
+      <Col md="3" className="mb-3">
         <FormLabel>Type</FormLabel>
         <FormSelect
           value={gcashTransFilter.selectedType ?? 'all'}
@@ -175,7 +152,7 @@ const GcashTransFilter = () => {
           <option>Date Created</option>
         </FormSelect>
       </Col>
-      <Col md="3" xl="2" className="mb-3">
+      <Col md="3" className="mb-3">
         <FormLabel>Select {isDaily ? 'Date' : 'Month'}</FormLabel>
         <DatePicker
           className="form-control"
@@ -190,43 +167,39 @@ const GcashTransFilter = () => {
           todayButton="Today"
         />
       </Col>
-      <Col md="3" xl="2" className="mb-3">
+      <Col md="3" className="mb-3">
         <FormLabel>Start {isDaily ? 'Time' : 'Date'}</FormLabel>
-        <DatePicker
-          className="form-control"
-          selected={gcashTransFilter?.startDate}
-          onChange={(date) =>
-            date &&
-            gcashTransFilter &&
-            setGcashTransFilter({ ...gcashTransFilter, startDate: date })
+        <StartEndDatePicker
+          selected={gcashTransFilter.startDate}
+          onChange={(update) =>
+            setGcashTransFilter({ ...gcashTransFilter, ...update })
           }
-          minDate={minDate}
-          maxDate={gcashTransFilter?.endDate}
-          showTimeSelectOnly={isDaily}
-          dateFormat={isDaily ? 'h:mm aa' : 'MM/dd/yyyy h:mm aa'}
-          showTimeInput
-          customTimeInput={
-            <TimeSelect onSelect={handleStartTimeSelect} type="start-date" />
-          }
+          isDaily={isDaily}
+          startDate={gcashTransFilter.startDate}
+          endDate={gcashTransFilter.endDate}
+          type="start-date"
         />
       </Col>
-      <Col md="3" xl="2" className="mb-3">
+      <Col md="3" className="mb-3">
         <FormLabel>End {isDaily ? 'Time' : 'Date'}</FormLabel>
-        <DatePicker
-          className="form-control"
-          selected={gcashTransFilter?.endDate}
-          onChange={(date) =>
-            date &&
-            gcashTransFilter &&
-            setGcashTransFilter({ ...gcashTransFilter, endDate: date })
+        <StartEndDatePicker
+          selected={gcashTransFilter.endDate}
+          onChange={(update) =>
+            setGcashTransFilter({ ...gcashTransFilter, ...update })
           }
-          minDate={gcashTransFilter?.startDate}
-          maxDate={maxDate}
-          showTimeSelectOnly={isDaily}
-          dateFormat={isDaily ? 'h:mm aa' : 'MM/dd/yyyy h:mm aa'}
-          showTimeInput
-          customTimeInput={
-            <TimeSelect onSelect={handleEndTimeSelect} type="end-date" />
+          isDaily={isDaily}
+          startDate={gcashTransFilter.startDate}
+          endDate={gcashTransFilter.endDate}
+          type="end-date"
+        />
+      </Col>
+      <Col lg="3" className="mb-3">
+        <FormLabel>Shift</FormLabel>
+        <ShiftSelect
+          startDate={gcashTransFilter.startDate}
+          endDate={gcashTransFilter.endDate}
+          onSelect={(update) =>
+            setGcashTransFilter({ ...gcashTransFilter, ...update })
           }
         />
       </Col>
