@@ -126,7 +126,7 @@ function CancelCashRegisterDetails({ details }: { details: Items }) {
   return (
     <div>
       {items.map((item) => (
-        <p className="m-0">
+        <p className="m-0" key={`${item._id}`}>
           {item.name} - {item.quantity} qty - {pesoFormat(item.totalPrice)}
         </p>
       ))}

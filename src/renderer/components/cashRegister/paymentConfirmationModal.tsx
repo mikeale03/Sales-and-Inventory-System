@@ -199,6 +199,7 @@ const PaymentConfirmationModal = ({
       transact_by: user.username,
       transact_by_user_id: user._id,
     });
+    onCancel();
     toggle(false);
   };
 
