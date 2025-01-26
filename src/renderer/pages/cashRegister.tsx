@@ -140,7 +140,9 @@ function CashRegisterPage() {
         items={items}
         onCancel={useCallback(() => {
           setPaymentAmount('');
-        }, [])}
+          setItems({});
+          setHasItems(false);
+        }, [setHasItems])}
         paymentAmount={+paymentAmount}
         onSuccess={useCallback(() => {
           setPaymentAmount('');
