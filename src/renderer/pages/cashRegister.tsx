@@ -138,15 +138,15 @@ function CashRegisterPage() {
         show={showPaymentConfirmationModal}
         toggle={setShowPaymentConfirmationModal}
         items={items}
-        onCancel={() => {
+        onCancel={useCallback(() => {
           setPaymentAmount('');
-          setItems({});
-        }}
-        paymentAmount={+paymentAmount}
-        onSuccess={useCallback(async () => {
-          setPaymentAmount('');
-          setItems({});
         }, [])}
+        paymentAmount={+paymentAmount}
+        onSuccess={useCallback(() => {
+          setPaymentAmount('');
+          setItems({});
+          setHasItems(false);
+        }, [setHasItems])}
         onExited={useCallback(() => {
           setTimeout(() => productSelectRef.current?.focus(), 50);
         }, [])}
