@@ -4,7 +4,8 @@ import DatePicker from 'react-datepicker';
 import UsersSelect from 'renderer/components/common/selects/usersSelect';
 import { MobileLoadFilterParams } from 'globalTypes/realm/mobileLoad.types';
 import useMobileLoadFilterStore from 'renderer/store/filtersStore/mobileLoadFilterStore';
-import TimeSelect from '../common/selects/timeSelect';
+import StartEndDatePicker from '../common/startEndDatePicker';
+import ShiftSelect from '../common/selects/shiftSelect';
 
 export type OnFilterParams = { user: string; startDate: Date; endDate: Date };
 
@@ -27,10 +28,6 @@ const MobileLoadFilter = ({ onFilter }: Props) => {
     (filterState) => filterState
   );
   const isDaily = filter.selectedPeriod === 'Daily';
-  const [minDate, setMinDate] = useState<Date>(filter.startDate);
-  const [maxDate, setMaxDate] = useState<Date>(filter.endDate);
-
-  const { startDate, endDate } = filter;
 
   useEffect(() => {
     onFilter({
@@ -67,8 +64,6 @@ const MobileLoadFilter = ({ onFilter }: Props) => {
         999
       );
     }
-    setMinDate(sDate);
-    setMaxDate(eDate);
     setFilter({
       ...filter,
       selectedDate,
@@ -95,22 +90,6 @@ const MobileLoadFilter = ({ onFilter }: Props) => {
     setDateRange(filter.selectedPeriod, date);
   };
 
-  const handleStartTimeSelect = (hour: string) => {
-    const [h] = hour.split(':');
-    hour && startDate.setHours(+h, 0, 0, 0);
-    setFilter({ ...filter, startDate });
-  };
-
-  const handleEndTimeSelect = (hour: string) => {
-    if (hour === '23:59') {
-      endDate.setHours(23, 59, 59, 999);
-    } else if (hour) {
-      const [h] = hour.split(':');
-      endDate.setHours(+h, 0, 0, 0);
-    }
-    setFilter({ ...filter, endDate });
-  };
-
   return (
     <Row>
       <Col lg="2" className="mb-3">
@@ -119,7 +98,7 @@ const MobileLoadFilter = ({ onFilter }: Props) => {
           onSelect={(value) => setFilter({ ...filter, userOption: value })}
         />
       </Col>
-      <Col lg="2" className="mb-3">
+      <Col lg="1" className="mb-3">
         <FormLabel>Source</FormLabel>
         <FormSelect value={filter.source} onChange={handleSourceSelect}>
           <option value="">All</option>
@@ -127,7 +106,7 @@ const MobileLoadFilter = ({ onFilter }: Props) => {
           <option value="gcash">Gcash</option>
         </FormSelect>
       </Col>
-      <Col lg="2" className="mb-3">
+      <Col lg="1" className="mb-3">
         <FormLabel>Period</FormLabel>
         <FormSelect value={filter.selectedPeriod} onChange={handlePeriodSelect}>
           <option>Daily</option>
@@ -149,38 +128,32 @@ const MobileLoadFilter = ({ onFilter }: Props) => {
       </Col>
       <Col lg="2" className="mb-3">
         <FormLabel>Start {isDaily ? 'Time' : 'Date'}</FormLabel>
-        <DatePicker
-          className="form-control"
-          selected={filter?.startDate}
-          onChange={(date) =>
-            date && filter && setFilter({ ...filter, startDate: date })
-          }
-          minDate={minDate}
-          maxDate={filter?.endDate}
-          showTimeSelectOnly={isDaily}
-          dateFormat={isDaily ? 'h:mm aa' : 'MM/dd/yyyy h:mm aa'}
-          showTimeInput
-          customTimeInput={
-            <TimeSelect onSelect={handleStartTimeSelect} type="start-date" />
-          }
+        <StartEndDatePicker
+          selected={filter.startDate}
+          onChange={(update) => setFilter({ ...filter, ...update })}
+          isDaily={isDaily}
+          startDate={filter.startDate}
+          endDate={filter.endDate}
+          type="start-date"
         />
       </Col>
       <Col lg="2" className="mb-3">
         <FormLabel>End {isDaily ? 'Time' : 'Date'}</FormLabel>
-        <DatePicker
-          className="form-control"
-          selected={filter?.endDate}
-          onChange={(date) =>
-            date && filter && setFilter({ ...filter, endDate: date })
-          }
-          minDate={filter?.startDate}
-          maxDate={maxDate}
-          showTimeSelectOnly={isDaily}
-          dateFormat={isDaily ? 'h:mm aa' : 'MM/dd/yyyy h:mm aa'}
-          showTimeInput
-          customTimeInput={
-            <TimeSelect onSelect={handleEndTimeSelect} type="end-date" />
-          }
+        <StartEndDatePicker
+          selected={filter.endDate}
+          onChange={(update) => setFilter({ ...filter, ...update })}
+          isDaily={isDaily}
+          startDate={filter.startDate}
+          endDate={filter.endDate}
+          type="end-date"
+        />
+      </Col>
+      <Col lg="2" className="mb-3">
+        <FormLabel>Shift</FormLabel>
+        <ShiftSelect
+          startDate={filter.startDate}
+          endDate={filter.endDate}
+          onSelect={(update) => setFilter({ ...filter, ...update })}
         />
       </Col>
     </Row>

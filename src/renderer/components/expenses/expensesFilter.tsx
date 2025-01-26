@@ -5,7 +5,8 @@ import { GetExpensesFilter } from 'globalTypes/realm/expenses.type';
 import UsersSelect from 'renderer/components/common/selects/usersSelect';
 import useExpensesFilterStore from 'renderer/store/filtersStore/expensesFilterStore';
 import ExpenseTypeSelect from './expenseTypeSelect';
-import TimeSelect from '../common/selects/timeSelect';
+import StartEndDatePicker from '../common/startEndDatePicker';
+import ShiftSelect from '../common/selects/shiftSelect';
 
 export type OnFilterParams = { user: string; startDate: Date; endDate: Date };
 
@@ -25,8 +26,6 @@ const ExpensesFilter = ({ onFilter }: Props) => {
     (filterState) => filterState
   );
   const isDaily = filter.selectedPeriod === 'Daily';
-  const [minDate, setMinDate] = useState<Date>(filter.startDate);
-  const [maxDate, setMaxDate] = useState<Date>(filter.endDate);
   const [type, setType] = useState('all');
 
   useEffect(() => {
@@ -82,8 +81,6 @@ const ExpensesFilter = ({ onFilter }: Props) => {
         999
       );
     }
-    setMinDate(sDate);
-    setMaxDate(eDate);
     setFilter({
       ...filter,
       selectedDate,
@@ -155,38 +152,32 @@ const ExpensesFilter = ({ onFilter }: Props) => {
       </Col>
       <Col lg="2" className="mb-3">
         <FormLabel>Start {isDaily ? 'Time' : 'Date'}</FormLabel>
-        <DatePicker
-          className="form-control"
-          selected={filter?.startDate}
-          onChange={(date) =>
-            date && filter && setFilter({ ...filter, startDate: date })
-          }
-          minDate={minDate}
-          maxDate={filter?.endDate}
-          showTimeSelectOnly={isDaily}
-          dateFormat={isDaily ? 'h:mm aa' : 'MM/dd/yyyy h:mm aa'}
-          showTimeInput
-          customTimeInput={
-            <TimeSelect onSelect={handleStartTimeSelect} type="start-date" />
-          }
+        <StartEndDatePicker
+          selected={filter.startDate}
+          onChange={(update) => setFilter({ ...filter, ...update })}
+          isDaily={isDaily}
+          startDate={filter.startDate}
+          endDate={filter.endDate}
+          type="start-date"
         />
       </Col>
       <Col lg="2" className="mb-3">
         <FormLabel>End {isDaily ? 'Time' : 'Date'}</FormLabel>
-        <DatePicker
-          className="form-control"
-          selected={filter?.endDate}
-          onChange={(date) =>
-            date && filter && setFilter({ ...filter, endDate: date })
-          }
-          minDate={filter?.startDate}
-          maxDate={maxDate}
-          showTimeSelectOnly={isDaily}
-          dateFormat={isDaily ? 'h:mm aa' : 'MM/dd/yyyy h:mm aa'}
-          showTimeInput
-          customTimeInput={
-            <TimeSelect onSelect={handleEndTimeSelect} type="end-date" />
-          }
+        <StartEndDatePicker
+          selected={filter.endDate}
+          onChange={(update) => setFilter({ ...filter, ...update })}
+          isDaily={isDaily}
+          startDate={filter.startDate}
+          endDate={filter.endDate}
+          type="end-date"
+        />
+      </Col>
+      <Col lg="2" className="mb-3">
+        <FormLabel>Shift</FormLabel>
+        <ShiftSelect
+          startDate={filter.startDate}
+          endDate={filter.endDate}
+          onSelect={(update) => setFilter({ ...filter, ...update })}
         />
       </Col>
     </Row>

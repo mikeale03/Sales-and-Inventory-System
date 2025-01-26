@@ -6,7 +6,8 @@ import useSalesFilterStore from 'renderer/store/filtersStore/salesFilterStore';
 import UsersSelect from '../common/selects/usersSelect';
 import TagsSelect from '../common/selects/tagsSelect';
 import CategorySelect from '../common/selects/categorySelect';
-import TimeSelect from '../common/selects/timeSelect';
+import ShiftSelect from '../common/selects/shiftSelect';
+import StartEndDatePicker from '../common/startEndDatePicker';
 
 type Props = {
   className?: string;
@@ -82,11 +83,12 @@ const SalesFilter = ({ className }: Props) => {
     setDateRange(salesFilter.selectedPeriod, date);
   };
 
-  const handleStartTimeSelect = (hour: string) => {
-    const { startDate } = salesFilter;
-    const [h] = hour.split(':');
-    hour && startDate.setHours(+h, 0, 0, 0);
-    setSalesFilter({ ...salesFilter, startDate });
+  const handleShiftSelect = (time: { startDate: Date; endDate: Date }) => {
+    // const { startDate } = salesFilter;
+    // const [h] = hour.split(':');
+    // hour && startDate.setHours(+h, 0, 0, 0);
+    // setSalesFilter({ ...salesFilter, startDate });
+    setSalesFilter({ ...salesFilter, ...time });
   };
 
   const handleEndTimeSelect = (hour: string) => {
@@ -133,9 +135,9 @@ const SalesFilter = ({ className }: Props) => {
           todayButton="Today"
         />
       </Col>
-      <Col md="3" className="mb-3">
+      <Col md="2" className="mb-3">
         <FormLabel>Start {isDaily ? 'Time' : 'Date'}</FormLabel>
-        <DatePicker
+        {/* <DatePicker
           className="form-control"
           selected={salesFilter?.startDate}
           onChange={(date) =>
@@ -149,28 +151,39 @@ const SalesFilter = ({ className }: Props) => {
           dateFormat={isDaily ? 'h:mm aa' : 'MM/dd/yyyy h:mm aa'}
           showTimeInput
           customTimeInput={
-            <TimeSelect onSelect={handleStartTimeSelect} type="start-date" />
+            <ShiftSelect
+              startDate={salesFilter.startDate}
+              endDate={salesFilter.endDate}
+              onSelect={handleShiftSelect}
+            />
           }
+        /> */}
+        <StartEndDatePicker
+          selected={salesFilter.startDate}
+          onChange={(update) => setSalesFilter({ ...salesFilter, ...update })}
+          isDaily={isDaily}
+          startDate={salesFilter.startDate}
+          endDate={salesFilter.endDate}
+          type="start-date"
         />
       </Col>
-      <Col md="3" className="mb-3">
+      <Col md="2" className="mb-3">
         <FormLabel>End {isDaily ? 'Time' : 'Date'}</FormLabel>
-        <DatePicker
-          className="form-control"
-          selected={salesFilter?.endDate}
-          onChange={(date) =>
-            date &&
-            salesFilter &&
-            setSalesFilter({ ...salesFilter, endDate: date })
-          }
-          minDate={salesFilter?.startDate}
-          maxDate={maxDate}
-          showTimeSelectOnly={isDaily}
-          dateFormat={isDaily ? 'h:mm aa' : 'MM/dd/yyyy h:mm aa'}
-          showTimeInput
-          customTimeInput={
-            <TimeSelect onSelect={handleEndTimeSelect} type="end-date" />
-          }
+        <StartEndDatePicker
+          selected={salesFilter.endDate}
+          onChange={(update) => setSalesFilter({ ...salesFilter, ...update })}
+          isDaily={isDaily}
+          startDate={salesFilter.startDate}
+          endDate={salesFilter.endDate}
+          type="end-date"
+        />
+      </Col>
+      <Col md="2" className="mb-3">
+        <FormLabel>Shift</FormLabel>
+        <ShiftSelect
+          startDate={salesFilter.startDate}
+          endDate={salesFilter.endDate}
+          onSelect={(update) => setSalesFilter({ ...salesFilter, ...update })}
         />
       </Col>
       <Col sm="6" xl="3" className="mb-3">
