@@ -109,7 +109,7 @@ const SalesBarChart = ({ title, categories, tags, sort }: Props) => {
     <Card>
       <Card.Body>
         <Row>
-          <Col lg="4">
+          <Col lg="4" className="mb-3">
             <Form.Group>
               <Form.Label>Period</Form.Label>
               <FormSelect onChange={handleChangePeriod}>
@@ -119,7 +119,7 @@ const SalesBarChart = ({ title, categories, tags, sort }: Props) => {
               </FormSelect>
             </Form.Group>
           </Col>
-          <Col lg="4">
+          <Col lg="4" className="mb-3">
             <Form.Group>
               <Form.Label>By</Form.Label>
               <Form.Control
@@ -132,7 +132,7 @@ const SalesBarChart = ({ title, categories, tags, sort }: Props) => {
               </Form.Control>
             </Form.Group>
           </Col>
-          <Col lg="4">
+          <Col lg="4" className="mb-3">
             <CategorySelect
               value={category}
               onSelect={setCategory}
@@ -142,7 +142,7 @@ const SalesBarChart = ({ title, categories, tags, sort }: Props) => {
           </Col>
         </Row>
         <Row>
-          <Col>
+          <Col className="mb-3">
             <TagsSelect
               value={selectedTags}
               onChange={setSelectedTags}

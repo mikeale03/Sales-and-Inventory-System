@@ -53,7 +53,7 @@ function TagsSelect({
   }, [options]);
 
   return (
-    <Form.Group className="mb-3">
+    <Form.Group>
       <Form.Label>Tags</Form.Label>
       {isCreatable ? (
         <CreatableSelect
