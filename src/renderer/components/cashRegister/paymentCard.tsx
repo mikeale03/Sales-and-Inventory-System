@@ -100,7 +100,7 @@ const PaymentCard = ({
               // eslint-disable-next-line jsx-a11y/tabindex-no-positive
               tabIndex={-1}
             >
-              Reset
+              Clear
             </Button>
             <Button
               className="w-100"
