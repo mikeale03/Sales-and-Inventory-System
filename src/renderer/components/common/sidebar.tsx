@@ -76,7 +76,7 @@ const Sidebar = () => {
           >
             {({ isActive }) => (
               <li
-                className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 shadow-sm transition-all
+                className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 transition-all
             ${isActive && 'active'}`}
                 style={{ fontSize: '0.8em' }}
               >
