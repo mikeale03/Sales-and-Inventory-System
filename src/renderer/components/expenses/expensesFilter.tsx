@@ -120,67 +120,74 @@ const ExpensesFilter = ({ onFilter }: Props) => {
   };
 
   return (
-    <Row>
-      <Col lg="2" className="mb-3">
-        <UsersSelect
-          value={filter.userOption}
-          onSelect={(value) => setFilter({ ...filter, userOption: value })}
-        />
-      </Col>
-      <Col lg="2" className="mb-3">
-        <ExpenseTypeSelect onSelect={setType} />
-      </Col>
-      <Col lg="2" className="mb-3">
-        <FormLabel>Period</FormLabel>
-        <FormSelect value={filter.selectedPeriod} onChange={handlePeriodSelect}>
-          <option>Daily</option>
-          <option>Monthly</option>
-        </FormSelect>
-      </Col>
-      <Col lg="2" className="mb-3">
-        <FormLabel>Select {isDaily ? 'Date' : 'Month'}</FormLabel>
-        <DatePicker
-          className="form-control"
-          selected={filter?.selectedDate}
-          onChange={handleDateSelect}
-          dateFormat={
-            filter?.selectedPeriod === 'Daily' ? 'MM/dd/yyyy' : 'MM/yyyy'
-          }
-          showMonthYearPicker={filter?.selectedPeriod === 'Monthly'}
-          todayButton="Today"
-        />
-      </Col>
-      <Col lg="2" className="mb-3">
-        <FormLabel>Start {isDaily ? 'Time' : 'Date'}</FormLabel>
-        <StartEndDatePicker
-          selected={filter.startDate}
-          onChange={(update) => setFilter({ ...filter, ...update })}
-          isDaily={isDaily}
-          startDate={filter.startDate}
-          endDate={filter.endDate}
-          type="start-date"
-        />
-      </Col>
-      <Col lg="2" className="mb-3">
-        <FormLabel>End {isDaily ? 'Time' : 'Date'}</FormLabel>
-        <StartEndDatePicker
-          selected={filter.endDate}
-          onChange={(update) => setFilter({ ...filter, ...update })}
-          isDaily={isDaily}
-          startDate={filter.startDate}
-          endDate={filter.endDate}
-          type="end-date"
-        />
-      </Col>
-      <Col lg="2" className="mb-3">
-        <FormLabel>Shift</FormLabel>
-        <ShiftSelect
-          startDate={filter.startDate}
-          endDate={filter.endDate}
-          onSelect={(update) => setFilter({ ...filter, ...update })}
-        />
-      </Col>
-    </Row>
+    <>
+      <Row>
+        <Col lg="2" className="mb-3">
+          <UsersSelect
+            value={filter.userOption}
+            onSelect={(value) => setFilter({ ...filter, userOption: value })}
+          />
+        </Col>
+        <Col lg="2" className="mb-3">
+          <ExpenseTypeSelect onSelect={setType} />
+        </Col>
+        <Col lg="2" className="mb-3">
+          <FormLabel>Period</FormLabel>
+          <FormSelect
+            value={filter.selectedPeriod}
+            onChange={handlePeriodSelect}
+          >
+            <option>Daily</option>
+            <option>Monthly</option>
+          </FormSelect>
+        </Col>
+        <Col lg="2" className="mb-3">
+          <FormLabel>Select {isDaily ? 'Date' : 'Month'}</FormLabel>
+          <DatePicker
+            className="form-control"
+            selected={filter?.selectedDate}
+            onChange={handleDateSelect}
+            dateFormat={
+              filter?.selectedPeriod === 'Daily' ? 'MM/dd/yyyy' : 'MM/yyyy'
+            }
+            showMonthYearPicker={filter?.selectedPeriod === 'Monthly'}
+            todayButton="Today"
+          />
+        </Col>
+      </Row>
+      <Row>
+        <Col lg="2" className="mb-3">
+          <FormLabel>Start {isDaily ? 'Time' : 'Date'}</FormLabel>
+          <StartEndDatePicker
+            selected={filter.startDate}
+            onChange={(update) => setFilter({ ...filter, ...update })}
+            isDaily={isDaily}
+            startDate={filter.startDate}
+            endDate={filter.endDate}
+            type="start-date"
+          />
+        </Col>
+        <Col lg="2" className="mb-3">
+          <FormLabel>End {isDaily ? 'Time' : 'Date'}</FormLabel>
+          <StartEndDatePicker
+            selected={filter.endDate}
+            onChange={(update) => setFilter({ ...filter, ...update })}
+            isDaily={isDaily}
+            startDate={filter.startDate}
+            endDate={filter.endDate}
+            type="end-date"
+          />
+        </Col>
+        <Col lg="2" className="mb-3">
+          <FormLabel>Shift</FormLabel>
+          <ShiftSelect
+            startDate={filter.startDate}
+            endDate={filter.endDate}
+            onSelect={(update) => setFilter({ ...filter, ...update })}
+          />
+        </Col>
+      </Row>
+    </>
   );
 };
 

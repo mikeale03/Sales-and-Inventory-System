@@ -101,109 +101,113 @@ const GcashTransFilter = () => {
   };
 
   return (
-    <Row>
-      <Col md="3" className="mb-3">
-        <FormLabel>User</FormLabel>
-        <FormSelect
-          value={gcashTransFilter.userOption}
-          onChange={(e) =>
-            setGcashTransFilter({
-              ...gcashTransFilter,
-              userOption: e.target.value,
-            })
-          }
-        >
-          <option value="all">All</option>
-          {users.map((opt) => (
-            <option key={opt._id} value={opt._id}>
-              {opt.username}
-            </option>
-          ))}
-        </FormSelect>
-      </Col>
-      <Col md="3" className="mb-3">
-        <FormLabel>Period</FormLabel>
-        <FormSelect
-          value={gcashTransFilter.selectedPeriod}
-          onChange={handlePeriodSelect}
-        >
-          <option>Daily</option>
-          <option>Monthly</option>
-        </FormSelect>
-      </Col>
-      <Col md="3" className="mb-3">
-        <FormLabel>Type</FormLabel>
-        <FormSelect
-          value={gcashTransFilter.selectedType ?? 'all'}
-          onChange={handleTypeSelect}
-        >
-          <option value="all">All Type</option>
-          <option value="cash in">Cash In</option>
-          <option value="cash out">Cash Out</option>
-        </FormSelect>
-      </Col>
-      <Col md="3" xl="2" className="mb-3">
-        <FormLabel>Date Filter</FormLabel>
-        <FormSelect
-          value={gcashTransFilter.selectedDateFilter}
-          onChange={handleDateFilterSelect}
-        >
-          <option>Date Transacted</option>
-          <option>Date Created</option>
-        </FormSelect>
-      </Col>
-      <Col md="3" className="mb-3">
-        <FormLabel>Select {isDaily ? 'Date' : 'Month'}</FormLabel>
-        <DatePicker
-          className="form-control"
-          selected={gcashTransFilter?.selectedDate}
-          onChange={handleDateSelect}
-          dateFormat={
-            gcashTransFilter?.selectedPeriod === 'Daily'
-              ? 'MM/dd/yyyy'
-              : 'MM/yyyy'
-          }
-          showMonthYearPicker={gcashTransFilter?.selectedPeriod === 'Monthly'}
-          todayButton="Today"
-        />
-      </Col>
-      <Col md="3" className="mb-3">
-        <FormLabel>Start {isDaily ? 'Time' : 'Date'}</FormLabel>
-        <StartEndDatePicker
-          selected={gcashTransFilter.startDate}
-          onChange={(update) =>
-            setGcashTransFilter({ ...gcashTransFilter, ...update })
-          }
-          isDaily={isDaily}
-          startDate={gcashTransFilter.startDate}
-          endDate={gcashTransFilter.endDate}
-          type="start-date"
-        />
-      </Col>
-      <Col md="3" className="mb-3">
-        <FormLabel>End {isDaily ? 'Time' : 'Date'}</FormLabel>
-        <StartEndDatePicker
-          selected={gcashTransFilter.endDate}
-          onChange={(update) =>
-            setGcashTransFilter({ ...gcashTransFilter, ...update })
-          }
-          isDaily={isDaily}
-          startDate={gcashTransFilter.startDate}
-          endDate={gcashTransFilter.endDate}
-          type="end-date"
-        />
-      </Col>
-      <Col lg="3" className="mb-3">
-        <FormLabel>Shift</FormLabel>
-        <ShiftSelect
-          startDate={gcashTransFilter.startDate}
-          endDate={gcashTransFilter.endDate}
-          onSelect={(update) =>
-            setGcashTransFilter({ ...gcashTransFilter, ...update })
-          }
-        />
-      </Col>
-    </Row>
+    <>
+      <Row>
+        <Col md="2" className="mb-3">
+          <FormLabel>User</FormLabel>
+          <FormSelect
+            value={gcashTransFilter.userOption}
+            onChange={(e) =>
+              setGcashTransFilter({
+                ...gcashTransFilter,
+                userOption: e.target.value,
+              })
+            }
+          >
+            <option value="all">All</option>
+            {users.map((opt) => (
+              <option key={opt._id} value={opt._id}>
+                {opt.username}
+              </option>
+            ))}
+          </FormSelect>
+        </Col>
+        <Col md="2" className="mb-3">
+          <FormLabel>Period</FormLabel>
+          <FormSelect
+            value={gcashTransFilter.selectedPeriod}
+            onChange={handlePeriodSelect}
+          >
+            <option>Daily</option>
+            <option>Monthly</option>
+          </FormSelect>
+        </Col>
+        <Col md="2" className="mb-3">
+          <FormLabel>Type</FormLabel>
+          <FormSelect
+            value={gcashTransFilter.selectedType ?? 'all'}
+            onChange={handleTypeSelect}
+          >
+            <option value="all">All Type</option>
+            <option value="cash in">Cash In</option>
+            <option value="cash out">Cash Out</option>
+          </FormSelect>
+        </Col>
+        <Col md="2" xl="2" className="mb-3">
+          <FormLabel>Date Filter</FormLabel>
+          <FormSelect
+            value={gcashTransFilter.selectedDateFilter}
+            onChange={handleDateFilterSelect}
+          >
+            <option>Date Transacted</option>
+            <option>Date Created</option>
+          </FormSelect>
+        </Col>
+        <Col md="2" className="mb-3">
+          <FormLabel>Select {isDaily ? 'Date' : 'Month'}</FormLabel>
+          <DatePicker
+            className="form-control"
+            selected={gcashTransFilter?.selectedDate}
+            onChange={handleDateSelect}
+            dateFormat={
+              gcashTransFilter?.selectedPeriod === 'Daily'
+                ? 'MM/dd/yyyy'
+                : 'MM/yyyy'
+            }
+            showMonthYearPicker={gcashTransFilter?.selectedPeriod === 'Monthly'}
+            todayButton="Today"
+          />
+        </Col>
+      </Row>
+      <Row>
+        <Col md="2" className="mb-3">
+          <FormLabel>Start {isDaily ? 'Time' : 'Date'}</FormLabel>
+          <StartEndDatePicker
+            selected={gcashTransFilter.startDate}
+            onChange={(update) =>
+              setGcashTransFilter({ ...gcashTransFilter, ...update })
+            }
+            isDaily={isDaily}
+            startDate={gcashTransFilter.startDate}
+            endDate={gcashTransFilter.endDate}
+            type="start-date"
+          />
+        </Col>
+        <Col md="2" className="mb-3">
+          <FormLabel>End {isDaily ? 'Time' : 'Date'}</FormLabel>
+          <StartEndDatePicker
+            selected={gcashTransFilter.endDate}
+            onChange={(update) =>
+              setGcashTransFilter({ ...gcashTransFilter, ...update })
+            }
+            isDaily={isDaily}
+            startDate={gcashTransFilter.startDate}
+            endDate={gcashTransFilter.endDate}
+            type="end-date"
+          />
+        </Col>
+        <Col lg="2" className="mb-3">
+          <FormLabel>Shift</FormLabel>
+          <ShiftSelect
+            startDate={gcashTransFilter.startDate}
+            endDate={gcashTransFilter.endDate}
+            onSelect={(update) =>
+              setGcashTransFilter({ ...gcashTransFilter, ...update })
+            }
+          />
+        </Col>
+      </Row>
+    </>
   );
 };
 

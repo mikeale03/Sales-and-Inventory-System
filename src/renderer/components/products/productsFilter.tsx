@@ -20,14 +20,14 @@ const ProductsFilter = ({ onFilter }: Props) => {
 
   return (
     <Row>
-      <Col sm="6" xl="3">
+      <Col sm="6" xl="3" className="mb-3">
         <CategorySelect
           value={category}
           onSelect={setCategory}
           defaltValue="All"
         />
       </Col>
-      <Col sm="6" xl="3">
+      <Col sm="6" xl="3" className="mb-3">
         <TagsSelect
           value={tags}
           onChange={setTags}

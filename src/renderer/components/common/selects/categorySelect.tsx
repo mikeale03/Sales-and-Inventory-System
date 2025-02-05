@@ -26,7 +26,7 @@ const CategorySelect = ({ value, onSelect, defaltValue, options }: Props) => {
   }, [options]);
 
   return (
-    <Form.Group className="mb-3">
+    <Form.Group>
       <Form.Label>Category</Form.Label>
       <Form.Control
         as="select"
