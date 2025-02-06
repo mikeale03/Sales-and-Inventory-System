@@ -40,25 +40,24 @@ const ProductsPage = () => {
     category: '',
     tags: [],
   });
+  const [searchInput, setSearchInput] = useState('');
+  const [searchText, setSearchText] = useState('');
   const { user } = useContext(UserContext);
 
-  const handleGetProducts = useCallback(
-    async (searchText?: string) => {
-      const response = await getProducts({
-        searchText,
-        sortProp: 'name',
-        sortAs: 'asc',
-        ...filter,
-      });
-      if (response.isSuccess) {
-        const data = response.result;
-        const prods = data ?? [];
-        setTotalPages(Math.ceil(prods.length / pageSize));
-        setProducts(prods);
-      }
-    },
-    [pageSize, filter]
-  );
+  const handleGetProducts = useCallback(async () => {
+    const response = await getProducts({
+      searchText,
+      sortProp: 'name',
+      sortAs: 'asc',
+      ...filter,
+    });
+    if (response.isSuccess) {
+      const data = response.result;
+      const prods = data ?? [];
+      setTotalPages(Math.ceil(prods.length / pageSize));
+      setProducts(prods);
+    }
+  }, [pageSize, filter, searchText]);
 
   const handleUpdateProduct = async (product: Product) => {
     setProducts(
@@ -104,9 +103,18 @@ const ProductsPage = () => {
     }
   };
 
-  const searchProduct = debounce<void>(async (search: string) => {
-    handleGetProducts(search);
-  }, 500);
+  const handleSearchText = useMemo(
+    () =>
+      debounce<void>(async (search: string) => {
+        setSearchText(search);
+      }, 500),
+    []
+  );
+
+  const handleSearchInput = (search: string) => {
+    setSearchInput(search);
+    handleSearchText(search);
+  };
 
   const displayProducts = useMemo(() => {
     const startIndex = (pageNumber - 1) * pageSize;
@@ -163,8 +171,8 @@ const ProductsPage = () => {
               <FormControl
                 type="search"
                 placeholder="Search name or barcode"
-                // value={search}
-                onChange={(e) => searchProduct(e.target.value.trim())}
+                value={searchInput}
+                onChange={(e) => handleSearchInput(e.target.value.trim())}
                 autoFocus
               />
             </Col>
