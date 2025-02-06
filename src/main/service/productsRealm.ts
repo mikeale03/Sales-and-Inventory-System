@@ -173,13 +173,13 @@ export const getAllProducts = async (filter?: {
     let query = '';
 
     if (barcode) {
-      query += `barcode == $${args.length}`;
+      query += `(barcode == $${args.length}`;
       args.push(barcode);
     }
 
-    query += `${barcode ? ' OR ' : ''}name CONTAINS[c] $${args.length}`;
+    query += `${barcode ? ' OR ' : '('}name CONTAINS[c] $${args.length}`;
     args.push(searchText);
-    query += ` OR barcodeStr CONTAINS[c] $${args.length}`;
+    query += ` OR barcodeStr CONTAINS[c] $${args.length})`;
     args.push(searchText);
 
     if (category) {
