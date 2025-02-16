@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { format } from 'date-fns';
 import { v4 as uuid } from 'uuid';
 import {
+  GetMobileLoadsResponse,
   MobileLoad,
   MobileLoadFilterParams,
 } from 'globalTypes/realm/mobileLoad.types';
@@ -25,7 +26,7 @@ import { pesoFormat } from 'renderer/utils/helper';
 
 const MobileLoadPage = () => {
   const [showMobileLoadModal, setShowMobileLoadModal] = useState(false);
-  const [mobileLoads, setMobileLoads] = useState<MobileLoad[]>([]);
+  const [mobileLoads, setMobileLoads] = useState<GetMobileLoadsResponse[]>([]);
   const [selectedMobileLoad, setSelectedMobileLoad] = useState<
     MobileLoad | undefined
   >();
@@ -144,7 +145,12 @@ const MobileLoadPage = () => {
             <tbody>
               {mobileLoads.map((d) => (
                 <tr key={d._id}>
-                  <td>{d.number}</td>
+                  <td
+                    title={d.numberName && d.number}
+                    className={d.numberName && 'text-success'}
+                  >
+                    {d.numberName || d.number}
+                  </td>
                   <td>{pesoFormat(d.amount)}</td>
                   <td>{pesoFormat(d.charge)}</td>
                   <td>{pesoFormat(d.total_amount)}</td>

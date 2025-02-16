@@ -17,6 +17,10 @@ export type MobileLoad = {
   transaction_id: string;
 };
 
+export type GetMobileLoadsResponse = MobileLoad & {
+  numberName: string;
+};
+
 export type CreateMobileLoadParams = {
   number: string;
   amount: number;

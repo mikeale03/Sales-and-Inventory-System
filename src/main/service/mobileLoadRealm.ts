@@ -6,11 +6,13 @@ import {
 } from 'globalTypes/realm/mobileLoad.types';
 import { Gcash } from 'globalTypes/realm/gcash.types';
 import { Sales } from 'globalTypes/realm/sales.types';
+import { MobileNumber } from 'globalTypes/realm/mobileNumber.types';
 import Realm, { ObjectSchema } from 'realm';
 import { create } from './realm';
 import { createSales, openSalesRealm } from './salesRealm';
 import { openGcashRealm } from './gcashRealm';
 import { adjustBalanceOnDelete } from './utils/gcashRealmHelper';
+import { MOBILENUMBER, openMobileNumberRealm } from './mobileNumbersRealm';
 
 const MOBILELOAD = 'MobileLoad';
 
@@ -108,7 +110,9 @@ export const createMobileLoad = async (data: CreateMobileLoadParams) => {
 
 export const getMobileLoads = async (params: MobileLoadFilterParams) => {
   const realm = await openMobileLoadRealm();
-  if (!realm) {
+  const numberRealm = await openMobileNumberRealm();
+
+  if (!realm || !numberRealm) {
     return {
       isSuccess: false,
       message: 'Error opening realm db',
@@ -153,15 +157,28 @@ export const getMobileLoads = async (params: MobileLoadFilterParams) => {
       `${query} SORT(date_transacted DESC)`,
       ...args
     );
-    const result = filtered.toJSON() as MobileLoad[];
+    const json = filtered.toJSON() as MobileLoad[];
+    const result = json.map((d) => {
+      const number = numberRealm.objectForPrimaryKey<MobileNumber>(
+        MOBILENUMBER,
+        d.number
+      );
+
+      const numberName = number ? number.name : '';
+
+      return { ...d, _id: d._id.toString(), numberName };
+    });
+
     realm.close();
+    numberRealm.close();
     return {
       isSuccess: true,
       message: 'Successfully get Mobile Load transactions',
-      result: result.map((d) => ({ ...d, _id: d._id.toString() })),
+      result,
     };
   } catch (error) {
     realm.close();
+    numberRealm.close();
     console.log(error);
     return {
       isSuccess: false,

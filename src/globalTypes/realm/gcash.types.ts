@@ -26,6 +26,8 @@ export type Gcash = {
   gcash_balance: number;
 };
 
+export type GetGcashTransResponse = Gcash & { numberName: string };
+
 export type GcashCreate = Omit<
   Gcash,
   '_id' | 'date_transacted' | 'date_created' | 'gcash_balance'

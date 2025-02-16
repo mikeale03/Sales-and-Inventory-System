@@ -1,6 +1,7 @@
 import { MobileLoadChannels } from 'globalTypes/channels/mobileLoadChannels';
 import {
   CreateMobileLoadParams,
+  GetMobileLoadsResponse,
   MobileLoad,
   MobileLoadFilterParams,
 } from 'globalTypes/realm/mobileLoad.types';
@@ -11,7 +12,7 @@ const {
 } = window;
 
 export const getMobileLoads = async (params: MobileLoadFilterParams) => {
-  const response = await ipcRenderer.invoke<Response<MobileLoad[]>>(
+  const response = await ipcRenderer.invoke<Response<GetMobileLoadsResponse[]>>(
     MobileLoadChannels.get,
     params
   );

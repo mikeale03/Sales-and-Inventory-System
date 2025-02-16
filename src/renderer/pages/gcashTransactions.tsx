@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import format from 'date-fns/format';
 import {
   Gcash,
+  GetGcashTransResponse,
   GcashTransFilter as TransFilter,
 } from 'globalTypes/realm/gcash.types';
 import { useContext, useEffect, useRef, useState } from 'react';
@@ -26,7 +27,7 @@ const isEdited = (item: Gcash) => {
 };
 
 const GcashTransactionsPage = () => {
-  const [transactions, setTransactions] = useState<Gcash[]>([]);
+  const [transactions, setTransactions] = useState<GetGcashTransResponse[]>([]);
   const [search, setSearch] = useState('');
   const [totalCashIn, setTotalCashIn] = useState(0);
   const [totalCashOut, setTotalCashOut] = useState(0);
@@ -230,7 +231,12 @@ const GcashTransactionsPage = () => {
                       <span className="text-primary">(GCash)</span>
                     )}
                   </td>
-                  <td>{item.number}</td>
+                  <td
+                    title={item.numberName && item.number}
+                    className={item.numberName && 'text-success'}
+                  >
+                    {item.numberName || item.number}
+                  </td>
                   <td>
                     {item.date_transacted &&
                       format(
