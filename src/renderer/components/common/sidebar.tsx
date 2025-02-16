@@ -9,6 +9,7 @@ import {
   faMoneyBillTransfer,
   faPersonDigging,
   faPesoSign,
+  faPhone,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { NavLink } from 'react-router-dom';
@@ -146,6 +147,26 @@ const Sidebar = () => {
                   className="color-primary"
                 />
                 <p className="m-0 text-center">GCash Trans.</p>
+              </li>
+            )}
+          </NavLink>
+          <NavLink
+            to="mobile-numbers"
+            className="mb-3"
+            style={hasItems ? { pointerEvents: 'none' } : {}}
+          >
+            {({ isActive }) => (
+              <li
+                className={`nav-link cursor-pointer text-center rounded bg-white mx-3 py-3 px-0 transition-all
+            ${isActive && 'active'}`}
+                style={{ fontSize: '0.8em' }}
+              >
+                <FontAwesomeIcon
+                  icon={faPhone}
+                  size="lg"
+                  className="color-primary"
+                />
+                <p className="m-0 text-center">Mobile Numbers</p>
               </li>
             )}
           </NavLink>
