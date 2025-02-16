@@ -3,6 +3,7 @@ import {
   Gcash,
   GcashCreate,
   GcashTransFilter,
+  GetGcashTransResponse,
 } from 'globalTypes/realm/gcash.types';
 import { Response } from 'globalTypes/realm/response.types';
 
@@ -11,7 +12,7 @@ const {
 } = window;
 
 export const getGcashTransactions = async (filter?: GcashTransFilter) => {
-  const response = await ipcRenderer.invoke<Response<Gcash[]>>(
+  const response = await ipcRenderer.invoke<Response<GetGcashTransResponse[]>>(
     Channels.getTransactions,
     filter
   );

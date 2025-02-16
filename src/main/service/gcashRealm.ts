@@ -1,5 +1,6 @@
 /* eslint-disable lines-between-class-members */
 import { Sales } from 'globalTypes/realm/sales.types';
+import { MobileNumber } from 'globalTypes/realm/mobileNumber.types';
 import Realm, { ObjectSchema } from 'realm';
 import {
   Gcash,
@@ -15,6 +16,7 @@ import {
   deductBalanceFromDate,
   getGcashBeforeDate,
 } from './utils/gcashRealmHelper';
+import { MOBILENUMBER, openMobileNumberRealm } from './mobileNumbersRealm';
 
 const GCASH = 'Gcash';
 
@@ -211,13 +213,15 @@ export const getGcashTransactions = async (
   filter?: GcashTransFilter
 ): Promise<Response<Gcash[]>> => {
   const realm = await openGcashRealm();
-  if (!realm)
+  const numberRealm = await openMobileNumberRealm();
+
+  if (!realm || !numberRealm)
     return {
       isSuccess: false,
       message: 'Error opening realm db',
     };
   try {
-    const task = realm?.objects<Gcash>(GCASH);
+    const task = realm.objects<Gcash>(GCASH);
     const { dateFilter } = filter ?? {};
     const sortFilter =
       dateFilter === 'Date Created'
@@ -228,20 +232,37 @@ export const getGcashTransactions = async (
     const filtered = query?.query
       ? task.filtered(`${query.query} ${sortFilter}`, ...query.params)
       : task;
-    // console.log(filtered[0].date_transacted);
+
     const gcashTrans = filtered.toJSON() as Gcash[];
+
+    const result = gcashTrans.map((item) => {
+      const number =
+        item.number &&
+        numberRealm.objectForPrimaryKey<MobileNumber>(
+          MOBILENUMBER,
+          item.number
+        );
+      const numberName = number ? number.name : '';
+
+      return {
+        ...item,
+        _id: item._id.toString(),
+        numberName,
+      };
+    });
+
     realm.close();
+    numberRealm.close();
+
     return {
       isSuccess: true,
       message: 'Successfully get GCash transactions',
-      result: gcashTrans.map((item) => ({
-        ...item,
-        _id: item._id.toString(),
-      })),
+      result,
     };
   } catch (error) {
     console.log(error);
     realm.close();
+    numberRealm.close();
     return {
       isSuccess: false,
       message: 'Failed to get GCash transactions',

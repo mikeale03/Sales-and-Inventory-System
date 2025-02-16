@@ -2,7 +2,7 @@ import Realm, { ObjectSchema } from 'realm';
 import { MobileNumber } from 'globalTypes/realm/mobileNumber.types';
 import { create } from './realm';
 
-const MOBILENUMBER = 'MobileNumber';
+export const MOBILENUMBER = 'MobileNumber';
 
 export class MobileNumberSchema extends Realm.Object<MobileNumber> {
   static schema: ObjectSchema = {
