@@ -3,6 +3,7 @@ import { useState, FormEvent } from 'react';
 import { Button, Modal, Form } from 'react-bootstrap';
 import ReactDatePicker from 'react-datepicker';
 import { pesoFormat } from 'renderer/utils/helper';
+import MobileNumberInput from '../common/forms/mobileNumberInput';
 
 export type MobileLoadForm = {
   _id?: string;
@@ -101,11 +102,11 @@ const SetMobileLoadModal = ({
             <Form.Label>
               Mobile Number <span className="text-danger">*</span>
             </Form.Label>
-            <Form.Control
+            <MobileNumberInput
               value={mobileLoad.number}
-              onChange={(e) => handleOnChange({ number: e.target.value })}
-              required
+              onChange={(number) => handleOnChange({ number })}
               autoFocus
+              required
             />
           </Form.Group>
           <Form.Group className="mb-3">
