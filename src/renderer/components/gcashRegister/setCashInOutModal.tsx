@@ -10,6 +10,7 @@ import { useState, FormEvent } from 'react';
 import { Button, Modal, Form, FormSelect, FormControl } from 'react-bootstrap';
 import ReactDatePicker from 'react-datepicker';
 import { pesoFormat } from 'renderer/utils/helper';
+import MobileNumberInput from '../common/forms/mobileNumberInput';
 
 type Type = 'cash in' | 'cash out' | 'add balance' | 'deduct balance';
 
@@ -136,9 +137,15 @@ const SetCashInOutModal = ({
             <Form.Label>
               GCash Number <span className="text-danger">*</span>
             </Form.Label>
-            <Form.Control
+            {/* <Form.Control
               value={item.number}
               onChange={(e) => handleChange({ number: e.target.value })}
+              required
+              autoFocus
+            /> */}
+            <MobileNumberInput
+              value={item.number}
+              onChange={(number) => handleChange({ number })}
               required
               autoFocus
             />
