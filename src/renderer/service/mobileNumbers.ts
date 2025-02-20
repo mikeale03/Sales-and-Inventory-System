@@ -26,10 +26,11 @@ export const updateMobileNumber = async (
   return response;
 };
 
-export const getMobileNumbers = async (searchText: string) => {
+export const getMobileNumbers = async (searchText: string, limit?: number) => {
   const response = await ipcRenderer.invoke<Response<MobileNumber[]>>(
     Channels.getAll,
-    searchText
+    searchText,
+    limit
   );
   return response;
 };

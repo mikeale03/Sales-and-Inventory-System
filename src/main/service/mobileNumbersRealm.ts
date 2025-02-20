@@ -120,7 +120,11 @@ export const updateMobileNumber = async (
   }
 };
 
-export const getMobileNumbers = async (searchText: string = '') => {
+export const getMobileNumbers = async (
+  // eslint-disable-next-line default-param-last
+  searchText: string = '',
+  limit?: number
+) => {
   const realm = await openMobileNumberRealm();
   if (!realm) {
     return {
@@ -128,7 +132,11 @@ export const getMobileNumbers = async (searchText: string = '') => {
       message: 'Error opening realm db',
     };
   }
-  const query = `number CONTAINS[c] '${searchText}' OR name CONTAINS[c] '${searchText}'`;
+  let query = `number CONTAINS[c] '${searchText}' OR name CONTAINS[c] '${searchText}'`;
+
+  if (limit) {
+    query += ` LIMIT(${limit})`;
+  }
 
   try {
     const numbers = realm.objects(MOBILENUMBER).filtered(query);

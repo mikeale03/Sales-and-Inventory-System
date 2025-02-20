@@ -20,8 +20,8 @@ const setMobileNumbersEventHandler = (ipcMain: IpcMain) => {
   );
   ipcMain.handle(
     Channels.getAll,
-    async (event: IpcMainInvokeEvent, searchText: string) => {
-      const result = await getMobileNumbers(searchText);
+    async (event: IpcMainInvokeEvent, searchText: string, limit?: number) => {
+      const result = await getMobileNumbers(searchText, limit);
       return result;
     }
   );
