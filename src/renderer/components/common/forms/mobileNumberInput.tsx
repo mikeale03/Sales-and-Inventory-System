@@ -13,8 +13,9 @@ import { FormControl } from 'react-bootstrap';
 import { getMobileNumbers } from 'renderer/service/mobileNumbers';
 import { debounce } from 'renderer/utils/helper';
 
-const getSuggestions = debounce((searchText: string) =>
-  getMobileNumbers(searchText)
+const getSuggestions = debounce(
+  (searchText: string) => getMobileNumbers(searchText, 10),
+  500
 );
 
 export type Props = Omit<ComponentProps<typeof FormControl>, 'onChange'> & {
@@ -24,8 +25,9 @@ export type Props = Omit<ComponentProps<typeof FormControl>, 'onChange'> & {
 function MobileNumberInput({ value, onChange, ...rest }: Props) {
   const [suggestions, setSuggestions] = useState<MobileNumber[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const inputRef = useRef<HTMLInputElement | null>(null);
   const [isMouseOver, setIsMouseOver] = useState(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const isInputFocusRef = useRef<boolean>(false);
 
   const handleInputChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const { value: v } = e.target;
@@ -46,6 +48,7 @@ function MobileNumberInput({ value, onChange, ...rest }: Props) {
   const handleKeyPress = () => {};
 
   const handleOnBlur = () => {
+    isInputFocusRef.current = false;
     !isMouseOver && setShowSuggestions(false);
   };
 
@@ -63,14 +66,17 @@ function MobileNumberInput({ value, onChange, ...rest }: Props) {
       style={{
         position: 'relative',
       }}
-      onBlur={handleOnBlur}
     >
       <FormControl
         ref={inputRef}
         type="text"
         value={value}
         onChange={handleInputChange}
-        onFocus={() => setShowSuggestions(true)}
+        onFocus={() => {
+          setShowSuggestions(true);
+          isInputFocusRef.current = true;
+        }}
+        onBlur={handleOnBlur}
         {...rest}
       />
       {showSuggestions && suggestions.length > 0 && (
@@ -96,7 +102,10 @@ function MobileNumberInput({ value, onChange, ...rest }: Props) {
               onClick={() => handleSuggestionSelect(suggestion)}
               onKeyDown={handleKeyPress}
               onMouseOver={() => setIsMouseOver(true)}
-              onMouseLeave={() => setIsMouseOver(false)}
+              onMouseLeave={() => {
+                setIsMouseOver(false);
+                !isInputFocusRef.current && setShowSuggestions(false);
+              }}
             >
               {`${suggestion.number} - ${suggestion.name}`}
             </li>
