@@ -196,6 +196,7 @@ const GcashRegisterPage = () => {
         show={showConfirmationModal}
         toggle={setShowConfirmationModal}
         onConfirm={handleSubmit}
+        size="md"
         message={
           <Row className="mb-2">
             <Col>
