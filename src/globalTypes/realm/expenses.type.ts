@@ -4,6 +4,8 @@ export type Expense = {
   amount: number;
   description?: string;
   charge_to_user_id?: string;
+  charge_to_user?: string;
+  status: 'paid' | 'unpaid';
   date_created: Date;
   transact_by: string;
   transact_by_user_id: string;
@@ -15,6 +17,7 @@ export type CreateExpenseRequest = {
   description: string;
   charge_to_user_id?: string;
   charge_to_user?: string;
+  status: 'paid' | 'unpaid';
   transact_by: string;
   transact_by_user_id: string;
 };
@@ -26,9 +29,17 @@ export type CreateExpenseData = {
   charge_to_user_id?: string;
   charge_to_user?: string;
   date_created: Date;
+  status: 'paid' | 'unpaid';
   transact_by: string;
   transact_by_user_id: string;
 };
+
+export type UpdateExpenseRequest = { _id: string } & Partial<
+  Omit<
+    CreateExpenseData,
+    'transact_by' | 'transact_by_user_id' | 'date_created'
+  >
+>;
 
 export type GetExpensesFilter = {
   transactBy?: string;

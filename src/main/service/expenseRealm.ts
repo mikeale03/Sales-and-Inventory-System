@@ -5,6 +5,7 @@ import {
   Expense,
   ExpenseDescriptionJson,
   GetExpensesFilter,
+  UpdateExpenseRequest,
 } from '../../globalTypes/realm/expenses.type';
 import { create } from './realm';
 import { PRODUCTS, openProductsRealm } from './productsRealm';
@@ -25,6 +26,7 @@ export class ExpensesSchema extends Realm.Object<Expense> {
       transact_by_user_id: 'string',
       charge_to_user_id: 'string?',
       charge_to_user: 'string?',
+      status: { type: 'string', default: 'unpaid' },
     },
     primaryKey: '_id',
   };
@@ -35,7 +37,7 @@ export const openExpensesRealm = async () => {
     const realm = await Realm.open({
       path: '../realm/expenses',
       schema: [ExpensesSchema],
-      schemaVersion: 2,
+      schemaVersion: 3,
     });
     return realm;
   } catch (error) {
@@ -224,6 +226,54 @@ export const deleteExpense = async (id: string) => {
     return {
       isSuccess: false,
       message: 'Failed to delete expense',
+      error,
+    };
+  }
+};
+
+export const updateExpense = async (update: UpdateExpenseRequest) => {
+  const realm = await openExpensesRealm();
+
+  if (!realm)
+    return {
+      isSuccess: false,
+      message: 'Error opening realm db',
+    };
+
+  try {
+    const expense = realm.objectForPrimaryKey<Expense>(
+      EXPENSES,
+      new Realm.BSON.ObjectID(update._id)
+    );
+
+    if (!expense) {
+      return {
+        isSuccess: false,
+        message: 'Expense not found',
+      };
+    }
+
+    realm.write(() => {
+      const updateKeys = Object.keys(update) as (keyof UpdateExpenseRequest)[];
+      updateKeys.forEach((key) => {
+        if (key !== '_id') {
+          expense[key] = update[key] as never;
+        }
+      });
+    });
+    const result = expense.toJSON() as Expense;
+    realm.close();
+    return {
+      isSuccess: true,
+      message: 'Successfully updated an expense',
+      result: { ...result, _id: result._id.toString() },
+    };
+  } catch (error) {
+    console.log(error);
+    realm.close();
+    return {
+      isSuccess: false,
+      message: 'Failed to update expense',
       error,
     };
   }

@@ -3,11 +3,13 @@ import { Channels } from '../../globalTypes/channels/expensesChannels';
 import {
   CreateExpenseRequest,
   GetExpensesFilter,
+  UpdateExpenseRequest,
 } from '../../globalTypes/realm/expenses.type';
 import {
   createExpense,
   deleteExpense,
   getExpenses,
+  updateExpense,
 } from '../service/expenseRealm';
 
 const setExpensesEventHandler = (ipcMain: IpcMain) => {
@@ -29,6 +31,13 @@ const setExpensesEventHandler = (ipcMain: IpcMain) => {
     Channels.delete,
     async (event: IpcMainInvokeEvent, id: string) => {
       const result = await deleteExpense(id);
+      return result;
+    }
+  );
+  ipcMain.handle(
+    Channels.update,
+    async (event: IpcMainInvokeEvent, data: UpdateExpenseRequest) => {
+      const result = await updateExpense(data);
       return result;
     }
   );
