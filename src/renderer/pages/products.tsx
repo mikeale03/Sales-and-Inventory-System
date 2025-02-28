@@ -56,6 +56,7 @@ const ProductsPage = () => {
       const prods = data ?? [];
       setTotalPages(Math.ceil(prods.length / pageSize));
       setProducts(prods);
+      setPageNumber(1);
     }
   }, [pageSize, filter, searchText]);
 
