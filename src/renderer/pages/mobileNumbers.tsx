@@ -1,8 +1,8 @@
 import { faPenToSquare, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { MobileNumber } from 'globalTypes/realm/mobileNumber.types';
-import { useEffect, useState } from 'react';
-import { Button, Card, Table } from 'react-bootstrap';
+import { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { Button, Card, Col, FormControl, Row, Table } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import ConfirmationModal from 'renderer/components/common/modals/confirmation';
 import SetMobileNumberModal from 'renderer/components/mobileNumbers/setMobileNumberModal';
@@ -10,6 +10,7 @@ import {
   getMobileNumbers,
   deleteMobileNumber,
 } from 'renderer/service/mobileNumbers';
+import { debounce } from 'renderer/utils/helper';
 
 function MobileNumbersPage() {
   const [mobileNumbers, setMobileNumbers] = useState<MobileNumber[]>([]);
@@ -19,6 +20,9 @@ function MobileNumbersPage() {
     MobileNumber | undefined
   >();
   const [searchText, setSearchText] = useState('');
+  const [pageSize] = useState(50);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
 
   const handleDeleteMobileNumber = async () => {
     if (!selectedMobileNumber) return;
@@ -54,16 +58,32 @@ function MobileNumbersPage() {
     setMobileNumberModal(true);
   };
 
+  const handleGetMobileNumbers = useCallback(async () => {
+    const response = await getMobileNumbers(searchText);
+    if (response.isSuccess) {
+      const data = response.result;
+      const mns = data ?? [];
+      setTotalPages(Math.ceil(mns.length / pageSize));
+      setMobileNumbers(mns);
+      setPageNumber(1);
+    } else {
+      toast.error(response.message);
+    }
+  }, [pageSize, searchText]);
+
+  const displayMobileNumbers = useMemo(() => {
+    const startIndex = (pageNumber - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    return mobileNumbers.slice(startIndex, endIndex);
+  }, [pageNumber, pageSize, mobileNumbers]);
+
+  const handleSearchText = debounce((e: ChangeEvent<HTMLInputElement>) => {
+    setSearchText(e.target.value.trim());
+  }, 500);
+
   useEffect(() => {
-    (async () => {
-      const response = await getMobileNumbers(searchText);
-      if (response.isSuccess && response.result) {
-        setMobileNumbers(response.result);
-      } else {
-        toast.error(response.message);
-      }
-    })();
-  }, [searchText]);
+    handleGetMobileNumbers();
+  }, [handleGetMobileNumbers]);
 
   return (
     <div>
@@ -93,6 +113,15 @@ function MobileNumbersPage() {
 
       <Card>
         <Card.Body>
+          <Row className="mb-3">
+            <Col md="6">
+              <FormControl
+                type="search"
+                placeholder="Search name or number"
+                onChange={handleSearchText}
+              />
+            </Col>
+          </Row>
           <Table responsive hover>
             <thead>
               <tr>
@@ -102,7 +131,7 @@ function MobileNumbersPage() {
               </tr>
             </thead>
             <tbody>
-              {mobileNumbers.map((number) => (
+              {displayMobileNumbers.map((number) => (
                 <tr key={number.number}>
                   <td>{number.number}</td>
                   <td>{number.name}</td>
@@ -137,6 +166,23 @@ function MobileNumbersPage() {
           )}
         </Card.Body>
       </Card>
+      <div className="d-flex justify-content-between align-items-center">
+        <Button
+          variant="outline-primary"
+          onClick={() => pageNumber > 1 && setPageNumber(pageNumber - 1)}
+        >
+          Previous
+        </Button>
+        <p className="pt-3 fw-bold">{pageNumber}</p>
+        <Button
+          variant="outline-primary"
+          onClick={() =>
+            pageNumber < totalPages && setPageNumber(pageNumber + 1)
+          }
+        >
+          Next
+        </Button>
+      </div>
     </div>
   );
 }
