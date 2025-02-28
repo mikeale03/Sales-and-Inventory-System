@@ -1,4 +1,4 @@
-import { faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import { faMoneyBill, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { format } from 'date-fns';
 import {
@@ -13,7 +13,11 @@ import ConfirmationModal from 'renderer/components/common/modals/confirmation';
 import AddExpenseModal from 'renderer/components/expenses/addExpenseModal';
 import ExpensesFilter from 'renderer/components/expenses/expensesFilter';
 import ItemChargeDescription from 'renderer/components/expenses/itemChargeDesciption';
-import { getExpenses, deleteExpense } from 'renderer/service/expenses';
+import {
+  getExpenses,
+  deleteExpense,
+  updateExpense,
+} from 'renderer/service/expenses';
 import { pesoFormat } from 'renderer/utils/helper';
 
 function ExpensesPage() {
@@ -47,10 +51,26 @@ function ExpensesPage() {
     setShowConfirmationModal(true);
   };
 
+  const handleMarkPaidUnpaid = async (exp: Expense) => {
+    const response = await updateExpense({
+      _id: exp._id,
+      status: exp.status === 'paid' ? 'unpaid' : 'paid',
+    });
+    if (response.isSuccess) {
+      const newExpense = expenses.map((item) =>
+        item._id === response.result?._id ? response.result : item
+      );
+      setExpenses(newExpense);
+    } else {
+      toast.error(response.message);
+    }
+  };
+
   useEffect(() => {
     let amount = 0;
     (async () => {
       const response = await getExpenses(filter);
+      console.log(response);
       if (response.isSuccess && response.result) {
         response.result.forEach((exp) => {
           amount += exp.amount;
@@ -96,6 +116,7 @@ function ExpensesPage() {
                 <th>Description</th>
                 <th>Date</th>
                 <th>Transact By</th>
+                <th>Status</th>
                 <th> </th>
               </tr>
             </thead>
@@ -121,7 +142,23 @@ function ExpensesPage() {
                     {format(new Date(exp.date_created), 'MM/dd/yyyy hh:mm aaa')}
                   </td>
                   <td>{exp.transact_by}</td>
+                  <td>{exp.status || 'unpaid'}</td>
                   <td>
+                    <FontAwesomeIcon
+                      onClick={() => handleMarkPaidUnpaid(exp)}
+                      icon={faMoneyBill}
+                      title={`Mark as ${
+                        exp.status === 'paid' ? 'Unpaid' : 'Paid'
+                      }`}
+                      size="xl"
+                      className={`me-2 ${
+                        exp.status !== 'paid'
+                          ? 'cursor-pointer'
+                          : 'text-secondary'
+                      }`}
+                      role="button"
+                      tabIndex={0}
+                    />
                     <FontAwesomeIcon
                       onClick={() => handleShowConfirmationModal(exp)}
                       icon={faTrashCan}
