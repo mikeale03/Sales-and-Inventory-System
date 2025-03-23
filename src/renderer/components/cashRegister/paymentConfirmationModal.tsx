@@ -136,6 +136,7 @@ const PaymentConfirmationModal = ({
       amount: total,
       description: JSON.stringify(description),
       charge_to_user_id: selectedUser._id,
+      status: 'unpaid',
       transact_by: user.username,
       transact_by_user_id: user._id,
     });

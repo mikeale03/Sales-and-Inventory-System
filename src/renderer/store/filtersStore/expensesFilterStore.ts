@@ -7,6 +7,7 @@ interface State {
     selectedPeriod: string;
     startDate: Date;
     endDate: Date;
+    status?: 'paid' | 'unpaid';
   };
   setState: (update: Partial<State['state']>) => void;
 }

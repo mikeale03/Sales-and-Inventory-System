@@ -1,7 +1,10 @@
 import { useEffect, useState, ChangeEvent } from 'react';
 import { Col, FormLabel, FormSelect, Row } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
-import { GetExpensesFilter } from 'globalTypes/realm/expenses.type';
+import {
+  ExpenseStatus,
+  GetExpensesFilter,
+} from 'globalTypes/realm/expenses.type';
 import UsersSelect from 'renderer/components/common/selects/usersSelect';
 import useExpensesFilterStore from 'renderer/store/filtersStore/expensesFilterStore';
 import ExpenseTypeSelect from './expenseTypeSelect';
@@ -29,7 +32,7 @@ const ExpensesFilter = ({ onFilter }: Props) => {
   const [type, setType] = useState('all');
 
   useEffect(() => {
-    const { userOption, startDate, endDate } = filter;
+    const { userOption, startDate, endDate, status } = filter;
 
     let excludeItemCharge = false;
     let chargeToUser;
@@ -52,6 +55,7 @@ const ExpensesFilter = ({ onFilter }: Props) => {
       endDate,
       excludeItemCharge,
       chargeToUser,
+      status,
     });
   }, [filter, onFilter, type]);
 
@@ -156,6 +160,19 @@ const ExpensesFilter = ({ onFilter }: Props) => {
         </Col>
       </Row>
       <Row>
+        <Col lg="2">
+          <FormLabel>Status</FormLabel>
+          <FormSelect
+            value={filter.status ?? ''}
+            onChange={(e) =>
+              setFilter({ ...filter, status: e.target.value as ExpenseStatus })
+            }
+          >
+            <option value="">All</option>
+            <option value="unpaid">Unpaid</option>
+            <option value="paid">Paid</option>
+          </FormSelect>
+        </Col>
         <Col lg="2" className="mb-3">
           <FormLabel>Start {isDaily ? 'Time' : 'Date'}</FormLabel>
           <StartEndDatePicker
