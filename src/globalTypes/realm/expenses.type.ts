@@ -1,3 +1,5 @@
+export type ExpenseStatus = 'paid' | 'unpaid';
+
 export type Expense = {
   _id: string;
   type: string;
@@ -41,12 +43,20 @@ export type UpdateExpenseRequest = { _id: string } & Partial<
   >
 >;
 
+export type UpdateExpensesRequest = ({ _id: string } & Partial<
+  Omit<
+    CreateExpenseData,
+    'transact_by' | 'transact_by_user_id' | 'date_created'
+  >
+>)[];
+
 export type GetExpensesFilter = {
   transactBy?: string;
   startDate?: Date;
   endDate?: Date;
   excludeItemCharge?: boolean;
   chargeToUser?: string;
+  status?: 'paid' | 'unpaid';
 };
 
 export type ExpenseItem = {

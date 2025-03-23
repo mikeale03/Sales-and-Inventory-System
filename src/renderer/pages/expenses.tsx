@@ -6,8 +6,8 @@ import {
   ExpenseDescriptionJson,
   GetExpensesFilter,
 } from 'globalTypes/realm/expenses.type';
-import { useCallback, useEffect, useState } from 'react';
-import { Button, Card, Table } from 'react-bootstrap';
+import { ChangeEvent, useCallback, useEffect, useState } from 'react';
+import { Button, Card, FormCheck, Table } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import ConfirmationModal from 'renderer/components/common/modals/confirmation';
 import AddExpenseModal from 'renderer/components/expenses/addExpenseModal';
@@ -17,8 +17,11 @@ import {
   getExpenses,
   deleteExpense,
   updateExpense,
+  updateExpenses,
 } from 'renderer/service/expenses';
 import { pesoFormat } from 'renderer/utils/helper';
+
+type LocalExpense = Expense & { isChecked?: boolean };
 
 function ExpensesPage() {
   const [filter, setFilter] = useState<GetExpensesFilter>({
@@ -27,15 +30,32 @@ function ExpensesPage() {
     endDate: new Date(new Date().setHours(23, 59, 59, 999)),
   });
 
-  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [expenses, setExpenses] = useState<LocalExpense[]>([]);
   const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>();
   const [totalAmount, setTotalAmount] = useState(0);
+  const [isCheckAll, setIsCheckAll] = useState(false);
 
   const onFilter = useCallback((filterValue: GetExpensesFilter) => {
     setFilter({ ...filterValue });
   }, []);
+
+  const handleGetExpenses = useCallback(async () => {
+    let amount = 0;
+    const response = await getExpenses(filter);
+    setIsCheckAll(false);
+
+    if (response.isSuccess && response.result) {
+      response.result.forEach((exp) => {
+        amount += exp.amount;
+      });
+      setExpenses(response.result);
+      setTotalAmount(amount);
+    } else {
+      toast.error(response.message);
+    }
+  }, [filter]);
 
   const handleDeleteExpense = async () => {
     if (!selectedExpense) return;
@@ -66,22 +86,34 @@ function ExpensesPage() {
     }
   };
 
+  const handleMarkPaidUnpaidMany = async (status: 'paid' | 'unpaid') => {
+    const response = await updateExpenses(
+      expenses.filter((v) => v.isChecked).map((v) => ({ ...v, status }))
+    );
+    if (response.isSuccess) {
+      handleGetExpenses();
+    } else {
+      toast.error(response.message);
+    }
+  };
+
+  const handleToggleCheck = async (exp: Expense & { isChecked?: boolean }) => {
+    setExpenses(
+      expenses.map((item) =>
+        item._id === exp._id ? { ...item, isChecked: !exp.isChecked } : item
+      )
+    );
+  };
+
+  const handleToggleCheckAll = async (e: ChangeEvent<HTMLInputElement>) => {
+    const { checked } = e.target;
+    setExpenses(expenses.map((item) => ({ ...item, isChecked: checked })));
+    setIsCheckAll(!isCheckAll);
+  };
+
   useEffect(() => {
-    let amount = 0;
-    (async () => {
-      const response = await getExpenses(filter);
-      console.log(response);
-      if (response.isSuccess && response.result) {
-        response.result.forEach((exp) => {
-          amount += exp.amount;
-        });
-        setExpenses(response.result);
-        setTotalAmount(amount);
-      } else {
-        toast.error(response.message);
-      }
-    })();
-  }, [filter]);
+    handleGetExpenses();
+  }, [handleGetExpenses]);
 
   return (
     <div>
@@ -106,11 +138,33 @@ function ExpensesPage() {
       <ExpensesFilter onFilter={onFilter} />
       <Card>
         <Card.Body>
-          <p className="m-0">Total Amount: {pesoFormat(totalAmount)}</p>
+          <p className="m-0 mb-2">Total Amount: {pesoFormat(totalAmount)}</p>
+          <div className="d-flex align-items-center">
+            <FormCheck
+              className="me-3"
+              checked={isCheckAll}
+              onChange={handleToggleCheckAll}
+            />
+            <Button
+              variant="outline-primary"
+              className="me-2"
+              onClick={() => handleMarkPaidUnpaidMany('paid')}
+            >
+              Mark Selected as Paid
+            </Button>
+            <Button
+              variant="outline-primary"
+              className="me-2"
+              onClick={() => handleMarkPaidUnpaidMany('unpaid')}
+            >
+              Mark Selected as Unpaid
+            </Button>
+          </div>
           <hr />
           <Table responsive hover>
             <thead>
               <tr>
+                <th> </th>
                 <th>Type</th>
                 <th>Amount</th>
                 <th>Description</th>
@@ -123,6 +177,12 @@ function ExpensesPage() {
             <tbody>
               {expenses.map((exp) => (
                 <tr key={exp._id}>
+                  <td>
+                    <FormCheck
+                      checked={exp.isChecked ?? false}
+                      onChange={() => handleToggleCheck(exp)}
+                    />
+                  </td>
                   <td>{exp.type}</td>
                   <td>{pesoFormat(exp.amount)}</td>
                   <td>

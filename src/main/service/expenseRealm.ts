@@ -6,6 +6,7 @@ import {
   ExpenseDescriptionJson,
   GetExpensesFilter,
   UpdateExpenseRequest,
+  UpdateExpensesRequest,
 } from '../../globalTypes/realm/expenses.type';
 import { create } from './realm';
 import { PRODUCTS, openProductsRealm } from './productsRealm';
@@ -118,6 +119,7 @@ export const getExpenses = async (filter?: GetExpensesFilter) => {
     const excludeItemCharge = filter?.excludeItemCharge;
     const startDate = filter?.startDate;
     const endDate = filter?.endDate;
+    const status = filter?.status;
 
     const query: string[] = [];
     const args = [];
@@ -145,6 +147,11 @@ export const getExpenses = async (filter?: GetExpensesFilter) => {
       query.push(`date_created <= $${args.length}`);
       args.push(endDate);
     }
+    if (status) {
+      query.push(`status == $${args.length}`);
+      args.push(status);
+    }
+
     expenses = args.length
       ? expenses.filtered(query.join(' && '), ...args)
       : expenses;
@@ -274,6 +281,70 @@ export const updateExpense = async (update: UpdateExpenseRequest) => {
     return {
       isSuccess: false,
       message: 'Failed to update expense',
+      error,
+    };
+  }
+};
+
+export const updateExpenses = async (updates: UpdateExpensesRequest) => {
+  const realm = await openExpensesRealm();
+
+  if (!realm)
+    return {
+      isSuccess: false,
+      message: 'Error opening realm db',
+    };
+
+  const idsMap = new Map<string, UpdateExpenseRequest>();
+
+  const ids = updates.map((v) => {
+    idsMap.set(v._id, v);
+
+    return new Realm.BSON.ObjectID(v._id);
+  });
+
+  try {
+    const expenses = realm
+      .objects<Expense>(EXPENSES)
+      .filtered(`_id IN {${ids.map((v, i) => `$${i}`)}}`, ...ids);
+
+    realm.write(() => {
+      for (const expense of expenses) {
+        const update = idsMap.get(expense._id.toString());
+
+        if (!update) {
+          // eslint-disable-next-line no-continue
+          continue;
+        }
+
+        const updateKeys = Object.keys(
+          update
+        ) as (keyof UpdateExpenseRequest)[];
+
+        updateKeys.forEach((key) => {
+          if (key !== '_id') {
+            expense[key] = update[key] as never;
+          }
+        });
+      }
+    });
+
+    const result = expenses.toJSON() as Expense[];
+    realm.close();
+    return {
+      isSuccess: true,
+      message: 'Successfully updated an expenses',
+      result: result.map((v) => ({
+        ...v,
+        _id: v._id.toString(),
+      })),
+    };
+  } catch (error) {
+    console.log(error);
+    realm.close();
+    return {
+      isSuccess: false,
+      message: 'Failed to update expenses',
       error,
     };
   }

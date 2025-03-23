@@ -4,6 +4,7 @@ import {
   Expense,
   GetExpensesFilter,
   UpdateExpenseRequest,
+  UpdateExpensesRequest,
 } from 'globalTypes/realm/expenses.type';
 import { Response } from 'globalTypes/realm/response.types';
 
@@ -22,6 +23,14 @@ export const createExpense = async (params: CreateExpenseRequest) => {
 export const updateExpense = async (params: UpdateExpenseRequest) => {
   const response = await ipcRenderer.invoke<Response<Expense>>(
     Channels.update,
+    params
+  );
+  return response;
+};
+
+export const updateExpenses = async (params: UpdateExpensesRequest) => {
+  const response = await ipcRenderer.invoke<Response<Expense[]>>(
+    Channels.updateMany,
     params
   );
   return response;
