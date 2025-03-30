@@ -24,6 +24,7 @@ import setCategoriesEventHandler from './eventHandlers/categories';
 import setTagsEventHandler from './eventHandlers/tags';
 import setMobileLoadEventHandler from './eventHandlers/mobileLoads';
 import setMobileNumbersEventHandler from './eventHandlers/mobileNumbers';
+import setGcashAccountsEventHandler from './eventHandlers/gcashAccounts';
 
 class AppUpdater {
   constructor() {
@@ -51,6 +52,7 @@ setCategoriesEventHandler(ipcMain);
 setTagsEventHandler(ipcMain);
 setMobileLoadEventHandler(ipcMain);
 setMobileNumbersEventHandler(ipcMain);
+setGcashAccountsEventHandler(ipcMain);
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');

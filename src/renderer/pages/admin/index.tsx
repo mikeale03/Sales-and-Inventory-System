@@ -30,6 +30,14 @@ const AdminPage = () => {
                 Tags
               </Link>
             </Col>
+            <Col lg="4">
+              <p className="mb-0">
+                <strong>Manage GCash Accounts</strong>
+              </p>
+              <Link to="gcash-accounts" className="d-block">
+                GCash Accounts
+              </Link>
+            </Col>
           </Row>
         </Card.Body>
       </Card>
