@@ -3,12 +3,18 @@ import { Gcash } from '../../../globalTypes/realm/gcash.types';
 
 export const getGcashBeforeDate = (
   gcashObjects: Realm.Results<Gcash>,
-  date: Date
+  date: Date,
+  account_number?: string
 ) => {
+  const args: (null | Date | string)[] = [null, date];
+  if (account_number) {
+    args.push(account_number);
+  }
   const result = gcashObjects.filtered(
-    'date_transacted != $0 AND date_transacted <= $1 SORT(date_transacted DESC, date_created DESC) LIMIT(1)',
-    null,
-    date
+    `date_transacted != $0 AND date_transacted <= $1 ${
+      account_number ? 'AND account_number == $3' : ''
+    } SORT(date_transacted DESC, date_created DESC) LIMIT(1)`,
+    ...args
   );
 
   return result.length ? result[0] : null;
@@ -18,12 +24,20 @@ export const addBalanceFromDate = (
   gcashRealm: Realm,
   gcashObjects: Realm.Results<Gcash>,
   date: Date,
-  amount: number
+  amount: number,
+  account_number?: string
 ) => {
+  const args: (null | Date | string)[] = [null, date];
+
+  if (account_number) {
+    args.push(account_number);
+  }
+
   const transactions = gcashObjects.filtered(
-    'date_transacted != $0 AND date_transacted > $1',
-    null,
-    date
+    `date_transacted != $0 AND date_transacted > $1 ${
+      account_number ? 'AND account_number == $3' : ''
+    }`,
+    ...args
   );
   gcashRealm.write(() => {
     for (const tran of transactions) {
@@ -39,12 +53,20 @@ export const deductBalanceFromDate = (
   gcashRealm: Realm,
   gcashObjects: Realm.Results<Gcash>,
   date: Date,
-  amount: number
+  amount: number,
+  account_number?: string
 ) => {
+  const args: (null | Date | string)[] = [null, date];
+
+  if (account_number) {
+    args.push(account_number);
+  }
+
   const transactions = gcashObjects.filtered(
-    'date_transacted != $0 AND date_transacted > $1',
-    null,
-    date
+    `date_transacted != $0 AND date_transacted > $1 ${
+      account_number ? 'AND account_number == $3' : ''
+    }`,
+    ...args
   );
   gcashRealm.write(() => {
     for (const tran of transactions) {
@@ -65,17 +87,23 @@ export const adjustBalanceOnDelete = (
     date_created,
     date_transacted,
     gcash_balance: itemBalance,
+    account_number,
   } = gcashItem;
 
   if (!date_transacted) return;
 
+  const args: (null | Date | string)[] = [null, date_transacted, date_created];
+
+  if (account_number) {
+    args.push(account_number);
+  }
+
   const result = gcashObjects.filtered(
     `date_transacted != $0 AND
     ( date_transacted < $1 OR (date_transacted == $1 AND date_created < $2) )
+    ${account_number ? 'AND account_number == $3' : ''}
     SORT(date_transacted DESC, date_created DESC) LIMIT(1)`,
-    null,
-    date_transacted,
-    date_created
+    ...args
   );
 
   const { gcash_balance = 0 } = result.length ? result[0] : {};

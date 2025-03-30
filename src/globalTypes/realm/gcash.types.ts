@@ -24,6 +24,7 @@ export type Gcash = {
   charge_payment: 'cash' | 'gcash';
   note?: string;
   gcash_balance: number;
+  account_number?: string;
 };
 
 export type GetGcashTransResponse = Gcash & { numberName: string };
@@ -47,4 +48,5 @@ export type GcashTransFilter = {
   endDate?: Date;
   number?: string;
   type?: GcashTransFilterType;
+  accountNumber?: string;
 };

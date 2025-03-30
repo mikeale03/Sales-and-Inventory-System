@@ -6,13 +6,20 @@ import {
   ExpenseDescriptionJson,
   GetExpensesFilter,
 } from 'globalTypes/realm/expenses.type';
-import { ChangeEvent, useCallback, useEffect, useState } from 'react';
+import {
+  ChangeEvent,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import { Button, Card, FormCheck, Table } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import ConfirmationModal from 'renderer/components/common/modals/confirmation';
 import AddExpenseModal from 'renderer/components/expenses/addExpenseModal';
 import ExpensesFilter from 'renderer/components/expenses/expensesFilter';
 import ItemChargeDescription from 'renderer/components/expenses/itemChargeDesciption';
+import UserContext from 'renderer/context/userContext';
 import {
   getExpenses,
   deleteExpense,
@@ -36,6 +43,7 @@ function ExpensesPage() {
   const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>();
   const [totalAmount, setTotalAmount] = useState(0);
   const [isCheckAll, setIsCheckAll] = useState(false);
+  const { user } = useContext(UserContext);
 
   const onFilter = useCallback((filterValue: GetExpensesFilter) => {
     setFilter({ ...filterValue });
@@ -204,21 +212,23 @@ function ExpensesPage() {
                   <td>{exp.transact_by}</td>
                   <td>{exp.status || 'unpaid'}</td>
                   <td>
-                    <FontAwesomeIcon
-                      onClick={() => handleMarkPaidUnpaid(exp)}
-                      icon={faMoneyBill}
-                      title={`Mark as ${
-                        exp.status === 'paid' ? 'Unpaid' : 'Paid'
-                      }`}
-                      size="xl"
-                      className={`me-2 ${
-                        exp.status !== 'paid'
-                          ? 'cursor-pointer'
-                          : 'text-secondary'
-                      }`}
-                      role="button"
-                      tabIndex={0}
-                    />
+                    {user?.role === 'admin' && (
+                      <FontAwesomeIcon
+                        onClick={() => handleMarkPaidUnpaid(exp)}
+                        icon={faMoneyBill}
+                        title={`Mark as ${
+                          exp.status === 'paid' ? 'Unpaid' : 'Paid'
+                        }`}
+                        size="xl"
+                        className={`me-2 ${
+                          exp.status !== 'paid'
+                            ? 'cursor-pointer'
+                            : 'text-secondary'
+                        }`}
+                        role="button"
+                        tabIndex={0}
+                      />
+                    )}
                     <FontAwesomeIcon
                       onClick={() => handleShowConfirmationModal(exp)}
                       icon={faTrashCan}

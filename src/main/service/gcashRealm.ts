@@ -42,6 +42,7 @@ export class GcashSchema extends Realm.Object<Gcash> {
       related_gcash_id: 'string?',
       note: 'string?',
       gcash_balance: 'float',
+      account_number: 'string?',
     },
     primaryKey: '_id',
   };
@@ -52,7 +53,7 @@ export const openGcashRealm = async () => {
     const realm = await Realm.open({
       path: '../realm/gcash',
       schema: [GcashSchema],
-      schemaVersion: 6,
+      schemaVersion: 7,
     });
     return realm;
   } catch (error) {
@@ -74,11 +75,17 @@ export const createGcashTransactions = async (
   const sales: Omit<Sales, '_id'>[] = [];
   try {
     gcashTrans.forEach((gcashTran) => {
-      const { date_transacted, type, amount, charge_payment, charge } =
-        gcashTran;
+      const {
+        date_transacted,
+        type,
+        amount,
+        charge_payment,
+        charge,
+        account_number,
+      } = gcashTran;
       const gcashObjects = realm.objects<Gcash>(GCASH);
       const { gcash_balance = 0 } =
-        getGcashBeforeDate(gcashObjects, date_transacted) ?? {};
+        getGcashBeforeDate(gcashObjects, date_transacted, account_number) ?? {};
 
       let balance = gcash_balance;
 
@@ -88,13 +95,25 @@ export const createGcashTransactions = async (
         type === 'mobile load'
       ) {
         balance = +(gcash_balance - amount).toFixed(2);
-        deductBalanceFromDate(realm, gcashObjects, date_transacted, amount);
+        deductBalanceFromDate(
+          realm,
+          gcashObjects,
+          date_transacted,
+          amount,
+          account_number
+        );
       } else if (type === 'cash out' || type === 'add balance') {
         const totalAmount =
           charge_payment === 'gcash' ? charge + amount : amount;
 
         balance = +(gcash_balance + totalAmount).toFixed(2);
-        addBalanceFromDate(realm, gcashObjects, date_transacted, totalAmount);
+        addBalanceFromDate(
+          realm,
+          gcashObjects,
+          date_transacted,
+          totalAmount,
+          account_number
+        );
       }
 
       const data = {
@@ -171,7 +190,15 @@ export const createGcashTransactions = async (
 };
 
 export const createGcashTransQuery = (filter: GcashTransFilter) => {
-  const { transactBy, startDate, endDate, number, type, dateFilter } = filter;
+  const {
+    transactBy,
+    startDate,
+    endDate,
+    number,
+    type,
+    dateFilter,
+    accountNumber,
+  } = filter;
   const query: string[] = [];
   const params = [];
   const dateField =
@@ -193,6 +220,10 @@ export const createGcashTransQuery = (filter: GcashTransFilter) => {
   if (type) {
     query.push(`type == $${params.length}`);
     params.push(type);
+  }
+  if (accountNumber) {
+    query.push(`account_number == $${params.length}`);
+    params.push(accountNumber);
   }
   if (startDate) {
     query.push(`${dateField} >= $${params.length}`);
