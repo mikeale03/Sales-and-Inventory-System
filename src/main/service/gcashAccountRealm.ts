@@ -112,16 +112,16 @@ export const updateGcashAccount = async (
   }
 
   try {
-    const number = realm.objectForPrimaryKey<GcashAccount>(
+    const account = realm.objectForPrimaryKey<GcashAccount>(
       GCASH_ACCOUNT,
       accountNumber
     );
-    if (!number)
+    if (!account)
       return {
         isSuccess: false,
         message: 'Number not found',
       };
-    if (updates.number !== number.number) {
+    if (updates.number !== account.number) {
       const duplicateNumber = realm.objectForPrimaryKey<GcashAccount>(
         GCASH_ACCOUNT,
         updates.number
@@ -135,11 +135,13 @@ export const updateGcashAccount = async (
     }
 
     realm.write(() => {
-      number.number = updates.number;
-      number.name = updates.name;
+      account.number = updates.number;
+      account.name = updates.name;
+      account.mpin = updates.mpin;
+      account.email = updates.email;
     });
 
-    const result = number.toJSON();
+    const result = account.toJSON();
     realm.close();
 
     return {
@@ -191,6 +193,7 @@ export const deleteGcashAccount = async (number: string) => {
     };
   } catch (error) {
     realm.close();
+    console.log(error);
     return {
       isSucces: false,
       message: 'Failed to delete Gcash Account',
