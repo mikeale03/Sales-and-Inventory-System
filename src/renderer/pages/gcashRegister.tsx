@@ -44,7 +44,7 @@ const GcashRegisterPage = () => {
   const [totalAddBalance, setTotalAddBalance] = useState(0);
   const [totalDeductBalance, setTotalDeductBalance] = useState(0);
   const [gcashBalance, setGcashBalance] = useState(0);
-  const [balances, setBalances] = useState<number[]>([]);
+  // const [balances, setBalances] = useState<number[]>([]);
 
   const { user } = useContext(UserContext);
 
@@ -101,7 +101,7 @@ const GcashRegisterPage = () => {
     setTotalAddBalance(tAddBalance);
     setTotalDeductBalance(tDeductBalance);
     setTotalAmount(tAmount);
-    setBalances(balanceArr);
+    // setBalances(balanceArr);
   }, [items, gcashBalance]);
 
   const handleSetCashInCashOutModal = (_type: GcashType, item?: GCashItem) => {
@@ -319,7 +319,7 @@ const GcashRegisterPage = () => {
 
       <Card>
         <Card.Body>
-          <div className="d-xl-flex justify-content-between">
+          {/* <div className="d-xl-flex justify-content-between">
             <p className="mx-2 my-2">
               Starting Balance: {pesoFormat(gcashBalance)}
             </p>
@@ -327,7 +327,7 @@ const GcashRegisterPage = () => {
               Resulting Balance:{' '}
               {pesoFormat(balances[balances.length - 1] ?? gcashBalance)}
             </p>
-          </div>
+          </div> */}
           <Table responsive hover>
             <thead>
               <tr>
@@ -337,13 +337,13 @@ const GcashRegisterPage = () => {
                 <th>Type</th>
                 <th>Total</th>
                 <th>Date Transacted</th>
-                <th>GCash Balance</th>
+                {/* <th>GCash Balance</th> */}
                 <th>Note</th>
                 <th> </th>
               </tr>
             </thead>
             <tbody>
-              {items.map((item, index) => (
+              {items.map((item) => (
                 <tr key={`${item.key}`}>
                   <td>{item.number}</td>
                   <td>{pesoFormat(item.amount)}</td>
@@ -368,7 +368,7 @@ const GcashRegisterPage = () => {
                   </td>
                   <td>{pesoFormat(item.amount + item.charge)}</td>
                   <td>{format(item.date_transacted, 'MM/dd/yyyy h:mm aa')}</td>
-                  <td>{pesoFormat(balances[index])}</td>
+                  {/* <td>{pesoFormat(balances[index])}</td> */}
                   <td>{item.note}</td>
                   <td className="align-middle text-center">
                     <FontAwesomeIcon

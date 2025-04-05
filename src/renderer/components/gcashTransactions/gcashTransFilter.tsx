@@ -11,6 +11,7 @@ import { getUsers } from 'renderer/service/users';
 import useGcashFilterStore from 'renderer/store/filtersStore/gcashFilterStore';
 import StartEndDatePicker from '../common/startEndDatePicker';
 import ShiftSelect from '../common/selects/shiftSelect';
+import GcashAccountFilterSelect from '../common/selects/gcashAccountFilterSelect';
 
 const GcashTransFilter = () => {
   const { user } = useContext(UserContext);
@@ -205,6 +206,9 @@ const GcashTransFilter = () => {
               setGcashTransFilter({ ...gcashTransFilter, ...update })
             }
           />
+        </Col>
+        <Col lg="2" className="mb-3">
+          <GcashAccountFilterSelect />
         </Col>
       </Row>
     </>

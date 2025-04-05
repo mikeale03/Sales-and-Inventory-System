@@ -10,7 +10,10 @@ import { useState, FormEvent } from 'react';
 import { Button, Modal, Form, FormSelect, FormControl } from 'react-bootstrap';
 import ReactDatePicker from 'react-datepicker';
 import { pesoFormat } from 'renderer/utils/helper';
+import useGcashAccountStore from 'renderer/store/gcashAccountsStore';
+import useSelectedGcashAccountStore from 'renderer/store/selectedGcashAccountStore';
 import MobileNumberInput from '../common/forms/mobileNumberInput';
+import GcashAccountSelect from '../common/selects/gcashAccountSelect';
 
 type Type = 'cash in' | 'cash out' | 'add balance' | 'deduct balance';
 
@@ -26,6 +29,7 @@ type GCashForm = {
 
 export type GCashItem = {
   key?: number;
+  account_number?: string;
   number: string;
   amount: number;
   charge: number;
@@ -66,6 +70,11 @@ const SetCashInOutModal = ({
   const [item, setItem] = useState<GCashForm>(initItem);
   const [isEditCharge, setIsEditCharge] = useState(false);
 
+  const { gcashAccounts } = useGcashAccountStore((state) => state);
+  const { selectedGcashAccount } = useSelectedGcashAccountStore(
+    (state) => state
+  );
+
   const handleCancel = () => {
     toggle(false);
     onCancel?.();
@@ -75,7 +84,10 @@ const SetCashInOutModal = ({
     e.stopPropagation();
     e.preventDefault();
     toggle(false);
+
+    const { number: account_number } = selectedGcashAccount || {};
     const { type: typ, amount, charge_payment, charge, date_transacted } = item;
+
     if (!date_transacted) return;
     if (
       (typ === 'cash in' || typ === 'cash out') &&
@@ -88,6 +100,7 @@ const SetCashInOutModal = ({
         type: typ,
         charge_payment,
         charge: +charge,
+        account_number,
       });
   };
 
@@ -102,7 +115,6 @@ const SetCashInOutModal = ({
     if (update.date_transacted && update.date_transacted > new Date()) {
       update.date_transacted = new Date();
     }
-
     setItem({ ...item, ...update });
   };
 
@@ -133,6 +145,7 @@ const SetCashInOutModal = ({
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          {gcashAccounts.length > 0 && <GcashAccountSelect />}
           <Form.Group className="mb-3">
             <Form.Label>
               GCash Number <span className="text-danger">*</span>

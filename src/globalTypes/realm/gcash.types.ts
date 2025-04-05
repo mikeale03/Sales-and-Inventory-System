@@ -27,7 +27,10 @@ export type Gcash = {
   account_number?: string;
 };
 
-export type GetGcashTransResponse = Gcash & { numberName: string };
+export type GetGcashTransResponse = Gcash & {
+  numberName: string;
+  accountName?: string | null;
+};
 
 export type GcashCreate = Omit<
   Gcash,

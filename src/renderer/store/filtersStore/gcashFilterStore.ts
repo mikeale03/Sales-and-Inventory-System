@@ -9,6 +9,7 @@ interface State {
     selectedDateFilter: 'Date Transacted' | 'Date Created';
     startDate: Date;
     endDate: Date;
+    accountNumber: string;
   };
   setState: (update: Partial<State['state']>) => void;
 }
@@ -38,6 +39,7 @@ const useGcashFilterStore = create<State>((set) => ({
     selectedType: undefined,
     startDate,
     endDate,
+    accountNumber: '',
   },
   setState: (update) =>
     set((state) => ({ state: { ...state.state, ...update } })),

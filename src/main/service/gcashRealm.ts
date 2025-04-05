@@ -1,6 +1,7 @@
 /* eslint-disable lines-between-class-members */
 import { Sales } from 'globalTypes/realm/sales.types';
 import { MobileNumber } from 'globalTypes/realm/mobileNumber.types';
+import { GcashAccount } from 'globalTypes/realm/gcashAccount.types';
 import Realm, { ObjectSchema } from 'realm';
 import {
   Gcash,
@@ -17,6 +18,7 @@ import {
   getGcashBeforeDate,
 } from './utils/gcashRealmHelper';
 import { MOBILENUMBER, openMobileNumberRealm } from './mobileNumbersRealm';
+import { GCASH_ACCOUNT, openGcashAccountRealm } from './gcashAccountRealm';
 
 const GCASH = 'Gcash';
 
@@ -245,8 +247,9 @@ export const getGcashTransactions = async (
 ): Promise<Response<Gcash[]>> => {
   const realm = await openGcashRealm();
   const numberRealm = await openMobileNumberRealm();
+  const accountRealm = await openGcashAccountRealm();
 
-  if (!realm || !numberRealm)
+  if (!realm || !numberRealm || !accountRealm)
     return {
       isSuccess: false,
       message: 'Error opening realm db',
@@ -275,10 +278,18 @@ export const getGcashTransactions = async (
         );
       const numberName = number ? number.name : '';
 
+      const gcashAccount =
+        item.account_number &&
+        accountRealm.objectForPrimaryKey<GcashAccount>(
+          GCASH_ACCOUNT,
+          item.account_number
+        );
+
       return {
         ...item,
         _id: item._id.toString(),
         numberName,
+        accountName: gcashAccount && gcashAccount.name,
       };
     });
 

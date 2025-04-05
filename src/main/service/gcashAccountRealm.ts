@@ -5,7 +5,7 @@ import {
 import Realm, { ObjectSchema } from 'realm';
 import { create } from './realm';
 
-const GCASH_ACCOUNT = 'GcashAccount';
+export const GCASH_ACCOUNT = 'GcashAccount';
 
 export class GcashAccountSchema extends Realm.Object<GcashAccount> {
   static schema: ObjectSchema = {

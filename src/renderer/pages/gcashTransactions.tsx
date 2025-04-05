@@ -68,8 +68,14 @@ const GcashTransactionsPage = () => {
   }, [transactions]);
 
   useEffect(() => {
-    const { userOption, selectedType, selectedDateFilter, startDate, endDate } =
-      gcashTransFilter;
+    const {
+      userOption,
+      selectedType,
+      selectedDateFilter,
+      startDate,
+      endDate,
+      accountNumber,
+    } = gcashTransFilter;
     userOption &&
       handleGetGcashTransactions({
         transactBy: userOption === 'all' ? undefined : userOption,
@@ -78,6 +84,7 @@ const GcashTransactionsPage = () => {
         dateFilter: selectedDateFilter,
         startDate,
         endDate,
+        accountNumber,
       });
   }, [gcashTransFilter, search]);
 
@@ -184,9 +191,12 @@ const GcashTransactionsPage = () => {
             )}
             {/* <p className="m-0">Total GCash Pay: {pesoFormat(totalGcashPay)}</p> */}
             <p className="m-0">Total Charge: {pesoFormat(totalCharge)}</p>
-            {!gcashTransFilter.selectedType && (
-              <p className="m-0">Ending Balance: {pesoFormat(endingBalance)}</p>
-            )}
+            {!gcashTransFilter.selectedType &&
+              gcashTransFilter.accountNumber && (
+                <p className="m-0">
+                  Ending Balance: {pesoFormat(endingBalance)}
+                </p>
+              )}
             <p className="m-0">
               Quantity: {transactions.length.toLocaleString()}
             </p>
@@ -195,6 +205,7 @@ const GcashTransactionsPage = () => {
           <Table responsive hover>
             <thead>
               <tr>
+                <th>Account</th>
                 <th>Type</th>
                 <th>Amount</th>
                 <th>Charge</th>
@@ -216,6 +227,12 @@ const GcashTransactionsPage = () => {
                   }
                   className={isPossibleDoubleEntry(index) ? 'text-danger' : ''}
                 >
+                  <td
+                    title={item.accountName ? item.account_number : ''}
+                    className="text-capitalize"
+                  >
+                    {item.accountName || item.account_number}
+                  </td>
                   <td
                     className={`text-capitalize ${
                       item.type === 'cash in' && 'text-primary'

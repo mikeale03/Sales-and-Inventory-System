@@ -93,7 +93,9 @@ const SetGcashAccountModal = ({
         </Modal.Header>
         <Modal.Body>
           <Form.Group className="mb-3">
-            <Form.Label>Account Number</Form.Label>
+            <Form.Label>
+              Account Number <span className="text-danger">*</span>
+            </Form.Label>
             <Form.Control
               type="text"
               value={account.number}
@@ -102,7 +104,9 @@ const SetGcashAccountModal = ({
             />
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>Account Name</Form.Label>
+            <Form.Label>
+              Account Name <span className="text-danger">*</span>
+            </Form.Label>
             <Form.Control
               type="text"
               value={account.name}
@@ -111,7 +115,9 @@ const SetGcashAccountModal = ({
             />
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>MPIN</Form.Label>
+            <Form.Label>
+              MPIN <span className="text-danger">*</span>
+            </Form.Label>
             <Form.Control
               type="number"
               value={account.mpin}

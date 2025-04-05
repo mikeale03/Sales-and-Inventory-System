@@ -2,7 +2,10 @@ import { FormEvent, useState } from 'react';
 import { Button, Form, FormSelect, Modal } from 'react-bootstrap';
 import ReactDatePicker from 'react-datepicker';
 import { GcashType } from 'globalTypes/realm/gcash.types';
+import useSelectedGcashAccountStore from 'renderer/store/selectedGcashAccountStore';
+import useGcashAccountStore from 'renderer/store/gcashAccountsStore';
 import { GCashItem } from './setCashInOutModal';
+import GcashAccountSelect from '../common/selects/gcashAccountSelect';
 
 type Props = {
   show: boolean;
@@ -23,6 +26,10 @@ const AddDeductGcashBalanceModal = ({
   const [date, setDate] = useState<Date | null>(null);
   const [localType, setLocalType] = useState<GcashType>(type);
   const [note, setNote] = useState('');
+  const { gcashAccounts } = useGcashAccountStore((state) => state);
+  const { selectedGcashAccount } = useSelectedGcashAccountStore(
+    (state) => state
+  );
 
   const onShow = () => {
     setAmount('');
@@ -53,6 +60,9 @@ const AddDeductGcashBalanceModal = ({
         type: localType,
         date_transacted: date,
         note,
+        account_number: selectedGcashAccount
+          ? selectedGcashAccount.number
+          : undefined,
       });
 
     toggle(false);
@@ -75,6 +85,8 @@ const AddDeductGcashBalanceModal = ({
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          {gcashAccounts.length > 0 && <GcashAccountSelect />}
+
           <Form.Group className="mb-3">
             <Form.Label>
               Amount <span className="text-danger">*</span>
