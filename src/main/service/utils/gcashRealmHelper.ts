@@ -12,7 +12,7 @@ export const getGcashBeforeDate = (
   }
   const result = gcashObjects.filtered(
     `date_transacted != $0 AND date_transacted <= $1 ${
-      account_number ? 'AND account_number == $3' : ''
+      account_number ? 'AND account_number == $2' : ''
     } SORT(date_transacted DESC, date_created DESC) LIMIT(1)`,
     ...args
   );
@@ -35,7 +35,7 @@ export const addBalanceFromDate = (
 
   const transactions = gcashObjects.filtered(
     `date_transacted != $0 AND date_transacted > $1 ${
-      account_number ? 'AND account_number == $3' : ''
+      account_number ? 'AND account_number == $2' : ''
     }`,
     ...args
   );
@@ -64,7 +64,7 @@ export const deductBalanceFromDate = (
 
   const transactions = gcashObjects.filtered(
     `date_transacted != $0 AND date_transacted > $1 ${
-      account_number ? 'AND account_number == $3' : ''
+      account_number ? 'AND account_number == $2' : ''
     }`,
     ...args
   );
@@ -111,7 +111,9 @@ export const adjustBalanceOnDelete = (
   const amount = +(gcash_balance - itemBalance).toFixed(2);
 
   const transactions = gcashObjects.filtered(
-    'date_transacted != $0 AND date_transacted >= $1',
+    `date_transacted != $0 AND date_transacted >= $1 ${
+      account_number ? 'AND account_number == $2' : ''
+    }`,
     null,
     date_transacted
   );

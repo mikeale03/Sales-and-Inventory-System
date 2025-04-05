@@ -5,27 +5,38 @@ import { useEffect, useState } from 'react';
 import { Button, Card, Col, Row, Table } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import ConfirmationModal from 'renderer/components/common/modals/confirmation';
 import SetGcashAccountModal from 'renderer/components/gcashAccounts/setGashAccountModal';
 import {
   deleteGcashAccount,
   getGcashAccounts,
 } from 'renderer/service/gcashAccounts';
+import useGcashAccountStore from 'renderer/store/gcashAccountsStore';
 
 const GCashAccountsPage = () => {
-  const [accounts, setAccounts] = useState<GcashAccount[]>([]);
   const [showSetGCashAccountModal, setShowSetGCashAccountModal] =
     useState(false);
   const [selectedAccount, setSelectedAccount] = useState<
     GcashAccount | undefined
   >();
+  const [confirmationModal, setConfirmationModal] = useState(false);
+
+  const { gcashAccounts, setGcashAccounts } = useGcashAccountStore(
+    (state) => state
+  );
+
   const navigate = useNavigate();
 
-  const handleDeleteGCashAccount = async (number: string) => {
+  const handleDeleteGCashAccount = async () => {
+    if (!selectedAccount) return;
+
+    const { number } = selectedAccount;
     const response = await deleteGcashAccount(number);
 
     if (response.isSuccess) {
       toast.success('Gcash Account deleted');
-      setAccounts(accounts.filter((v) => v.number !== number));
+      const newAccounts = gcashAccounts.filter((v) => v.number !== number);
+      setGcashAccounts(newAccounts);
     } else {
       toast.error('Failed to delete access code');
     }
@@ -37,11 +48,11 @@ const GCashAccountsPage = () => {
   };
 
   const onAddAccount = (newAccount: GcashAccount) =>
-    setAccounts([newAccount, ...accounts]);
+    setGcashAccounts([newAccount, ...gcashAccounts]);
 
   const onUpdateAccount = (newAccount: GcashAccount) =>
-    setAccounts(
-      accounts.map((v) =>
+    setGcashAccounts(
+      gcashAccounts.map((v) =>
         selectedAccount?.number === v.number ? newAccount : v
       )
     );
@@ -49,12 +60,22 @@ const GCashAccountsPage = () => {
   useEffect(() => {
     (async () => {
       const { isSuccess, result } = await getGcashAccounts();
-      if (isSuccess && result) setAccounts(result);
+      if (isSuccess && result) {
+        setGcashAccounts(result);
+      }
     })();
-  }, []);
+  }, [setGcashAccounts]);
 
   return (
     <div>
+      <ConfirmationModal
+        show={confirmationModal}
+        toggle={setConfirmationModal}
+        message={
+          <p className="text-center">Are sure to delete Gcash Account?</p>
+        }
+        onConfirm={handleDeleteGCashAccount}
+      />
       <SetGcashAccountModal
         show={showSetGCashAccountModal}
         toggle={setShowSetGCashAccountModal}
@@ -85,7 +106,7 @@ const GCashAccountsPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {accounts.map((d) => (
+                  {gcashAccounts.map((d) => (
                     <tr key={d.number}>
                       <td>{d.number}</td>
                       <td>{d.name}</td>
@@ -100,7 +121,10 @@ const GCashAccountsPage = () => {
                           className="me-2"
                         />
                         <FontAwesomeIcon
-                          onClick={() => handleDeleteGCashAccount(d.number)}
+                          onClick={() => {
+                            setSelectedAccount(d);
+                            setConfirmationModal(true);
+                          }}
                           icon={faTrashCan}
                           title="Delete"
                           size="xl"
@@ -111,7 +135,7 @@ const GCashAccountsPage = () => {
                   ))}
                 </tbody>
               </Table>
-              {accounts.length === 0 && (
+              {gcashAccounts.length === 0 && (
                 <span className="ms-2 fw-light fst-italic text-secondary">
                   no gcash accounts
                 </span>
