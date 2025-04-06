@@ -1,4 +1,4 @@
-export type Source = 'gcash' | 'other';
+export type Source = 'gcash' | 'other' | string;
 
 export type MobileLoad = {
   _id: string;
@@ -19,6 +19,7 @@ export type MobileLoad = {
 
 export type GetMobileLoadsResponse = MobileLoad & {
   numberName: string;
+  sourceName: string;
 };
 
 export type CreateMobileLoadParams = {

@@ -347,6 +347,7 @@ export const deleteGcashTransaction = async (
       message: 'Successfully deleted a GCash transaction',
     };
   } catch (error) {
+    console.log(error);
     realm?.close();
     return {
       isSuccess: false,
