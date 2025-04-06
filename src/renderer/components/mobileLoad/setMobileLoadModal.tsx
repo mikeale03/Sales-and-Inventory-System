@@ -1,9 +1,10 @@
-import { MobileLoad, Source } from 'globalTypes/realm/mobileLoad.types';
+import { Source } from 'globalTypes/realm/mobileLoad.types';
 import { useState, FormEvent } from 'react';
 import { Button, Modal, Form } from 'react-bootstrap';
 import ReactDatePicker from 'react-datepicker';
 import { pesoFormat } from 'renderer/utils/helper';
 import MobileNumberInput from '../common/forms/mobileNumberInput';
+import SourceSelect from './sourceSelect';
 
 export type MobileLoadForm = {
   _id?: string;
@@ -27,7 +28,6 @@ export type MobileLoadResponse = {
 export type Props = {
   show: boolean;
   toggle: (show: boolean) => void;
-  selectedItem?: MobileLoad;
   onConfirm: (mobileLoad: MobileLoadResponse) => void;
   onCancel?: () => void;
   onExited?: () => void;
@@ -37,14 +37,13 @@ const initMobileLoad = {
   number: '',
   amount: '',
   total_amount: '',
-  source: 'gcash',
+  source: 'other',
   date_transacted: null,
 };
 
 const SetMobileLoadModal = ({
   show,
   toggle,
-  selectedItem,
   onConfirm,
   onCancel,
   onExited,
@@ -72,7 +71,7 @@ const SetMobileLoadModal = ({
       ...mobileLoad,
       amount: +amount,
       charge: +charge,
-      source: source as Source,
+      source,
       total_amount: +total_amount,
       date_transacted,
     });
@@ -80,7 +79,7 @@ const SetMobileLoadModal = ({
   };
 
   const onShow = () => {
-    setMobileLoad(selectedItem || initMobileLoad);
+    setMobileLoad(initMobileLoad);
   };
 
   return (
@@ -151,19 +150,11 @@ const SetMobileLoadModal = ({
               required
             />
           </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>
-              Source <span className="text-danger">*</span>
-            </Form.Label>
-            <Form.Control
-              as="select"
-              value={mobileLoad.source}
-              onChange={(e) => handleOnChange({ source: e.target.value })}
-            >
-              <option value="other">Other</option>
-              <option value="gcash">GCash</option>
-            </Form.Control>
-          </Form.Group>
+          <SourceSelect
+            value={mobileLoad.source}
+            onChange={(e) => handleOnChange({ source: e.target.value })}
+            required
+          />
           <p>
             <strong>Charge Amount:</strong>{' '}
             <span>{charge ? pesoFormat(+charge) : 0}</span>

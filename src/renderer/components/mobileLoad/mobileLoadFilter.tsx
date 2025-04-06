@@ -1,4 +1,4 @@
-import { useEffect, useState, ChangeEvent } from 'react';
+import { useEffect, ChangeEvent } from 'react';
 import { Col, FormLabel, FormSelect, Row } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import UsersSelect from 'renderer/components/common/selects/usersSelect';
@@ -6,6 +6,7 @@ import { MobileLoadFilterParams } from 'globalTypes/realm/mobileLoad.types';
 import useMobileLoadFilterStore from 'renderer/store/filtersStore/mobileLoadFilterStore';
 import StartEndDatePicker from '../common/startEndDatePicker';
 import ShiftSelect from '../common/selects/shiftSelect';
+import SourceSelect from './sourceSelect';
 
 export type OnFilterParams = { user: string; startDate: Date; endDate: Date };
 
@@ -79,7 +80,7 @@ const MobileLoadFilter = ({ onFilter }: Props) => {
     setDateRange(value, filter.selectedDate);
   };
 
-  const handleSourceSelect = (e: ChangeEvent<HTMLSelectElement>) => {
+  const handleSourceSelect = (e: ChangeEvent<HTMLInputElement>) => {
     if (!filter) return;
     const { value } = e.target;
     setFilter({ ...filter, source: value });
@@ -99,12 +100,11 @@ const MobileLoadFilter = ({ onFilter }: Props) => {
         />
       </Col>
       <Col lg="1" className="mb-3">
-        <FormLabel>Source</FormLabel>
-        <FormSelect value={filter.source} onChange={handleSourceSelect}>
-          <option value="">All</option>
-          <option value="other">Other</option>
-          <option value="gcash">Gcash</option>
-        </FormSelect>
+        <SourceSelect
+          value={filter.source}
+          onChange={handleSourceSelect}
+          asFilter
+        />
       </Col>
       <Col lg="1" className="mb-3">
         <FormLabel>Period</FormLabel>

@@ -7,12 +7,14 @@ import {
 import { Gcash } from 'globalTypes/realm/gcash.types';
 import { Sales } from 'globalTypes/realm/sales.types';
 import { MobileNumber } from 'globalTypes/realm/mobileNumber.types';
+import { GcashAccount } from 'globalTypes/realm/gcashAccount.types';
 import Realm, { ObjectSchema } from 'realm';
 import { create } from './realm';
 import { createSales, openSalesRealm } from './salesRealm';
 import { openGcashRealm } from './gcashRealm';
 import { adjustBalanceOnDelete } from './utils/gcashRealmHelper';
 import { MOBILENUMBER, openMobileNumberRealm } from './mobileNumbersRealm';
+import { GCASH_ACCOUNT, openGcashAccountRealm } from './gcashAccountRealm';
 
 const MOBILELOAD = 'MobileLoad';
 
@@ -111,8 +113,9 @@ export const createMobileLoad = async (data: CreateMobileLoadParams) => {
 export const getMobileLoads = async (params: MobileLoadFilterParams) => {
   const realm = await openMobileLoadRealm();
   const numberRealm = await openMobileNumberRealm();
+  const accountRealm = await openGcashAccountRealm();
 
-  if (!realm || !numberRealm) {
+  if (!realm || !numberRealm || !accountRealm) {
     return {
       isSuccess: false,
       message: 'Error opening realm db',
@@ -140,10 +143,15 @@ export const getMobileLoads = async (params: MobileLoadFilterParams) => {
       query += ` AND transact_by_user_id == $${args.length}`;
       args.push(transactBy);
     }
-    if (source) {
+
+    if (source === 'gcash') {
+      query += ` AND source != $${args.length}`;
+      args.push('other');
+    } else if (source) {
       query += ` AND source == $${args.length}`;
       args.push(source);
     }
+
     if (startDate) {
       query += ` AND date_transacted >= $${args.length}`;
       args.push(startDate);
@@ -164,13 +172,24 @@ export const getMobileLoads = async (params: MobileLoadFilterParams) => {
         d.number
       );
 
+      const account =
+        d.source !== 'other' &&
+        d.source !== 'gcash' &&
+        accountRealm.objectForPrimaryKey<GcashAccount>(GCASH_ACCOUNT, d.source);
+
       const numberName = number ? number.name : '';
 
-      return { ...d, _id: d._id.toString(), numberName };
+      return {
+        ...d,
+        _id: d._id.toString(),
+        numberName,
+        sourceName: account ? account.name : '',
+      };
     });
 
     realm.close();
     numberRealm.close();
+    accountRealm.close();
     return {
       isSuccess: true,
       message: 'Successfully get Mobile Load transactions',
@@ -179,6 +198,7 @@ export const getMobileLoads = async (params: MobileLoadFilterParams) => {
   } catch (error) {
     realm.close();
     numberRealm.close();
+    accountRealm.close();
     console.log(error);
     return {
       isSuccess: false,
@@ -210,7 +230,7 @@ export const deleteMobileLoad = async (id: string) => {
       };
     }
 
-    if (mobileLoad.source === 'gcash') {
+    if (mobileLoad.source !== 'other') {
       const gcashRealm = await openGcashRealm();
       if (!gcashRealm) {
         return {
@@ -225,12 +245,14 @@ export const deleteMobileLoad = async (id: string) => {
         mobileLoad.transaction_id
       )[0];
 
-      adjustBalanceOnDelete(gcashRealm, gcashObjects, gcash);
+      if (gcash) {
+        adjustBalanceOnDelete(gcashRealm, gcashObjects, gcash);
 
-      gcashRealm?.write(() => {
-        gcashRealm.delete(gcash);
-      });
-      gcashRealm.close();
+        gcashRealm?.write(() => {
+          gcashRealm.delete(gcash);
+        });
+        gcashRealm.close();
+      }
     }
 
     salesRealm.write(() => {

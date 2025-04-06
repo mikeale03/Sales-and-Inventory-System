@@ -61,7 +61,7 @@ const MobileLoadPage = () => {
       return;
     }
 
-    if (mobileLoad.source === 'gcash') {
+    if (mobileLoad.source !== 'other') {
       const response2 = await createGcashTransactions([
         {
           type: 'mobile load',
@@ -73,6 +73,8 @@ const MobileLoadPage = () => {
           transact_by_user_id: user._id,
           charge_payment: 'cash',
           transaction_id,
+          account_number:
+            mobileLoad.source === 'gcash' ? undefined : mobileLoad.source,
         },
       ]);
       if (!response2.isSuccess) {
@@ -154,7 +156,7 @@ const MobileLoadPage = () => {
                   <td>{pesoFormat(d.amount)}</td>
                   <td>{pesoFormat(d.charge)}</td>
                   <td>{pesoFormat(d.total_amount)}</td>
-                  <td>{d.source}</td>
+                  <td title={d.source}>{d.sourceName || d.source}</td>
                   <td>
                     {format(
                       new Date(d.date_transacted),
