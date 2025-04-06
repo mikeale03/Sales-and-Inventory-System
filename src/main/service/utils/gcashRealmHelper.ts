@@ -115,7 +115,8 @@ export const adjustBalanceOnDelete = (
       account_number ? 'AND account_number == $2' : ''
     }`,
     null,
-    date_transacted
+    date_transacted,
+    account_number
   );
 
   gcashRealm.write(() => {
