@@ -191,12 +191,9 @@ const GcashTransactionsPage = () => {
             )}
             {/* <p className="m-0">Total GCash Pay: {pesoFormat(totalGcashPay)}</p> */}
             <p className="m-0">Total Charge: {pesoFormat(totalCharge)}</p>
-            {!gcashTransFilter.selectedType &&
-              gcashTransFilter.accountNumber && (
-                <p className="m-0">
-                  Ending Balance: {pesoFormat(endingBalance)}
-                </p>
-              )}
+            {!gcashTransFilter.selectedType && (
+              <p className="m-0">Ending Balance: {pesoFormat(endingBalance)}</p>
+            )}
             <p className="m-0">
               Quantity: {transactions.length.toLocaleString()}
             </p>
