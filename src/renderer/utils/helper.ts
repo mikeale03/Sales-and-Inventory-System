@@ -108,3 +108,31 @@ export const toPascalCase = (str: string): string => {
   // Join the PascalCase words with the original spacing
   return pascalCaseWords.join(' ');
 };
+
+export const getGcashCharge = (amount: number) => {
+  let charge = 0;
+
+  if (amount <= 2000) {
+    // 1–2000: 10 pesos per 500
+    charge = Math.ceil(amount / 500) * 10;
+  } else if (amount <= 5000) {
+    // First 2000 = 40
+    charge = 40;
+    const remaining = amount - 2000;
+    charge += Math.ceil(remaining / 500) * 5;
+  } else if (amount <= 10000) {
+    // First 5000 = 70
+    charge = 70;
+    const remaining = amount - 5000;
+    charge += Math.ceil(remaining / 500) * 4;
+  } else {
+    // First 10000 = 100
+    charge = 100;
+    const remaining = amount - 10000;
+    charge += Math.ceil(remaining / 500) * 3;
+  }
+
+  charge = Math.round(charge / 5) * 5;
+
+  return charge;
+};

@@ -9,7 +9,7 @@ import { GcashType } from 'globalTypes/realm/gcash.types';
 import { useState, FormEvent } from 'react';
 import { Button, Modal, Form, FormSelect, FormControl } from 'react-bootstrap';
 import ReactDatePicker from 'react-datepicker';
-import { pesoFormat } from 'renderer/utils/helper';
+import { getGcashCharge, pesoFormat } from 'renderer/utils/helper';
 import useGcashAccountStore from 'renderer/store/gcashAccountsStore';
 import useSelectedGcashAccountStore from 'renderer/store/selectedGcashAccountStore';
 import MobileNumberInput from '../common/forms/mobileNumberInput';
@@ -110,11 +110,17 @@ const SetCashInOutModal = ({
 
   const handleChange = (update: Partial<GCashForm>) => {
     if (update.type === 'cash in') update.charge_payment = 'cash';
-    if (update.amount !== undefined)
-      update.charge = Math.ceil(+update.amount / 500) * 10;
+
+    if (update.amount !== undefined) {
+      const amount = +update.amount;
+      const charge = getGcashCharge(amount);
+      update.charge = charge;
+    }
+
     if (update.date_transacted && update.date_transacted > new Date()) {
       update.date_transacted = new Date();
     }
+
     setItem({ ...item, ...update });
   };
 
@@ -200,7 +206,7 @@ const SetCashInOutModal = ({
             />
             <FontAwesomeIcon
               onClick={() => {
-                handleChange({ charge: Math.ceil(+item.amount / 500) * 10 });
+                handleChange({ charge: getGcashCharge(+item.amount) });
                 setIsEditCharge(false);
               }}
               icon={faRotateRight}
