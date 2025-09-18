@@ -19,11 +19,11 @@ import {
 } from 'renderer/service/gcash';
 import { updateByGcashDelete } from 'renderer/service/sales';
 import useGcashFilterStore from 'renderer/store/filtersStore/gcashFilterStore';
-import { debounce, pesoFormat } from 'renderer/utils/helper';
+import { debounce, getGcashCharge, pesoFormat } from 'renderer/utils/helper';
 
 const isEdited = (item: Gcash) => {
   if (item.type === 'gcash pay') return false;
-  return item.charge !== Math.ceil(item.amount / 500) * 10;
+  return item.charge !== getGcashCharge(item.amount);
 };
 
 const GcashTransactionsPage = () => {
