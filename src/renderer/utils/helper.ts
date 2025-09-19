@@ -119,17 +119,17 @@ export const getGcashCharge = (amount: number) => {
     // First 2000 = 40
     charge = 40;
     const remaining = amount - 2000;
-    charge += Math.ceil(remaining / 500) * 5;
+    charge += Math.ceil(remaining / 500) * 8;
   } else if (amount <= 10000) {
-    // First 5000 = 70
-    charge = 70;
+    // First 5000 = 90
+    charge = 90;
     const remaining = amount - 5000;
-    charge += Math.ceil(remaining / 500) * 4;
+    charge += Math.ceil(remaining / 500) * 6;
   } else {
-    // First 10000 = 100
-    charge = 100;
+    // First 10000 = 150
+    charge = 150;
     const remaining = amount - 10000;
-    charge += Math.ceil(remaining / 500) * 3;
+    charge += Math.ceil(remaining / 500) * 4;
   }
 
   charge = Math.round(charge / 5) * 5;
