@@ -1,14 +1,16 @@
 import Realm, { ObjectSchema } from 'realm';
-import { MobileNumber } from 'globalTypes/realm/mobileNumber.types';
+import { Customer, MobileNumber } from 'globalTypes/realm/mobileNumber.types';
+import { v4 as uuid } from 'uuid';
 import { create } from './realm';
 
-export const MOBILENUMBER = 'MobileNumber';
+export const MOBILENUMBER = 'MobileNumber'; // name as Customers in front end
 
 export class MobileNumberSchema extends Realm.Object<MobileNumber> {
   static schema: ObjectSchema = {
     name: MOBILENUMBER,
     properties: {
       number: { type: 'string', indexed: true },
+      mobile: 'string?',
       name: 'string',
     },
     primaryKey: 'number',
@@ -20,7 +22,20 @@ export const openMobileNumberRealm = async () => {
     const realm = await Realm.open({
       path: '../realm/mobile-number',
       schema: [MobileNumberSchema],
-      schemaVersion: 1,
+      schemaVersion: 2,
+      onMigration: (oldRealm, newRealm) => {
+        // only apply this change if upgrading to schemaVersion 2
+        if (oldRealm.schemaVersion < 2) {
+          const oldObjects = oldRealm.objects<MobileNumber>(MOBILENUMBER);
+          const newObjects = newRealm.objects<MobileNumber>(MOBILENUMBER);
+          // loop through all objects and set the mobile property in the new schema
+          for (const objectIndex in oldObjects) {
+            const oldObject = oldObjects[objectIndex];
+            const newObject = newObjects[objectIndex];
+            newObject.mobile = oldObject.number;
+          }
+        }
+      }
     });
     return realm;
   } catch (error) {
@@ -28,7 +43,7 @@ export const openMobileNumberRealm = async () => {
   }
 };
 
-export const createMobileNumber = async (data: MobileNumber) => {
+export const createMobileNumber = async (data: Customer) => {
   const realm = await openMobileNumberRealm();
   if (!realm) {
     return {
@@ -38,19 +53,22 @@ export const createMobileNumber = async (data: MobileNumber) => {
   }
 
   try {
-    const task = create<MobileNumber>(realm, MOBILENUMBER, data);
+    const task = create<MobileNumber>(realm, MOBILENUMBER, {
+      ...data,
+      number: uuid(),
+    });
     const result = task?.toJSON() as MobileNumber;
     realm.close();
 
     return {
       isSuccess: true,
-      message: 'Successfully created Mobile Number',
+      message: 'Successfully created Customer',
       result,
     };
   } catch (error: any) {
     realm.close();
     console.log(error);
-    let message = 'Failed to create Mobile Number';
+    let message = 'Failed to create Customer';
     if (error.code === 'ObjectAlreadyExists') message = 'Number already exists';
 
     return {
@@ -132,7 +150,7 @@ export const getMobileNumbers = async (
       message: 'Error opening realm db',
     };
   }
-  let query = `number CONTAINS[c] '${searchText}' OR name CONTAINS[c] '${searchText}'`;
+  let query = `mobile CONTAINS[c] '${searchText}' OR name CONTAINS[c] '${searchText}'`;
 
   if (limit) {
     query += ` LIMIT(${limit})`;
