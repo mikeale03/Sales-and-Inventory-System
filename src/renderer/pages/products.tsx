@@ -173,7 +173,7 @@ const ProductsPage = () => {
                 type="search"
                 placeholder="Search name or barcode"
                 value={searchInput}
-                onChange={(e) => handleSearchInput(e.target.value.trim())}
+                onChange={(e) => handleSearchInput(e.target.value)}
                 autoFocus
               />
             </Col>

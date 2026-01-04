@@ -40,6 +40,7 @@ const SalesPage = () => {
   const [totalQuantity, setTotalQuantity] = useState(0);
   const [totalCash, setTotalCash] = useState(0);
   const [totalGcash, setTotalGcash] = useState(0);
+  const [totalGcashCharge, setTotalGcashCharge] = useState(0);
   const [searchText, setSearchText] = useState('');
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [accessCodeUser, setAccessCodeUser] = useState<User | undefined>();
@@ -81,12 +82,16 @@ const SalesPage = () => {
     let qty = 0;
     let amount = 0;
     let gcash = 0;
+    let gcashCharge = 0;
     let cash = 0;
     sales.forEach((sale) => {
       qty += sale.quantity;
       amount += sale.total_price;
       if (sale.payment === 'gcash') {
         gcash += sale.total_price;
+        if (sale.product_name.toLowerCase().includes('gcash-')) {
+          gcashCharge += sale.total_price;
+        }
       } else {
         cash += sale.total_price;
       }
@@ -96,6 +101,7 @@ const SalesPage = () => {
     setTotalAmount(amount);
     setTotalQuantity(qty);
     setTotalGcash(gcash);
+    setTotalGcashCharge(gcashCharge);
     setTotalCash(cash);
   }, [sales]);
 
@@ -250,7 +256,14 @@ const SalesPage = () => {
                   <p className="m-0">Total Cash: {pesoFormat(totalCash)}</p>
                 )}
                 {!isGroupByProduct && (
-                  <p className="m-0">Total Gcash: {pesoFormat(totalGcash)}</p>
+                  <p className="m-0">
+                    Total Gcash Pay: {pesoFormat(totalGcash)}
+                  </p>
+                )}
+                {!isGroupByProduct && (
+                  <p className="m-0">
+                    Total Gcash Charge: {pesoFormat(totalGcashCharge)}
+                  </p>
                 )}
                 <p className="m-0">Total Amount: {pesoFormat(totalAmount)}</p>
                 <p className="m-0">

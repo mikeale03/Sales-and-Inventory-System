@@ -19,11 +19,11 @@ import {
 } from 'renderer/service/gcash';
 import { updateByGcashDelete } from 'renderer/service/sales';
 import useGcashFilterStore from 'renderer/store/filtersStore/gcashFilterStore';
-import { debounce, pesoFormat } from 'renderer/utils/helper';
+import { debounce, getGcashCharge, pesoFormat } from 'renderer/utils/helper';
 
 const isEdited = (item: Gcash) => {
   if (item.type === 'gcash pay') return false;
-  return item.charge !== Math.ceil(item.amount / 500) * 10;
+  return item.charge !== getGcashCharge(item.amount);
 };
 
 const GcashTransactionsPage = () => {
@@ -191,12 +191,9 @@ const GcashTransactionsPage = () => {
             )}
             {/* <p className="m-0">Total GCash Pay: {pesoFormat(totalGcashPay)}</p> */}
             <p className="m-0">Total Charge: {pesoFormat(totalCharge)}</p>
-            {!gcashTransFilter.selectedType &&
-              gcashTransFilter.accountNumber && (
-                <p className="m-0">
-                  Ending Balance: {pesoFormat(endingBalance)}
-                </p>
-              )}
+            {!gcashTransFilter.selectedType && (
+              <p className="m-0">Ending Balance: {pesoFormat(endingBalance)}</p>
+            )}
             <p className="m-0">
               Quantity: {transactions.length.toLocaleString()}
             </p>

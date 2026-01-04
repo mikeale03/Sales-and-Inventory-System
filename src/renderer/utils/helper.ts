@@ -108,3 +108,7 @@ export const toPascalCase = (str: string): string => {
   // Join the PascalCase words with the original spacing
   return pascalCaseWords.join(' ');
 };
+
+export const getGcashCharge = (amount: number) => {
+  return Math.ceil(amount / 1000) * 10;
+};
