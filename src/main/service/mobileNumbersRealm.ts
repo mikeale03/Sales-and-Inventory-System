@@ -55,7 +55,7 @@ export const createMobileNumber = async (data: Customer) => {
   try {
     const task = create<MobileNumber>(realm, MOBILENUMBER, {
       ...data,
-      number: uuid(),
+      number: data.mobile || uuid(),
     });
     const result = task?.toJSON() as MobileNumber;
     realm.close();
@@ -81,7 +81,7 @@ export const createMobileNumber = async (data: Customer) => {
 
 export const updateMobileNumber = async (
   currentNumber: string,
-  updates: MobileNumber
+  updates: Customer
 ) => {
   const realm = await openMobileNumberRealm();
   if (!realm) {
@@ -92,19 +92,19 @@ export const updateMobileNumber = async (
   }
 
   try {
-    const number = realm.objectForPrimaryKey<MobileNumber>(
+    const customer = realm.objectForPrimaryKey<MobileNumber>(
       MOBILENUMBER,
       currentNumber
     );
-    if (!number)
+    if (!customer)
       return {
         isSuccess: false,
-        message: 'Number not found',
+        message: 'Customer not found',
       };
-    if (updates.number !== number.number) {
+    if (updates.mobile && updates.mobile !== customer.mobile) {
       const duplicateNumber = realm.objectForPrimaryKey<MobileNumber>(
         MOBILENUMBER,
-        updates.number
+        updates.mobile
       );
       if (duplicateNumber) {
         return {
@@ -115,11 +115,12 @@ export const updateMobileNumber = async (
     }
 
     realm.write(() => {
-      number.number = updates.number;
-      number.name = updates.name;
+      customer.mobile = updates.mobile;
+      customer.name = updates.name;
+      customer.number = updates.mobile || customer.number
     });
 
-    const result = number.toJSON();
+    const result = customer.toJSON();
     realm.close();
 
     return {
@@ -150,6 +151,45 @@ export const getMobileNumbers = async (
       message: 'Error opening realm db',
     };
   }
+  let query = `(mobile CONTAINS[c] '${searchText}' OR name CONTAINS[c] '${searchText}') AND (mobile != nil AND mobile != '')`;
+
+  if (limit) {
+    query += ` LIMIT(${limit})`;
+  }
+
+  try {
+    const numbers = realm.objects(MOBILENUMBER).filtered(query);
+    const result = numbers.toJSON();
+
+    realm.close();
+    return {
+      isSuccess: true,
+      result,
+      message: 'Successfully get Mobile Numbers',
+    };
+  } catch (error) {
+    console.error(error);
+    realm.close();
+    return {
+      isSucces: false,
+      message: 'Failed to get Mobile Numbers',
+      error,
+    };
+  }
+};
+
+export const getCustomers = async (
+  // eslint-disable-next-line default-param-last
+  searchText: string = '',
+  limit?: number
+) => {
+  const realm = await openMobileNumberRealm();
+  if (!realm) {
+    return {
+      isSuccess: false,
+      message: 'Error opening realm db',
+    };
+  }
   let query = `mobile CONTAINS[c] '${searchText}' OR name CONTAINS[c] '${searchText}'`;
 
   if (limit) {
@@ -167,6 +207,7 @@ export const getMobileNumbers = async (
       message: 'Successfully get users',
     };
   } catch (error) {
+    console.error(error);
     realm.close();
     return {
       isSucces: false,
