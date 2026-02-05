@@ -1,3 +1,4 @@
+import { ActionMeta, SingleValue } from 'react-select';
 import AsyncSelect from 'react-select/async';
 import { getCustomers } from 'renderer/service/mobileNumbers';
 
@@ -22,8 +23,32 @@ const loadOptions = (
     .catch((err) => console.error(err));
 };
 
-const CustomerSelect = () => {
-  return <AsyncSelect cacheOptions loadOptions={loadOptions} defaultOptions />;
+type Props = {
+  onSelect:
+    | ((
+        newValue: SingleValue<{
+          label: string;
+          value: string;
+        }>,
+        actionMeta: ActionMeta<{
+          label: string;
+          value: string;
+        }>
+      ) => void)
+    | undefined;
+};
+
+const CustomerSelect = ({ onSelect }: Props) => {
+  return (
+    <AsyncSelect
+      name="customer"
+      cacheOptions
+      loadOptions={loadOptions}
+      defaultOptions
+      onChange={onSelect}
+      required
+    />
+  );
 };
 
 export default CustomerSelect;
